@@ -39,7 +39,7 @@ struct ContentView: View {
     // MARK: - Função CloudKit
     func savePhrase(_ phrase: String, completion: @escaping (Result<Void, Error>) -> Void) {
         let container = CKContainer(identifier: "iCloud.com.Recaps.app")
-        let database = container.privateCloudDatabase
+        let database = container.publicCloudDatabase
 
         let record = CKRecord(recordType: "Phrase")
         record["text"] = phrase as CKRecordValue
