@@ -1,3 +1,11 @@
+//
+//  Capsule.swift
+//  recaps
+//
+//  Created by Leonel Ferraz Hernandez on 18/11/25.
+//
+import Foundation
+
 // MARK: - Capsule
 
 struct Capsule: Codable, Identifiable {
