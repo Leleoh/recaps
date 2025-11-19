@@ -41,7 +41,6 @@ class AuthenthicationViewModel {
     }
 }
 
-//Essa parte vai para o service do CloudKit
 import CloudKit
 
 extension AuthenthicationViewModel {
