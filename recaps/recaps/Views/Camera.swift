@@ -34,7 +34,7 @@ struct Camera: View {
                     .frame(maxWidth: .infinity)
             }
             .sheet(isPresented: $showingCamera){
-                CameraView(image: $selectedImage)
+                CameraView(image: $selectedImage, selectedItem: $selectedItem)
             }
             
             

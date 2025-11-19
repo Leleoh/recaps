@@ -8,10 +8,12 @@
 import SwiftUI
 import Foundation
 import UIKit
+import PhotosUI
 
 struct CameraView: UIViewControllerRepresentable{
     
     @Binding var image: UIImage?
+    @Binding var selectedItem: PhotosPickerItem?
     @Environment(\.presentationMode) var presentationMode
     
     func makeUIViewController(context: Context) -> UIImagePickerController {
@@ -36,11 +38,12 @@ struct CameraView: UIViewControllerRepresentable{
             self.parent = parent
         }
         
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]){
+        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
             if let image = info[.originalImage] as? UIImage {
-                parent.image = image //manda a imagem selecionada para o "pai"
+                parent.image = image
+                parent.selectedItem = nil  // ← DESELECIONA A FOTO DA GALERIA
             }
-            parent.presentationMode.wrappedValue.dismiss() //dismiss no picker
+            parent.presentationMode.wrappedValue.dismiss()
         }
         
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
