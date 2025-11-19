@@ -10,11 +10,10 @@ import Foundation
 // MARK: - User
 
 struct User: Codable, Identifiable {
-    let id: UUID
+    let id: String
     var name: String
-    var mail: String
+    var email: String
     var capsulesIDs: [UUID]
-    var photo: Data
 }
 
 
