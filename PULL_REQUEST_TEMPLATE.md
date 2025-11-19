@@ -24,3 +24,8 @@
 
 ### Como testar
 <!-- Exemplo: - Commitar arquivo .DS_Store > executar git status > validar se o arquivo consta na lista de itens bendentes de subir para o repositório -->
+
+---
+
+### Demo da feature (vídeo / print)
+<!-- Inserir um registro visual da feature ou resultado da task implementada -->
