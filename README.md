@@ -16,7 +16,7 @@ O idioma de mensagens de commit ou dos nomes para as branches devem *SEMPRE* est
 
 - `main`: branch estável, sempre pronta para deploy.
 - `dev`: branch de integração, onde as features são testadas antes de irem para `main`.
-- `feat-TK<numero-da-task>/<nome-da-feature>`: novas funcionalidades.
+- `feat/<nome-da-feature>`: novas funcionalidades.
 - `fix/<nome-do-bug>`: correções de bugs.
 - `hotfix/<nome-do-hotfix>`: correções urgentes que devem ir direto para produção.
 - `test/<nome-do-teste>`: experimentos ou provas de conceito.
