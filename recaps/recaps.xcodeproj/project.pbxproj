@@ -6,11 +6,27 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXContainerItemProxy section */
+		CA60B6D02ED0B89900FD2014 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D72F9B792ECCE53A00B1C949 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D72F9B802ECCE53A00B1C949;
+			remoteInfo = recaps;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		CA60B6CC2ED0B89800FD2014 /* RecapsuleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecapsuleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D72F9B812ECCE53A00B1C949 /* recaps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = recaps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		CA60B6CD2ED0B89900FD2014 /* RecapsuleTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RecapsuleTests;
+			sourceTree = "<group>";
+		};
 		D72F9B832ECCE53A00B1C949 /* recaps */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = recaps;
@@ -19,6 +35,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		CA60B6C92ED0B89800FD2014 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D72F9B7E2ECCE53A00B1C949 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -33,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				D72F9B832ECCE53A00B1C949 /* recaps */,
+				CA60B6CD2ED0B89900FD2014 /* RecapsuleTests */,
 				D72F9B822ECCE53A00B1C949 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				D72F9B812ECCE53A00B1C949 /* recaps.app */,
+				CA60B6CC2ED0B89800FD2014 /* RecapsuleTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +73,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		CA60B6CB2ED0B89800FD2014 /* RecapsuleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CA60B6D42ED0B89900FD2014 /* Build configuration list for PBXNativeTarget "RecapsuleTests" */;
+			buildPhases = (
+				CA60B6C82ED0B89800FD2014 /* Sources */,
+				CA60B6C92ED0B89800FD2014 /* Frameworks */,
+				CA60B6CA2ED0B89800FD2014 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CA60B6D12ED0B89900FD2014 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CA60B6CD2ED0B89900FD2014 /* RecapsuleTests */,
+			);
+			name = RecapsuleTests;
+			packageProductDependencies = (
+			);
+			productName = RecapsuleTests;
+			productReference = CA60B6CC2ED0B89800FD2014 /* RecapsuleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D72F9B802ECCE53A00B1C949 /* recaps */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D72F9B8C2ECCE53B00B1C949 /* Build configuration list for PBXNativeTarget "recaps" */;
@@ -77,9 +125,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					CA60B6CB2ED0B89800FD2014 = {
+						CreatedOnToolsVersion = 26.1;
+						TestTargetID = D72F9B802ECCE53A00B1C949;
+					};
 					D72F9B802ECCE53A00B1C949 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -100,11 +152,19 @@
 			projectRoot = "";
 			targets = (
 				D72F9B802ECCE53A00B1C949 /* recaps */,
+				CA60B6CB2ED0B89800FD2014 /* RecapsuleTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		CA60B6CA2ED0B89800FD2014 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D72F9B7F2ECCE53A00B1C949 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +175,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		CA60B6C82ED0B89800FD2014 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D72F9B7D2ECCE53A00B1C949 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +191,59 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		CA60B6D12ED0B89900FD2014 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D72F9B802ECCE53A00B1C949 /* recaps */;
+			targetProxy = CA60B6D02ED0B89900FD2014 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		CA60B6D22ED0B89900FD2014 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4S5UL2WGZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = AnaPoletto.RecapsuleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/recaps.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/recaps";
+			};
+			name = Debug;
+		};
+		CA60B6D32ED0B89900FD2014 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4S5UL2WGZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = AnaPoletto.RecapsuleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/recaps.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/recaps";
+			};
+			name = Release;
+		};
 		D72F9B8A2ECCE53B00B1C949 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -323,6 +442,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		CA60B6D42ED0B89900FD2014 /* Build configuration list for PBXNativeTarget "RecapsuleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CA60B6D22ED0B89900FD2014 /* Debug */,
+				CA60B6D32ED0B89900FD2014 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D72F9B7C2ECCE53A00B1C949 /* Build configuration list for PBXProject "recaps" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

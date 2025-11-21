@@ -11,19 +11,20 @@ import SwiftUI
 struct AuthenthicationView: View {
     var viewModel = AuthenthicationViewModel()
     @Environment(\.colorScheme) var colorScheme
-
+    
     var body: some View {
-        Group{
+        Group {
             if viewModel.isSignedIn {
-                ContentView()
-            }
-            else {
+                CKUsabilityView()
+            } else {
                 NavigationView {
                     VStack {
                         SignInWithAppleButton(.continue) { request in
                             request.requestedScopes = [.email, .fullName]
                         } onCompletion: { result in
-                            viewModel.handleAuthResult(result)
+                            Task {
+                                await viewModel.handleAuthResult(result)
+                            }
                         }
                         .signInWithAppleButtonStyle(
                             colorScheme == .dark ? .white : .black
@@ -35,9 +36,6 @@ struct AuthenthicationView: View {
                 }
             }
         }
-            .onAppear {
-                viewModel.checkExistingAccount()
-            }
     }
 }
 

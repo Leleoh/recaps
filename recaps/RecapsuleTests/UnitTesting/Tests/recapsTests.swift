@@ -15,7 +15,6 @@ struct CloudKitServiceTests {
     let mockCapsule = Capsule(
         id: UUID(),
         code: "ABCDE",
-        submissions: [],
         name: "Teste",
         createdAt: .now,
         offensive: 0,
@@ -23,13 +22,13 @@ struct CloudKitServiceTests {
         validOffensive: true,
         lives: 3,
         members: [],
-        ownerId: UUID(),
+        ownerId: " ",
         status: .inProgress
     )
 
     @Test("Teste: criar cápsula chama o método correto")
     func testCreateCapsule() async throws {
-        let mockService = MockCKService()
+        let mockService = MockCapsuleService()
 
         try await mockService.createCapsule(capsule: mockCapsule)
 
@@ -39,7 +38,7 @@ struct CloudKitServiceTests {
 
     @Test("Teste: deletar cápsula passa o ID correto")
     func testDeleteCapsule() async throws {
-        let mockService = MockCKService()
+        let mockService = MockCapsuleService()
 
         try await mockService.deleteCapsule(capsuleID: mockCapsule.id)
 
@@ -49,7 +48,7 @@ struct CloudKitServiceTests {
 
     @Test("Teste: updateCapsule atualiza corretamente")
     func testUpdateCapsule() async throws {
-        let mockService = MockCKService()
+        let mockService = MockCapsuleService()
         try await mockService.updateCapsule(capsule: mockCapsule)
 
         #expect(mockService.didUpdate == true)

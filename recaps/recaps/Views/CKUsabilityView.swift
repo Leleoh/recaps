@@ -7,19 +7,25 @@ struct CKUsabilityView: View {
     
     @State private var message: String = ""
     
-    private let CKService = CloudKitService()
+    
+    private let CKService = CapsuleService()
 
     var body: some View {
+        let fakeRecordID = CKRecord.ID(recordName: UUID().uuidString)
+
+        let mockReference = CKRecord.Reference(
+            recordID: fakeRecordID,
+            action: .none
+        )
         let mockUser = User(
-            id: UUID(),
+            id: "mock-user-id",
             name: "Leonel Hernandez",
-            mail: "leonel@example.com",
-            capsulesIDs: [UUID()]
+            email: "leonel@example.com",
+            capsules: [mockReference]
         )
         let mockCapsule = Capsule(
             id: createdID,
             code: "A7K4Q",
-            submissions: [],
             name: "Festa de Reveillon 2025",
             createdAt: Date(),
             offensive: 0,
@@ -33,7 +39,6 @@ struct CKUsabilityView: View {
         let mockCapsuleUpdate = Capsule(
             id: createdID,
             code: "MORRALEONEL",
-            submissions: [],
             name: "Festa de Reveillon 2025",
             createdAt: Date(),
             offensive: 0,
@@ -112,6 +117,7 @@ struct CKUsabilityView: View {
             }
 
             Spacer()
+            
         }
         .padding()
     }

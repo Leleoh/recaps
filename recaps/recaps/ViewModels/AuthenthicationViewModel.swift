@@ -5,88 +5,81 @@
 //  Created by Ana Carolina Poletto on 18/11/25.
 //
 
-import AuthenticationServices
 import SwiftUI
+import AuthenticationServices
+import CloudKit
 
 @Observable
 class AuthenthicationViewModel {
-    var isSignedIn = false
-    var email: String = ""
+    private let ck = UserService()
+    
+    private let defaults = UserDefaults.standard
+    init() { self.userId = getUserId() }
     var userId: String = ""
-    var name: String = ""
+    var isLoading = false
     
+    var isSignedIn: Bool {
+        !userId.isEmpty
+    }
     
-    func handleAuthResult(_ result: Result<ASAuthorization, Error>) {
+    func handleAuthResult(_ result: Result<ASAuthorization, Error>) async {
         switch result {
         case .success(let auth):
             guard let credential = auth.credential as? ASAuthorizationAppleIDCredential else { return }
             
-            self.email = credential.email ?? ""
-            self.userId = credential.user
-            self.name = credential.fullName?.givenName ?? ""
+            let newUserId = credential.user
+            let newEmail = credential.email ?? ""
+            let newName = credential.fullName?.givenName ?? ""
             
-            DispatchQueue.main.async {
-                self.isSignedIn = true
+            self.userId = newUserId
+            
+            do {
+                let _ = try await ck.getCurrentUser(userId: newUserId)
+                
+                saveUserId(userId)
+                
+                print("Usuário encontrado no CloudKit")
+                
+            } catch {
+                print("Usuário não existe. Criando no CloudKit...")
+                
+                let newUser = User(
+                    id: newUserId,
+                    name: newName,
+                    email: newEmail,
+                    capsules: []
+                )
+                
+                print(newUser.name)
+                print(newUser.email)
+                
+                _ = try? await ck.createUser(user: newUser)
+                
+                saveUserId(userId)
+                
+                print("Novo usuário criado no CloudKit")
             }
             
         case .failure(let error):
-            print("Error: \(error.localizedDescription)")
+            print("Erro no Sign In With Apple:", error)
         }
     }
     
-    func checkExistingAccount() {
-        if !userId.isEmpty {
-            isSignedIn = true
-        }
+    //Salvar localmente  usuário logado
+    func loadUserId() -> String {
+        return UserDefaults.standard.string(forKey: "userId") ?? ""
     }
-}
-
-import CloudKit
-
-extension AuthenthicationViewModel {
-    func fetchUserFromCloud(completion: @escaping (User?) -> Void) {
-        let container = CKContainer(identifier: "iCloud.com.Recaps.app")
-        let database = container.publicCloudDatabase
-        
-        let recordID = CKRecord.ID(recordName: userId)
-        
-        database.fetch(withRecordID: recordID) { record, error in
-            if let _ = error {
-                completion(nil)
-                return
-            }
-            
-            guard let record = record else {
-                completion(nil)
-                return
-            }
-            
-            let name = record["name"] as? String ?? ""
-            let email = record["email"] as? String ?? ""
-            
-            let user = User(id: self.userId, name: name, email: email, capsulesIDs: [])
-            completion(user)
-        }
+    func saveUserId(_ id: String) {
+        defaults.set(id, forKey: "userId")
+    }
+    func getUserId() -> String {
+        defaults.string(forKey: "userId") ?? ""
+    }
+    func logout() {
+        defaults.removeObject(forKey: "userId")
     }
     
-    func createUserInCloud(completion: @escaping (Result<Void, Error>) -> Void) {
-        let container = CKContainer(identifier: "iCloud.com.Recaps.app")
-        let database = container.publicCloudDatabase
-        
-        let recordID = CKRecord.ID(recordName: userId)
-        let record = CKRecord(recordType: "User", recordID: recordID)
-        
-        record["email"] = email as CKRecordValue
-        record["name"] = name as CKRecordValue
-        
-        
-        database.save(record) { _, error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
-            }
-        }
+    func getCurrentUser() async -> User? {
+        try? await ck.getCurrentUser(userId: userId)
     }
 }
-

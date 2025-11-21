@@ -6,14 +6,13 @@
 //
 
 import Foundation
-
+import CloudKit
 // MARK: - User
 
-struct User: Codable, Identifiable {
+struct User {
     let id: String
     var name: String
     var email: String
-    var capsulesIDs: [UUID]
+    var capsules: [CKRecord.Reference]
 }
-
 
