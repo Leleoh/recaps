@@ -44,6 +44,14 @@ struct CKUsabilityView: View {
             ownerId: mockUser.id,
             status: .inProgress
         )
+        let mockSubmission = Submission(
+            id: UUID(),
+            image: Data(),
+            description: "A vida é curta, vive cada momento!",
+            authorId: mockUser.id,
+            date: Date(),
+            capsuleID: createdID,
+        )
         
         VStack(spacing: 20) {
             TextField("Digite uma frase...", text: $phrase)
@@ -103,6 +111,25 @@ struct CKUsabilityView: View {
                 }
             } label: {
                 Text("Atualizar Cápsula")
+            }
+            .buttonStyle(.borderedProminent)
+            
+            Button {
+    
+                Task {
+                    do {
+                        try await CKService.createSubmission(submission: mockSubmission, capsuleID: mockCapsule.id)
+                        await MainActor.run {
+                            message = "submission inserida com sucesso! \n\(mockCapsuleUpdate)"
+                        }
+                    } catch {
+                        await MainActor.run {
+                            message = "Erro ao submeter a submission: \(error.localizedDescription)"
+                        }
+                    }
+                }
+            } label: {
+                Text("Submeter Submission")
             }
             .buttonStyle(.borderedProminent)
 

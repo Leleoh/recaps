@@ -7,6 +7,7 @@
 
 import Foundation
 import CloudKit
+import UIKit
 
 protocol CKServiceProtocol {
     func createCapsule(capsule: Capsule) async throws
@@ -90,5 +91,41 @@ class CloudKitService: CKServiceProtocol {
                 throw error
             }
         }
+    }
+    
+    func createSubmission(submission: Submission, capsuleID: UUID) async throws {
+        let recordID = CKRecord.ID(recordName: submission.id.uuidString)
+        let record = CKRecord(recordType: "Submission", recordID: recordID)
+        
+        record["id"] = submission.id.uuidString as CKRecordValue
+        
+        if let description = submission.description {
+            record["description"] = description as CKRecordValue
+        }
+        
+        guard
+            let image = UIImage(named: "monkey"),
+            let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("monkey.jpg"),
+            let data = image.jpegData(compressionQuality: 1.0) else { return }
+        
+        do {
+            try data.write(to: url)
+            let asset = CKAsset(fileURL: url)
+            record["image"] = asset
+        } catch let error {
+            print(error)
+        }
+        
+        record["date"] = submission.date as CKRecordValue
+        record["capsuleID"] = capsuleID.uuidString as CKRecordValue
+        
+        do {
+            let savedRecord = try await database.save(record)
+            print("Capsula salva: \(savedRecord)")
+        } catch {
+            print("Erro ao salvar a Capsula : \(error)")
+            throw error
+        }
+        
     }
 }
