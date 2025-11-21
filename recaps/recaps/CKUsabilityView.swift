@@ -46,7 +46,7 @@ struct CKUsabilityView: View {
         )
         let mockSubmission = Submission(
             id: UUID(),
-            image: Data(),
+            imageURL: nil,
             description: "A vida é curta, vive cada momento!",
             authorId: mockUser.id,
             date: Date(),
@@ -118,7 +118,7 @@ struct CKUsabilityView: View {
     
                 Task {
                     do {
-                        try await CKService.createSubmission(submission: mockSubmission, capsuleID: mockCapsule.id)
+//                        try await CKService.createSubmission(submission: mockSubmission, capsuleID: mockCapsule.id)
                         await MainActor.run {
                             message = "submission inserida com sucesso! \n\(mockCapsuleUpdate)"
                         }

@@ -93,7 +93,7 @@ class CloudKitService: CKServiceProtocol {
         }
     }
     
-    func createSubmission(submission: Submission, capsuleID: UUID) async throws {
+    func createSubmission(submission: Submission, capsuleID: UUID, image: UIImage) async throws {
         let recordID = CKRecord.ID(recordName: submission.id.uuidString)
         let record = CKRecord(recordType: "Submission", recordID: recordID)
         
@@ -103,9 +103,10 @@ class CloudKitService: CKServiceProtocol {
             record["description"] = description as CKRecordValue
         }
         
+        let fileName = "\(UUID().uuidString).jpg"
+        
         guard
-            let image = UIImage(named: "monkey"),
-            let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent("monkey.jpg"),
+            let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(fileName),
             let data = image.jpegData(compressionQuality: 1.0) else { return }
         
         do {
@@ -121,11 +122,133 @@ class CloudKitService: CKServiceProtocol {
         
         do {
             let savedRecord = try await database.save(record)
-            print("Capsula salva: \(savedRecord)")
+            print("Submission salva: \(savedRecord)")
         } catch {
-            print("Erro ao salvar a Capsula : \(error)")
+            print("Erro ao salvar a Submission: \(error)")
             throw error
         }
         
+    }
+    
+    func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
+        let predicate = NSPredicate(format: "capsuleID == %@", capsuleID.uuidString)
+       // let predicate = NSPredicate(value: true)
+        let query = CKQuery(recordType: "Submission", predicate: predicate)
+
+        var submissions: [Submission] = []
+
+        let result = try await database.records(matching: query)
+
+        for (_, recordResult) in result.matchResults {
+            switch recordResult {
+            case .success(let record):
+                
+                let idString = record["id"] as? String ?? ""
+                guard let id = UUID(uuidString: idString) else { continue }
+                
+                let description = record["description"] as? String
+                
+                let date = record["date"] as? Date ?? Date()
+
+                let authorIdString = record["authorId"] as? String
+                let authorId = UUID(uuidString: authorIdString ?? "") ?? UUID()
+                
+                let capsuleIDString = record["capsuleID"] as? String ?? ""
+                let capsuleID = UUID(uuidString: capsuleIDString) ?? UUID()
+                
+                var imageURL: URL? = nil
+                if let asset = record["image"] as? CKAsset,
+                   let fileURL = asset.fileURL {
+                    
+                    let localURL = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("\(UUID().uuidString).jpg")
+
+                    do {
+                        try FileManager.default.copyItem(at: fileURL, to: localURL)
+                        imageURL = localURL
+                    } catch {
+                        print("Erro ao copiar asset: \(error)")
+                    }
+                }
+
+                let submission = Submission(
+                    id: id,
+                    imageURL: imageURL,
+                    description: description,
+                    authorId: authorId,
+                    date: date,
+                    capsuleID: capsuleID
+                )
+
+                submissions.append(submission)
+
+            case .failure(let error):
+                print("Erro ao obter registro: \(error)")
+            }
+        }
+
+        return submissions
+    }
+    
+    func fetchCapsules(IDs: [UUID]) async throws -> [Capsule] {
+        let recordNames = IDs.map { $0.uuidString }
+        
+        let referenceIDs = recordNames.map { CKRecord.ID(recordName: $0) }
+
+        var capsules: [Capsule] = []
+
+        let result = try await database.records(for: referenceIDs)
+
+        for (_, recordResult) in result {
+            switch recordResult {
+            case .success(let record):
+                
+                guard
+                    let idString = record["id"] as? String,
+                    let id = UUID(uuidString: idString)
+                else { continue }
+
+                let code = record["code"] as? String ?? ""
+                let name = record["name"] as? String ?? ""
+                let createdAt = record["createdAt"] as? Date ?? Date()
+                let offensive = record["offensive"] as? Int ?? 0
+                let lastSubmissionDate = record["lastSubmissionDate"] as? Date ?? Date()
+                let validOffensive = record["validOffensive"] as? Bool ?? false
+                let lives = record["lives"] as? Int ?? 0
+
+                let ownerIdString = record["ownerId"] as? String ?? ""
+                let ownerId = UUID(uuidString: ownerIdString) ?? UUID()
+
+                let statusRaw = record["status"] as? String ?? ""
+                let status = CapsuleStatus(rawValue: statusRaw) ?? .inProgress
+
+                let membersStrings = record["members"] as? [String] ?? []
+                let members = membersStrings.compactMap { UUID(uuidString: $0) }
+
+                let submissions = try await fetchSubmissions(capsuleID: id)
+
+                let capsule = Capsule(
+                    id: id,
+                    code: code,
+                    submissions: submissions,
+                    name: name,
+                    createdAt: createdAt,
+                    offensive: offensive,
+                    lastSubmissionDate: lastSubmissionDate,
+                    validOffensive: validOffensive,
+                    lives: lives,
+                    members: members,
+                    ownerId: ownerId,
+                    status: status
+                )
+
+                capsules.append(capsule)
+
+            case .failure(let error):
+                print("Erro ao obter Capsule: \(error)")
+            }
+        }
+
+        return capsules
     }
 }
