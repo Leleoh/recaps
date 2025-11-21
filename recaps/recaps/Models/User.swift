@@ -14,7 +14,7 @@ struct User: Codable, Identifiable {
     var name: String
     var mail: String
     var capsulesIDs: [UUID]
-    var photo: Data
+    var photo: Data?
 }
 
 
