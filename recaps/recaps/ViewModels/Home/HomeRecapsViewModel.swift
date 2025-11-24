@@ -6,3 +6,14 @@
 //
 
 import Foundation
+import SwiftUI
+
+@Observable
+class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
+    
+    var showCreateCapsule: Bool = false
+    
+    func didTapNewRecap() {
+        showCreateCapsule = true
+    }
+}

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct HomeRecapsView: View {
     
+    @State private var viewModel = HomeRecapsViewModel()
+    
     // Capsulas em progresso mockadas para avaliar visual.  Excluir quando não mais necessário
     private let inProgressRecaps: [Capsule] = [
         .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.inProgress),
@@ -47,7 +49,7 @@ struct HomeRecapsView: View {
                 
                 HStack(spacing: 12) {
                     Button{
-                        // Chamar método da ViewModel
+                        viewModel.didTapNewRecap()
                     } label: {
                         Text("Novo recap")
                             .fontWeight(.medium)
@@ -111,6 +113,9 @@ struct HomeRecapsView: View {
                 }
             }
             .padding()
+        }
+        .sheet(isPresented: $viewModel.showCreateCapsule) {
+            CreateCapsuleView()
         }
     }
 }
