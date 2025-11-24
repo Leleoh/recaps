@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct HomeRecapsView: View {
+    var viewModel = CreatingCapsuleTestViewModel()
     
     // Capsulas em progresso mockadas para avaliar visual.  Excluir quando não mais necessário
     private let inProgressRecaps: [Capsule] = [
@@ -47,7 +48,10 @@ struct HomeRecapsView: View {
                 
                 HStack(spacing: 12) {
                     Button{
-                        // Chamar método da ViewModel
+                        Task {
+                                let code = viewModel.generateCode()
+                                try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
+                            }
                     } label: {
                         Text("Novo recap")
                             .fontWeight(.medium)
@@ -60,9 +64,11 @@ struct HomeRecapsView: View {
                     }
                     
                     Button {
-                        // Chamar método da ViewModel
+                        Task {
+                            print("botao apertado")
+                            try await viewModel.joinCapsule(code: "i1JzDF2D")
+                        }
                     } label: {
-                        Button(action: {}) {
                             Text("Juntar-se")
                                 .fontWeight(.medium)
                                 .frame(maxWidth: .infinity)
@@ -71,7 +77,6 @@ struct HomeRecapsView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.accentColor, lineWidth: 1.5)
                                 )
-                        }
                     }
                 }
             }

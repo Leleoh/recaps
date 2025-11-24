@@ -30,6 +30,8 @@ class CapsuleService: CapsuleServiceProtocol {
         record["status"] = capsule.status.rawValue as CKRecordValue
         record["members"] = capsule.members.map { $0 } as CKRecordValue
         
+        _ = try await database.save(record)
+        
         return capsule.id
     }
     
@@ -202,6 +204,59 @@ class CapsuleService: CapsuleServiceProtocol {
                 let status = CapsuleStatus(rawValue: statusRaw) ?? .inProgress
                 
                 let members = record["members"] as? [String] ?? []
+                
+                let submissions = try await fetchSubmissions(capsuleID: id)
+                
+                let capsule = Capsule(
+                    id: id,
+                    code: code,
+                    submissions: submissions,
+                    name: name,
+                    createdAt: createdAt,
+                    offensive: offensive,
+                    lastSubmissionDate: lastSubmissionDate,
+                    validOffensive: validOffensive,
+                    lives: lives,
+                    members: members,
+                    ownerId: ownerId,
+                    status: status
+                )
+                
+                capsules.append(capsule)
+                
+            case .failure(let error):
+                print("Erro ao obter Capsule: \(error)")
+            }
+        }
+        
+        return capsules
+    }
+    
+    func fetchAllCapsules() async throws -> [Capsule] {
+        let predicate = NSPredicate(value: true)
+        let query = CKQuery(recordType: "Capsule", predicate: predicate)
+        
+        let result = try await database.records(matching: query)
+        var capsules: [Capsule] = []
+        
+        for (_, recordResult) in result.matchResults {
+            switch recordResult {
+            case .success(let record):
+                guard
+                    let idString = record["id"] as? String,
+                    let id = UUID(uuidString: idString),
+                    let code = record["code"] as? String,
+                    let name = record["name"] as? String,
+                    let createdAt = record["createdAt"] as? Date,
+                    let offensive = record["offensive"] as? Int,
+                    let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
+                    let validOffensive = record["validOffensive"] as? Bool,
+                    let lives = record["lives"] as? Int,
+                    let ownerId = record["ownerId"] as? String,
+                    let statusRaw = record["status"] as? String,
+                    let status = CapsuleStatus(rawValue: statusRaw),
+                    let members = record["members"] as? [String]
+                else { continue }
                 
                 let submissions = try await fetchSubmissions(capsuleID: id)
                 

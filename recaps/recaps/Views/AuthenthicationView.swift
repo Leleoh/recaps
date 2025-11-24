@@ -15,7 +15,7 @@ struct AuthenthicationView: View {
     var body: some View {
         Group {
             if viewModel.isSignedIn {
-                CKUsabilityView()
+                HomeRecapsView()
             } else {
                 NavigationView {
                     VStack {

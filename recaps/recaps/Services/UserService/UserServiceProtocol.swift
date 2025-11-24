@@ -7,6 +7,10 @@
 
 import Foundation
 protocol UserServiceProtocol {
-    func getCurrentUser(userId: String) async throws -> User
+    func getCurrentUser() async throws -> User
     func createUser(user: User) async throws
+    func loadUserId() -> String
+    func saveUserId(_ id: String)
+    func getUserId() -> String
+    func logout()
 }

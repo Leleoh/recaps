@@ -11,15 +11,11 @@ import CloudKit
 
 @Observable
 class AuthenthicationViewModel {
-    private let ck = UserService()
-    
-    private let defaults = UserDefaults.standard
-    init() { self.userId = getUserId() }
-    var userId: String = ""
+    private let userService = UserService()
     var isLoading = false
     
     var isSignedIn: Bool {
-        !userId.isEmpty
+        !userService.userId.isEmpty
     }
     
     func handleAuthResult(_ result: Result<ASAuthorization, Error>) async {
@@ -31,12 +27,12 @@ class AuthenthicationViewModel {
             let newEmail = credential.email ?? ""
             let newName = credential.fullName?.givenName ?? ""
             
-            self.userId = newUserId
+            userService.userId = newUserId
             
             do {
-                let _ = try await ck.getCurrentUser(userId: newUserId)
+                let _ = try await userService.getCurrentUser()
                 
-                saveUserId(userId)
+                userService.saveUserId(userService.userId)
                 
                 print("Usuário encontrado no CloudKit")
                 
@@ -53,9 +49,9 @@ class AuthenthicationViewModel {
                 print(newUser.name)
                 print(newUser.email)
                 
-                _ = try? await ck.createUser(user: newUser)
+                _ = try? await userService.createUser(user: newUser)
                 
-                saveUserId(userId)
+                userService.saveUserId(userService.userId)
                 
                 print("Novo usuário criado no CloudKit")
             }
@@ -63,23 +59,5 @@ class AuthenthicationViewModel {
         case .failure(let error):
             print("Erro no Sign In With Apple:", error)
         }
-    }
-    
-    //Salvar localmente  usuário logado
-    func loadUserId() -> String {
-        return UserDefaults.standard.string(forKey: "userId") ?? ""
-    }
-    func saveUserId(_ id: String) {
-        defaults.set(id, forKey: "userId")
-    }
-    func getUserId() -> String {
-        defaults.string(forKey: "userId") ?? ""
-    }
-    func logout() {
-        defaults.removeObject(forKey: "userId")
-    }
-    
-    func getCurrentUser() async -> User? {
-        try? await ck.getCurrentUser(userId: userId)
     }
 }
