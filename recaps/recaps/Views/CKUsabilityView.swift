@@ -11,21 +11,18 @@ struct CKUsabilityView: View {
     private let CKService = CapsuleService()
 
     var body: some View {
-        let fakeRecordID = CKRecord.ID(recordName: UUID().uuidString)
+        let mockId = UUID()
 
-        let mockReference = CKRecord.Reference(
-            recordID: fakeRecordID,
-            action: .none
-        )
         let mockUser = User(
             id: "mock-user-id",
             name: "Leonel Hernandez",
             email: "leonel@example.com",
-            capsules: [mockReference]
+            capsules: [mockId]
         )
         let mockCapsule = Capsule(
             id: createdID,
             code: "A7K4Q",
+            submissions: [],
             name: "Festa de Reveillon 2025",
             createdAt: Date(),
             offensive: 0,
@@ -39,6 +36,7 @@ struct CKUsabilityView: View {
         let mockCapsuleUpdate = Capsule(
             id: createdID,
             code: "MORRALEONEL",
+            submissions: [],
             name: "Festa de Reveillon 2025",
             createdAt: Date(),
             offensive: 0,
@@ -48,6 +46,14 @@ struct CKUsabilityView: View {
             members: [mockUser.id],
             ownerId: mockUser.id,
             status: .inProgress
+        )
+        let mockSubmission = Submission(
+            id: UUID(),
+            imageURL: nil,
+            description: "A vida é curta, vive cada momento!",
+            authorId: mockUser.id,
+            date: Date(),
+            capsuleID: createdID,
         )
         
         VStack(spacing: 20) {
@@ -108,6 +114,25 @@ struct CKUsabilityView: View {
                 }
             } label: {
                 Text("Atualizar Cápsula")
+            }
+            .buttonStyle(.borderedProminent)
+            
+            Button {
+    
+                Task {
+                    do {
+//                        try await CKService.createSubmission(submission: mockSubmission, capsuleID: mockCapsule.id)
+                        await MainActor.run {
+                            message = "submission inserida com sucesso! \n\(mockCapsuleUpdate)"
+                        }
+                    } catch {
+                        await MainActor.run {
+                            message = "Erro ao submeter a submission: \(error.localizedDescription)"
+                        }
+                    }
+                }
+            } label: {
+                Text("Submeter Submission")
             }
             .buttonStyle(.borderedProminent)
 

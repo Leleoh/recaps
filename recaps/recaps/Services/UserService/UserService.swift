@@ -21,8 +21,12 @@ class UserService: UserServiceProtocol {
 
         let name = record["name"] as? String ?? ""
         let email = record["email"] as? String ?? ""
-        let capsules = record["capsules"] as? [CKRecord.Reference] ?? []
+        let capsulesRecords = record["capsules"] as? [CKRecord.ID] ?? []
 
+        let capsules: [UUID] = capsulesRecords.compactMap { recordID in
+            UUID(uuidString: recordID.recordName)
+        }
+        
         return User(
             id: userId,
             name: name,

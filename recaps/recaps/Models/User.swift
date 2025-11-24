@@ -13,6 +13,6 @@ struct User {
     let id: String
     var name: String
     var email: String
-    var capsules: [CKRecord.Reference]
+    var capsules: [UUID]
 }
 

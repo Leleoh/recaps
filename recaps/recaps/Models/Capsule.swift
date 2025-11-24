@@ -11,6 +11,7 @@ import Foundation
 struct Capsule: Codable, Identifiable {
     let id: UUID
     var code: String
+    var submissions: [Submission]
     var name: String
     var createdAt: Date
     var offensive: Int
