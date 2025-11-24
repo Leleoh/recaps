@@ -6,28 +6,50 @@
 //
 
 import SwiftUI
-
-import SwiftUI
+import PhotosUI
 
 struct CreateCapsuleView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var capsulename: String = "Terceirão"
-    @State private var selectionValue: Int = 0
-    
+    @State private var viewModel = CreateCapsuleViewModel()
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 24) {
                 
-                // Botão Placeholder de Fotos
-                Button {
-                    // Chamar método da ViewModel que abre o picker de fotos.
-                } label: {
+                // MARK: - Área de Seleção de Fotos
+                PhotosPicker(
+                    selection: $viewModel.selectedPickerItems,
+                    maxSelectionCount: nil,
+                    matching: .images
+                ) {
                     VStack(spacing: 12) {
-                        Image(systemName: "camera.fill")
-                            .font(.title)
-                        Text("Escolha 3 fotos de sua galeria")
-                            .font(.headline)
+                        if viewModel.selectedImages.isEmpty {
+                            // EmtyState
+                            Image(systemName: "camera.fill")
+                                .font(.title)
+                            Text("Escolha pelo menos 3 fotos")
+                                .font(.headline)
+                        } else {
+                            // Estado com Fotos Selecionadas (Carrossel)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(viewModel.selectedImages, id: \.self) { image in
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 100, height: 140)
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .clipped()
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                            .frame(height: 160)
+                            
+                            Text("\(viewModel.selectedImages.count) fotos selecionadas")
+                                .font(.caption)
+                                .foregroundStyle(viewModel.selectedImages.count >= 3 ? .green : .red)
+                        }
                     }
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
@@ -35,22 +57,20 @@ struct CreateCapsuleView: View {
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(12)
                 }
-                .padding(.top, 40)
                 
                 // Input de Nome
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Nome:")
                         .foregroundStyle(.black)
                     
-                    TextField("capsule name", text: $capsulename)
+                    TextField("Nome da cápsula", text: $viewModel.capsuleName)
                         .padding()
                         .background(
                             RoundedRectangle(cornerRadius: 26)
                                 .fill(Color.white)
-                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
+                                .shadow(radius: 2, y: 2)
                         )
                 }
-                
                 
                 // Input de Ofensiva
                 HStack(alignment: .center, spacing: 16) {
@@ -59,12 +79,10 @@ struct CreateCapsuleView: View {
                     
                     Spacer()
                     
-                    Picker(selection: $selectionValue) {
+                    Picker("", selection: $viewModel.offensiveDuration) {
                         ForEach(1...365, id: \.self) { days in
                             Text("\(days)").tag(days)
                         }
-                    } label: {
-                        Text("Teste")
                     }
                     .pickerStyle(.menu)
                     .background(
@@ -72,13 +90,11 @@ struct CreateCapsuleView: View {
                             .fill(Color.white)
                             .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
                     )
-
-                    
                 }
                 
                 Spacer()
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // Botão Cancelar (Esquerda)
@@ -87,33 +103,36 @@ struct CreateCapsuleView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.black)
                             .padding(8)
-                            .background(Color.gray.opacity(0.2))
-                            .clipShape(Circle())
                     }
                 }
                 
                 // Título Central
                 ToolbarItem(placement: .principal) {
-                    Text("Title")
+                    Text("Nova Capsula")
                         .font(.headline)
                 }
                 
                 // Botão Salvar (Direita)
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
-                        //                        viewModel.createRecap { success in
-                        //                            if success { dismiss() }
-                        //                        }
+                        Task {
+                            let success = await viewModel.createCapsule()
+                            if success {
+                                dismiss()
+                            }
+                        }
                     } label: {
-                        Image(systemName: "arrow.up")
-                            .foregroundColor(.white)
-                            .padding(8)
-                        //                            .background(viewModel.title.isEmpty ? Color.gray : Color.black) // Desabilitado visualmente
-                            .clipShape(Circle())
+                        if viewModel.isLoading {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "arrow.up")
+                                .foregroundColor(viewModel.isValidToSave ? Color.black : Color.gray)
+                        }
                     }
-                    //                    .disabled(viewModel.title.isEmpty || viewModel.isLoading)
+                    // Desabilita o botão se a validação falhar ou estiver carregando
+                    .disabled(!viewModel.isValidToSave || viewModel.isLoading)
                 }
             }
         }
