@@ -15,7 +15,7 @@ class Database {
     let database: CKDatabase
 
     init() {
-        container = CKContainer.default()
+        container = CKContainer(identifier: "iCloud.com.Recaps.app")
         database = container.publicCloudDatabase
     }
 }
