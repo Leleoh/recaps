@@ -117,6 +117,68 @@ class CloudKitService: CKServiceProtocol {
         }
     }
     
+    func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            guard
+                let lastSubmissionDate = record["lastSubmissionDate"] as? Date
+            else {
+                return false
+            }
+            
+            let serverTime = try await fetchUniversalTime()
+            
+            let difference = serverTime.timeIntervalSince(lastSubmissionDate)
+            
+            let twentyFourHours: TimeInterval = 24 * 60 * 60
+            
+            print("Horário Atual: \(serverTime)")
+            print("Diferenca de Tempo: \(difference / 60)")
+            return difference <= twentyFourHours
+            
+        } catch {
+            print("Erro ao verificar cápsula: \(error)")
+            throw error
+        }
+    }
+    
+    func consumeCapsuleLive(capsuleID: UUID) async throws -> Bool {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            if var capsuleLives = record["lives"] as? Int {
+                
+                if capsuleLives == 0 {
+                    return false
+                }
+                
+                capsuleLives = capsuleLives - 1
+                
+                record["lives"] = capsuleLives as CKRecordValue
+                
+                do {
+                    let savedRecord = try await database.save(record)
+                    print("Capsula com vida consumida: \(savedRecord)")
+                    return true
+                } catch {
+                    print("Erro ao consumir a vida da Capsula : \(error)")
+                    throw error
+                }
+            }
+            
+        } catch {
+            print("Erro ao verificar cápsula: \(error)")
+            throw error
+        }
+        
+        return false
+    }
+    
     func createSubmission(submission: Submission, capsuleID: UUID, image: UIImage) async throws {
         let recordID = CKRecord.ID(recordName: submission.id.uuidString)
         let record = CKRecord(recordType: "Submission", recordID: recordID)
@@ -275,4 +337,29 @@ class CloudKitService: CKServiceProtocol {
 
         return capsules
     }
+
+    func fetchUniversalTime() async throws -> Date {
+        let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw NSError(domain: "TimeAPIError", code: -1)
+        }
+
+        let decoded = try JSONDecoder().decode(TimeResponse.self, from: data)
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+        guard let date = formatter.date(from: decoded.utc) else {
+            throw NSError(domain: "TimeAPIParse", code: -1)
+        }
+
+        return date
+    }
+}
+
+struct TimeResponse: Codable {
+    let utc: String
 }
