@@ -85,7 +85,12 @@ struct HomeRecapsView: View {
                 TabView {
                     ForEach(inProgressRecaps) { recap in
                         // Trocar pelo card correto atualizado quando o design de alta fidelidade estiver implementado ou atualizar este
-                        CapsuleCardComponent(capsule: recap)
+                        NavigationLink{
+                            InsideCapsule(capsule: recap)
+                        }label:{
+                            CapsuleCardComponent(capsule: recap)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
@@ -94,7 +99,7 @@ struct HomeRecapsView: View {
             .padding()
             
             VStack(alignment: .leading, spacing: 16) {
-                Text("Conclídas")
+                Text("Concluídas")
                 
                 let columns = [
                     GridItem(.flexible()),
