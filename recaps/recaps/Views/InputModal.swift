@@ -28,7 +28,7 @@ struct InputModal: View {
                 showOptions.toggle()
             } label: {
                 Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 40, weight: .bold))
+                    .font(.system(size: 80, weight: .bold))
                     .foregroundStyle(.blue)
             }
             .sheet(isPresented: $showOptions){
