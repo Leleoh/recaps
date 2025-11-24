@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXContainerItemProxy section */
-		CA60B6D02ED0B89900FD2014 /* PBXContainerItemProxy */ = {
+		75E9FEFE2ECE471600D47F7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D72F9B792ECCE53A00B1C949 /* Project object */;
 			proxyType = 1;
@@ -17,12 +17,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		CA60B6CC2ED0B89800FD2014 /* RecapsuleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RecapsuleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		75E9FEFA2ECE471600D47F7F /* recapsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = recapsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D72F9B812ECCE53A00B1C949 /* recaps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = recaps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CA60B6CD2ED0B89900FD2014 /* RecapsuleTests */ = {
+		75E9FEFB2ECE471600D47F7F /* RecapsuleTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = RecapsuleTests;
 			sourceTree = "<group>";
@@ -35,7 +35,7 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		CA60B6C92ED0B89800FD2014 /* Frameworks */ = {
+		75E9FEF72ECE471600D47F7F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -56,7 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				D72F9B832ECCE53A00B1C949 /* recaps */,
-				CA60B6CD2ED0B89900FD2014 /* RecapsuleTests */,
+				75E9FEFB2ECE471600D47F7F /* RecapsuleTests */,
 				D72F9B822ECCE53A00B1C949 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -65,7 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				D72F9B812ECCE53A00B1C949 /* recaps.app */,
-				CA60B6CC2ED0B89800FD2014 /* RecapsuleTests.xctest */,
+				75E9FEFA2ECE471600D47F7F /* recapsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -73,27 +73,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		CA60B6CB2ED0B89800FD2014 /* RecapsuleTests */ = {
+		75E9FEF92ECE471600D47F7F /* recapsTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CA60B6D42ED0B89900FD2014 /* Build configuration list for PBXNativeTarget "RecapsuleTests" */;
+			buildConfigurationList = 75E9FF002ECE471600D47F7F /* Build configuration list for PBXNativeTarget "recapsTests" */;
 			buildPhases = (
-				CA60B6C82ED0B89800FD2014 /* Sources */,
-				CA60B6C92ED0B89800FD2014 /* Frameworks */,
-				CA60B6CA2ED0B89800FD2014 /* Resources */,
+				75E9FEF62ECE471600D47F7F /* Sources */,
+				75E9FEF72ECE471600D47F7F /* Frameworks */,
+				75E9FEF82ECE471600D47F7F /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				CA60B6D12ED0B89900FD2014 /* PBXTargetDependency */,
+				75E9FEFF2ECE471600D47F7F /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				CA60B6CD2ED0B89900FD2014 /* RecapsuleTests */,
+				75E9FEFB2ECE471600D47F7F /* RecapsuleTests */,
 			);
-			name = RecapsuleTests;
+			name = recapsTests;
 			packageProductDependencies = (
 			);
-			productName = RecapsuleTests;
-			productReference = CA60B6CC2ED0B89800FD2014 /* RecapsuleTests.xctest */;
+			productName = recapsTests;
+			productReference = 75E9FEFA2ECE471600D47F7F /* recapsTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		D72F9B802ECCE53A00B1C949 /* recaps */ = {
@@ -128,8 +128,8 @@
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
-					CA60B6CB2ED0B89800FD2014 = {
-						CreatedOnToolsVersion = 26.1;
+					75E9FEF92ECE471600D47F7F = {
+						CreatedOnToolsVersion = 26.0.1;
 						TestTargetID = D72F9B802ECCE53A00B1C949;
 					};
 					D72F9B802ECCE53A00B1C949 = {
@@ -152,13 +152,13 @@
 			projectRoot = "";
 			targets = (
 				D72F9B802ECCE53A00B1C949 /* recaps */,
-				CA60B6CB2ED0B89800FD2014 /* RecapsuleTests */,
+				75E9FEF92ECE471600D47F7F /* recapsTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		CA60B6CA2ED0B89800FD2014 /* Resources */ = {
+		75E9FEF82ECE471600D47F7F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -175,7 +175,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		CA60B6C82ED0B89800FD2014 /* Sources */ = {
+		75E9FEF62ECE471600D47F7F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -192,25 +192,24 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		CA60B6D12ED0B89900FD2014 /* PBXTargetDependency */ = {
+		75E9FEFF2ECE471600D47F7F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D72F9B802ECCE53A00B1C949 /* recaps */;
-			targetProxy = CA60B6D02ED0B89900FD2014 /* PBXContainerItemProxy */;
+			targetProxy = 75E9FEFE2ECE471600D47F7F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		CA60B6D22ED0B89900FD2014 /* Debug */ = {
+		75E9FF012ECE471600D47F7F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4S5UL2WGZS;
+				DEVELOPMENT_TEAM = A67PA4386R;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = AnaPoletto.RecapsuleTests;
+				PRODUCT_BUNDLE_IDENTIFIER = academy.recapsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -222,17 +221,16 @@
 			};
 			name = Debug;
 		};
-		CA60B6D32ED0B89900FD2014 /* Release */ = {
+		75E9FF022ECE471600D47F7F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4S5UL2WGZS;
+				DEVELOPMENT_TEAM = A67PA4386R;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = AnaPoletto.RecapsuleTests;
+				PRODUCT_BUNDLE_IDENTIFIER = academy.recapsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -378,6 +376,8 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RX54746WSR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to take photos to add them to our app";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need to access your photos to add them to our app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -415,6 +415,8 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RX54746WSR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to take photos to add them to our app";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need to access your photos to add them to our app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -442,11 +444,11 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CA60B6D42ED0B89900FD2014 /* Build configuration list for PBXNativeTarget "RecapsuleTests" */ = {
+		75E9FF002ECE471600D47F7F /* Build configuration list for PBXNativeTarget "recapsTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				CA60B6D22ED0B89900FD2014 /* Debug */,
-				CA60B6D32ED0B89900FD2014 /* Release */,
+				75E9FF012ECE471600D47F7F /* Debug */,
+				75E9FF022ECE471600D47F7F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
