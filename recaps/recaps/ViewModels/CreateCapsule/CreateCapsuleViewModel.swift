@@ -70,7 +70,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         let newCapsule = Capsule(
             id: newCapsuleID,
             code: String(UUID().uuidString.prefix(5)), // Lógica provisória de código, precisa ser ajustado para a geração de um código aleatório que será repassado para outras pessoas se juntarem àquela capsula
-            submissions: [], // Começa vazia, as submissions são linkadas pelo ID (Aqui não deveria já conter uma submission referente às 3 imagens inseridas na criação da capsula?)
+            submissions: [], // Começa vazia, as submissions são linkadas pelo ID
             name: capsuleName,
             createdAt: Date(),
             offensive: offensiveDuration,
