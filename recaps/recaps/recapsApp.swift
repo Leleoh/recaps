@@ -11,7 +11,7 @@ import SwiftUI
 struct recapsApp: App {
     var body: some Scene {
         WindowGroup {
-            Camera()
+            InsideCapsule()
         }
     }
 }
