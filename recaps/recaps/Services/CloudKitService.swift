@@ -87,9 +87,33 @@ class CloudKitService: CKServiceProtocol {
                 let savedRecord = try await database.save(record)
                 print("Capsula salva: \(savedRecord)")
             } catch {
+                print("Erro ao atulizar a Capsula : \(error)")
+                throw error
+            }
+        } catch {
+            print("Erro ao atualizar a Capsula : \(error)")
+            throw error
+        }
+    }
+    
+    func updateLastSubmissionDate(capsuleID: UUID) async throws {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            record["lastSubmissionDate"] = Date() as CKRecordValue
+            
+            do {
+                let savedRecord = try await database.save(record)
+                print("Capsula salva: \(savedRecord)")
+            } catch {
                 print("Erro ao salvar a Capsula : \(error)")
                 throw error
             }
+        } catch {
+            print("Erro ao atualizar a Capsula : \(error)")
+            throw error
         }
     }
     
