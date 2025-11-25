@@ -11,9 +11,7 @@ import SwiftUI
 struct recapsApp: App {
     var body: some Scene {
         WindowGroup {
-            NavigationStack{
-                HomeRecapsView()
-            }
+            HomeRecapsView()
         }
     }
 }
