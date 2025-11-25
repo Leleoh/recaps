@@ -15,13 +15,13 @@ struct Camera: View {
     
     @State private var submissions: [Submission] = []
     
-    private let CKService = CloudKitService()
+    private let CKService = CapsuleService()
     
     let mockSubmission = Submission(
         id: UUID(),
         imageURL: nil,
         description: "A vida é curta, vive cada momento!",
-        authorId: UUID(),
+        authorId: "11111222",
         date: Date(),
         capsuleID: UUID()
     )
