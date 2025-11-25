@@ -53,29 +53,28 @@ struct CKUsabilityView: View {
             description: "A vida é curta, vive cada momento!",
             authorId: mockUser.id,
             date: Date(),
-            capsuleID: createdID,
+            capsuleID: createdID
         )
+        let idsToFetch: [UUID] = [
+            UUID(uuidString: "116AF188-382F-4F93-8F4C-572E0015ADA1")
+        ].compactMap { $0 }
         
         VStack(spacing: 20) {
-            TextField("Digite uma frase...", text: $phrase)
-                .textFieldStyle(.roundedBorder)
-                .padding()
 
             Button {
                 Task {
                     do {
-                        try await CKService.createCapsule(capsule: mockCapsule)
-                        await MainActor.run {
-                            message = "Capsula salva com sucesso! \n\(mockCapsule)"
-                        }
+                        let capsules = try await CKService.fetchCapsules(IDs: idsToFetch)
+                        let id = capsules.first?.id ?? nil
+                        let lastSubmissionDate = capsules.first?.lastSubmissionDate
+                        
+                        print("Capsula ID: \(id) \n LastSubmission: \(lastSubmissionDate)")
                     } catch {
-                        await MainActor.run {
-                            message = "Erro ao salvar a capsula: \(error.localizedDescription)"
-                        }
+                        print("Erro ao buscar cápsula: \(error)")
                     }
                 }
             } label: {
-                Text("Salvar no CloudKit")
+                Text("Buscar Capsula")
             }
             .buttonStyle(.borderedProminent)
     
@@ -83,32 +82,18 @@ struct CKUsabilityView: View {
     
                 Task {
                     do {
-                        try await CKService.deleteCapsule(capsuleID: createdID)
+                        try await CKService.updateLastSubmissionDate(capsuleID: idsToFetch.first!)
+                        let capsules = try await CKService.fetchCapsules(IDs: idsToFetch)
+                        let id = capsules.first?.id ?? nil
+                        let lastSubmissionDate = capsules.first?.lastSubmissionDate
+                        print("Atualizado!")
+                        print("Capsula ID: \(id) \n LastSubmission: \(lastSubmissionDate)")
                         await MainActor.run {
-                            message = "Capsula deletado com sucesso! \n\(mockCapsule)"
+                            message = "Capsula atualizada com sucesso! \n\(mockCapsule)"
                         }
                     } catch {
                         await MainActor.run {
-                            message = "Erro ao deletar a capsula: \(error.localizedDescription)"
-                        }
-                    }
-                }
-            } label: {
-                Text("Deletar Cápsula")
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button {
-    
-                Task {
-                    do {
-                        try await CKService.updateCapsule(capsule: mockCapsuleUpdate)
-                        await MainActor.run {
-                            message = "Capsula atualizada com sucesso! \n\(mockCapsuleUpdate)"
-                        }
-                    } catch {
-                        await MainActor.run {
-                            message = "Erro ao atualizar a capsula: \(error.localizedDescription)"
+                            message = "Erro ao atualizar last submissiond a capsula: \(error.localizedDescription)"
                         }
                     }
                 }
@@ -117,24 +102,6 @@ struct CKUsabilityView: View {
             }
             .buttonStyle(.borderedProminent)
             
-            Button {
-    
-                Task {
-                    do {
-//                        try await CKService.createSubmission(submission: mockSubmission, capsuleID: mockCapsule.id)
-                        await MainActor.run {
-                            message = "submission inserida com sucesso! \n\(mockCapsuleUpdate)"
-                        }
-                    } catch {
-                        await MainActor.run {
-                            message = "Erro ao submeter a submission: \(error.localizedDescription)"
-                        }
-                    }
-                }
-            } label: {
-                Text("Submeter Submission")
-            }
-            .buttonStyle(.borderedProminent)
 
             if !message.isEmpty {
                 Text(message)
