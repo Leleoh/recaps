@@ -43,7 +43,7 @@ class CreatingCapsuleTestViewModel {
             var currentUser = try await userService.getCurrentUser()
             currentUser.capsules.append(newCapsuleID)
 
-            try await userService.updateUser(
+            _ = try await userService.updateUser(
                 currentUser,
                 capsules: currentUser.capsules
             )

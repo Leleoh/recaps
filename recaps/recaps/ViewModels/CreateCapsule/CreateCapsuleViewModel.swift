@@ -109,11 +109,16 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
             var currentUser = try await userService.getCurrentUser()
             currentUser.capsules.append(newCapsuleID)
             
-            try await userService.updateUser(currentUser, name: currentUser.name, email: currentUser.email, capsules: currentUser.capsules)
+            _ = try await userService.updateUser(
+                currentUser,
+                name: currentUser.name,
+                email: currentUser.email,
+                capsules: currentUser.capsules
+            )
             print("✅ Usuário atualizado com a nova cápsula.")
             
             // Salvar as Imagens - Iteramos sobre as imagens carregadas e criamos uma submission para cada
-            for (index, image) in selectedImages.enumerated() {
+            for image in selectedImages {
                 let newSubmission = Submission(
                     id: UUID(),
                     imageURL: nil, // CloudKit gerencia a URL do asset

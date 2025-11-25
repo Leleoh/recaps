@@ -48,7 +48,12 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             // Adiciona cápsula ao usuário e atualiza
             user.capsules.append(capsule.id)
-            try await userService.updateUser(user, name: user.name, email: user.email, capsules: user.capsules)
+            _ = try await userService.updateUser(
+                user,
+                name: user.name,
+                email: user.email,
+                capsules: user.capsules
+            )
             
             print("✅ Sucesso! Entrou na cápsula: \(capsule.name)")
             
