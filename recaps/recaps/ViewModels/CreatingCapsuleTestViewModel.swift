@@ -36,31 +36,30 @@ class CreatingCapsuleTestViewModel {
                 status: .inProgress
             )
 
-            print("AAAA >>> Criando cápsula")
+            print("Criando cápsula")
 
             let newCapsuleID = try await capsuleService.createCapsule(capsule: capsule)
 
-            // busca user
-            var currentUser = try await userService.getCurrentUser()
-            currentUser.capsules.append(newCapsuleID)
-            
+            let currentUser = try await userService.getCurrentUser()
+
+            var userCapsules = currentUser.capsules
+            userCapsules.append(newCapsuleID)
+
             print(capsule)
-            print("Usuário:  ", currentUser)
+            print("Usuário:", currentUser)
 
-            // atualiza user com referências
-            let updatedUser = try await userService.updateUser(
-                currentUser,
-                capsules: currentUser.capsules
-            )
+            try await userService.updateUser(currentUser, capsules: userCapsules)
 
-            print("User atualizado:", updatedUser)
+            let user = try await userService.getCurrentUser()
+            print("User atualizado:", user)
 
         } catch {
-            print("Erro ao criar a Capsula", error)
+            print("Erro ao criar a cápsula", error)
         }
     }
 
-
+    
+    
     
     func joinCapsule(code: String) async throws {
         print("entro no join")
@@ -76,30 +75,27 @@ class CreatingCapsuleTestViewModel {
             print("Nenhuma cápsula encontrada com esse código.")
             return
         }
-
-        // 4. Verificar se usuário já está na cápsula
+        
         if capsule.members.contains(user.id) {
             print("Usuário já é membro desta cápsula.")
+            return
         }
-
-        // 5. Verificar se cápsula já está na lista do usuário
+        
         if user.capsules.contains(capsule.id) {
             print("Cápsula já está na lista do usuário.")
+            return
         }
-
-        // 6. Adiciona usuário à cápsula
+        
         capsule.members.append(user.id)
         try await capsuleService.updateCapsule(capsule: capsule)
-
-        // 7. Adiciona cápsula ao usuário
+        
         user.capsules.append(capsule.id)
-        _ = try await userService.updateUser(user, capsules: user.capsules)
-
-        // --- LOG FINAL ---
+        _ = try await userService.updateUser(user)
+        
         print("Usuário entrou na cápsula:", capsule.code)
         print("User:", user)
         print("Capsule:", capsule)
     }
-
-
+    
+    
 }

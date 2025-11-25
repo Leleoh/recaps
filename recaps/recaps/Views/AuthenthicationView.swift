@@ -9,7 +9,7 @@ import AuthenticationServices
 import SwiftUI
 
 struct AuthenthicationView: View {
-    var viewModel = AuthenthicationViewModel()
+    @State var viewModel = AuthenthicationViewModel()
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {

@@ -5,8 +5,8 @@
 //  Created by Ana Carolina Poletto on 21/11/25.
 //
 
-import Foundation
 import CloudKit
+import Foundation
 
 class UserService: UserServiceProtocol {
     private let database: CKDatabase
@@ -16,38 +16,38 @@ class UserService: UserServiceProtocol {
         self.userId = getUserId()
     }
     var userId: String = ""
-    
-    
+
     func getCurrentUser() async throws -> User {
-        let recordID = CKRecord.ID(recordName: userId)
-        
+        let recordID = CKRecord.ID(recordName: getUserId())
         let record = try await database.record(for: recordID)
-        
+
         let name = record["name"] as? String ?? ""
         let email = record["email"] as? String ?? ""
-        let capsulesRecords = record["capsules"] as? [CKRecord.ID] ?? []
-        
-        let capsules: [UUID] = capsulesRecords.compactMap { recordID in
-            UUID(uuidString: recordID.recordName)
+
+        let references = record["capsules"] as? [CKRecord.Reference] ?? []
+
+        let capsuleUUIDs: [UUID] = references.compactMap { ref in
+            UUID(uuidString: ref.recordID.recordName)
         }
-        
+
         return User(
             id: userId,
             name: name,
             email: email,
-            capsules: capsules
+            capsules: capsuleUUIDs
         )
     }
-    
+
+
     func createUser(user: User) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
         let record = CKRecord(recordType: "User", recordID: recordID)
-        
+
         //preencher dados do User
         record["id"] = user.id as CKRecordValue
         record["email"] = user.email as CKRecordValue
         record["name"] = user.name as CKRecordValue
-        
+
         //salvar usuário
         do {
             let savedRecord = try await database.save(record)
@@ -57,47 +57,29 @@ class UserService: UserServiceProtocol {
             throw error
         }
     }
-    
-    func updateUser(
-        _ user: User,
-        name: String? = nil,
-        email: String? = nil,
-        capsules: [UUID]? = nil
-    ) async throws -> User {
 
+    func updateUser(_ user: User, capsules: [UUID]? = nil) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
         let record = try await database.record(for: recordID)
 
-        if let name = name {
-            record["name"] = name as CKRecordValue
-        }
-
-        if let email = email {
-            record["email"] = email as CKRecordValue
-        }
+        record["name"] = user.name as CKRecordValue
+        record["email"] = user.email as CKRecordValue
 
         if let capsules = capsules {
-            let refs = capsules.map {
-                CKRecord.Reference(recordID: CKRecord.ID(recordName: $0.uuidString), action: .none)
+            let capsuleRefs = capsules.map { uuid in
+                CKRecord.Reference(
+                    recordID: CKRecord.ID(recordName: uuid.uuidString),
+                    action: .none
+                )
             }
-            record["capsules"] = refs as CKRecordValue
+            record["capsules"] = capsuleRefs as CKRecordValue
         }
 
-        let saved = try await database.save(record)
-
-        let savedRefs = saved["capsules"] as? [CKRecord.Reference] ?? []
-        let savedCapsules = savedRefs.compactMap { UUID(uuidString: $0.recordID.recordName) }
-
-        return User(
-            id: saved.recordID.recordName,
-            name: saved["name"] as? String ?? "",
-            email: saved["email"] as? String ?? "",
-            capsules: savedCapsules
-        )
+        _ = try await database.save(record)
     }
 
 
-    
+
     //Salvar localmente  usuário logado
     func loadUserId() -> String {
         return UserDefaults.standard.string(forKey: "userId") ?? ""
@@ -111,5 +93,5 @@ class UserService: UserServiceProtocol {
     func logout() {
         defaults.removeObject(forKey: "userId")
     }
-    
+
 }

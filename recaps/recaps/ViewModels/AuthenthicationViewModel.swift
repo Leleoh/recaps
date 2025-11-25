@@ -30,11 +30,12 @@ class AuthenthicationViewModel {
             userService.userId = newUserId
             
             do {
-                let _ = try await userService.getCurrentUser()
-                
                 userService.saveUserId(userService.userId)
                 
+                let _ = try await userService.getCurrentUser()
+                
                 print("Usuário encontrado no CloudKit")
+                
                 
             } catch {
                 print("Usuário não existe. Criando no CloudKit...")
