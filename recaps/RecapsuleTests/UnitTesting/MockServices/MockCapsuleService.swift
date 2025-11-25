@@ -6,35 +6,33 @@
 //
 
 import Foundation
+import CloudKit
 @testable import recaps
 
-class MockCKService: CKServiceProtocol {
-
+class MockCapsuleService: CapsuleServiceProtocol {
     // MARK: - Trackers
     var didCreate = false
     var didDelete = false
     var didUpdate = false
-
+    
     var createdCapsule: Capsule?
     var updatedCapsule: Capsule?
     var deletedCapsuleID: UUID?
-
-    var storedCapsules: [UUID: Capsule] = [:]
-    var storedSubmissions: [UUID: [Submission]] = [:]
-
-    // MARK: - Required protocol methods
-    func createCapsule(capsule: Capsule) async throws {
+    
+    func createCapsule(capsule: recaps.Capsule) async throws -> UUID {
         didCreate = true
         createdCapsule = capsule
-        storedCapsules[capsule.id] = capsule
+        return capsule.id
     }
-
+        var storedCapsules: [UUID: Capsule] = [:]
+        var storedSubmissions: [UUID: [Submission]] = [:]
+    
     func deleteCapsule(capsuleID: UUID) async throws {
         didDelete = true
         deletedCapsuleID = capsuleID
         storedCapsules.removeValue(forKey: capsuleID)
     }
-
+    
     func updateCapsule(capsule: Capsule) async throws {
         didUpdate = true
         updatedCapsule = capsule

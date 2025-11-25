@@ -8,22 +8,23 @@
 import SwiftUI
 
 struct HomeRecapsView: View {
+    var viewModel = CreatingCapsuleTestViewModel()
     
     @State private var viewModel = HomeRecapsViewModel()
     
     // Capsulas em progresso mockadas para avaliar visual.  Excluir quando não mais necessário
     private let inProgressRecaps: [Capsule] = [
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste1", createdAt: Date(), offensive: 20, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste2", createdAt: Date(), offensive: 80, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste3", createdAt: Date(), offensive: 99, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.inProgress)
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "11111", status: CapsuleStatus.inProgress),
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste1", createdAt: Date(), offensive: 20, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "222", status: CapsuleStatus.inProgress),
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste2", createdAt: Date(), offensive: 80, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "3333", status: CapsuleStatus.inProgress),
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste3", createdAt: Date(), offensive: 99, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "44444", status: CapsuleStatus.inProgress)
     ]
     
     // Capsulas abertas mockadas para avaliar visual. Excluir quando não mais necessário
     private let completedRecaps: [Capsule] = [
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste1", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.completed),
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste2", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.completed),
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste3", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: UUID(), status: CapsuleStatus.completed)
+        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste1", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "55555", status: CapsuleStatus.completed),
+        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste2", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "66666", status: CapsuleStatus.completed),
+        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste3", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "77777", status: CapsuleStatus.completed)
     ]
     
     var body: some View {
@@ -62,9 +63,11 @@ struct HomeRecapsView: View {
                     }
                     
                     Button {
-                        // Chamar método da ViewModel
+                        Task {
+                            print("botao apertado")
+                            try await viewModel.joinCapsule(code: "i1JzDF2D")
+                        }
                     } label: {
-                        Button(action: {}) {
                             Text("Juntar-se")
                                 .fontWeight(.medium)
                                 .frame(maxWidth: .infinity)
@@ -73,7 +76,6 @@ struct HomeRecapsView: View {
                                     RoundedRectangle(cornerRadius: 12)
                                         .stroke(Color.accentColor, lineWidth: 1.5)
                                 )
-                        }
                     }
                 }
             }
