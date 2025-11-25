@@ -7,7 +7,10 @@ struct CKUsabilityView: View {
     
     @State private var message: String = ""
     
+    @State private var selectedCapsule: Capsule?
     
+    @State private var capsules: [Capsule] = []
+        
     private let CKService = CapsuleService()
 
     var body: some View {
@@ -53,29 +56,25 @@ struct CKUsabilityView: View {
             description: "A vida é curta, vive cada momento!",
             authorId: mockUser.id,
             date: Date(),
-            capsuleID: createdID,
+            capsuleID: createdID
         )
+        let idsToFetch: [UUID] = [
+            UUID(uuidString: "116AF188-382F-4F93-8F4C-572E0015ADA1")
+        ].compactMap { $0 }
         
         VStack(spacing: 20) {
-            TextField("Digite uma frase...", text: $phrase)
-                .textFieldStyle(.roundedBorder)
-                .padding()
 
             Button {
                 Task {
                     do {
-                        try await CKService.createCapsule(capsule: mockCapsule)
-                        await MainActor.run {
-                            message = "Capsula salva com sucesso! \n\(mockCapsule)"
-                        }
+                        capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
+                        print("Sucesso!")
                     } catch {
-                        await MainActor.run {
-                            message = "Erro ao salvar a capsula: \(error.localizedDescription)"
-                        }
+                        print("Erro ao buscar cápsulas: \(error)")
                     }
                 }
             } label: {
-                Text("Salvar no CloudKit")
+                Text("Buscar Capsulas")
             }
             .buttonStyle(.borderedProminent)
     
@@ -83,32 +82,14 @@ struct CKUsabilityView: View {
     
                 Task {
                     do {
-                        try await CKService.deleteCapsule(capsuleID: createdID)
-                        await MainActor.run {
-                            message = "Capsula deletado com sucesso! \n\(mockCapsule)"
+                        if let selectedCapsule = selectedCapsule {
+                            try await CKService.updateLastSubmissionDate(capsuleID: selectedCapsule.id)
+                            capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
+                            print("Atualizado!")
                         }
                     } catch {
                         await MainActor.run {
-                            message = "Erro ao deletar a capsula: \(error.localizedDescription)"
-                        }
-                    }
-                }
-            } label: {
-                Text("Deletar Cápsula")
-            }
-            .buttonStyle(.borderedProminent)
-            
-            Button {
-    
-                Task {
-                    do {
-                        try await CKService.updateCapsule(capsule: mockCapsuleUpdate)
-                        await MainActor.run {
-                            message = "Capsula atualizada com sucesso! \n\(mockCapsuleUpdate)"
-                        }
-                    } catch {
-                        await MainActor.run {
-                            message = "Erro ao atualizar a capsula: \(error.localizedDescription)"
+                            message = "Erro ao atualizar last submissiond a capsula: \(error.localizedDescription)"
                         }
                     }
                 }
@@ -121,20 +102,60 @@ struct CKUsabilityView: View {
     
                 Task {
                     do {
-//                        try await CKService.createSubmission(submission: mockSubmission, capsuleID: mockCapsule.id)
-                        await MainActor.run {
-                            message = "submission inserida com sucesso! \n\(mockCapsuleUpdate)"
+                        if let selectedCapsule = selectedCapsule {
+                            let validOffensive = try await CKService.checkIfCapsuleIsValidOffensive(capsuleID: selectedCapsule.id)
+                            if !validOffensive {
+                                let succeded = try await CKService.consumeCapsuleLive(capsuleID: selectedCapsule.id)
+                                if succeded {
+                                    capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
+                                    print("Consumido com sucesso!")
+                                } else {
+                                    print("Não há vidas para consumir")
+                                }
+                            }
+                            print("Capsula válida: \(validOffensive)")
                         }
+                        
+//                        await MainActor.run {
+//                            message = "Capsula atualizada com sucesso! \n\(mockCapsule)"
+//                        }
                     } catch {
                         await MainActor.run {
-                            message = "Erro ao submeter a submission: \(error.localizedDescription)"
+                            message = "Erro ao atualizar last submissiond a capsula: \(error.localizedDescription)"
                         }
                     }
                 }
             } label: {
-                Text("Submeter Submission")
+                Text("Verificar se ValidOffensive é válido")
             }
             .buttonStyle(.borderedProminent)
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(capsules) { capsule in
+                        
+                        Button {
+                            selectedCapsule = capsule
+                        } label: {
+                            HStack {
+                                Text(capsule.id.uuidString)
+                                Text(capsule.lastSubmissionDate, style: .date)
+                                Text("\(capsule.lives)")
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                selectedCapsule?.id == capsule.id
+                                ? Color.blue.opacity(0.1)
+                                : Color.gray.opacity(0.1)
+                            )
+                            .cornerRadius(8)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding()
+            }
 
             if !message.isEmpty {
                 Text(message)
