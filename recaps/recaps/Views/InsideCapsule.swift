@@ -12,6 +12,7 @@ import SwiftUI
 struct InsideCapsule: View {
     
     var capsule: Capsule
+    @State private var showInputModal = false
     
     var body: some View {
         
@@ -39,10 +40,19 @@ struct InsideCapsule: View {
 
         Spacer()
         
-        InputModal()
-        
-        Spacer()
+        Button{
+            showInputModal = true
+        }label:{
+            Image(systemName: "plus.circle.fill")
+                .font(.system(size: 40, weight: .bold))
+                .foregroundStyle(Color.blue)
+        }
+        .sheet(isPresented: $showInputModal) {
+            InputModal()
+        }
     }
+    
+        
 }
 
 #Preview {
