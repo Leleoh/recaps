@@ -11,4 +11,5 @@ protocol HomeRecapsViewModelProtocol {
     var showCreateCapsule: Bool { get set }
     
     func didTapNewRecap()
+    func joinCapsule(code: String) async
 }

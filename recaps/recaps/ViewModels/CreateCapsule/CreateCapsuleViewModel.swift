@@ -34,13 +34,22 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         return !capsuleName.isEmpty && selectedImages.count >= 3
     }
     
-    private let cloudKitService: CKServiceProtocol
+    // MARK: - Services
+    private let capsuleService: CapsuleServiceProtocol
+    private let userService: UserServiceProtocol
     
-    init(service: CKServiceProtocol = CloudKitService()) {
-        self.cloudKitService = service
+    init(capsuleService: CapsuleServiceProtocol = CapsuleService(), userService: UserServiceProtocol = UserService()) {
+        self.capsuleService = capsuleService
+        self.userService = userService
     }
     
-    // MARK: - Image Loading Logic
+    // MARK: Helpers
+    private func generateCode() -> String {
+        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return String((0..<6).map { _ in chars.randomElement()! })
+    }
+    
+    // MARK: - Image Loading
     func loadSelectedImages() async {
         var loadedImages: [UIImage] = []
         
@@ -56,7 +65,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         }
     }
     
-    // MARK: - CloudKit Operations
+    // MARK: - Main Actor
     func createCapsule() async -> Bool {
         guard isValidToSave else { return false }
         
@@ -64,13 +73,22 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         errorMessage = nil
         
         let newCapsuleID = UUID()
-        let currentUserID = UUID() // TODO: Substituir pelo ID real do User quando tiver autenticação
+        let currentUserID = userService.getUserId()
+        
+        guard !currentUserID.isEmpty else {
+            print("ERRO CRÍTICO: Tentativa de criar cápsula sem usuário logado.")
+            await MainActor.run {
+                self.isLoading = false
+                self.errorMessage = "Erro: Usuário não identificado. Faça login novamente."
+            }
+            return false
+        }
         
         // Criar o Objeto Cápsula
         let newCapsule = Capsule(
             id: newCapsuleID,
-            code: String(UUID().uuidString.prefix(5)), // Lógica provisória de código, precisa ser ajustado para a geração de um código aleatório que será repassado para outras pessoas se juntarem àquela capsula
-            submissions: [], // Começa vazia, as submissions são linkadas pelo ID
+            code: generateCode(),
+            submissions: [],
             name: capsuleName,
             createdAt: Date(),
             offensive: offensiveDuration,
@@ -85,12 +103,17 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         do {
             print("Iniciando upload da cápsula: \(newCapsule.name)")
             // Salvar a Cápsula
-            try await cloudKitService.createCapsule(capsule: newCapsule)
+            _ = try await capsuleService.createCapsule(capsule: newCapsule)
             print("Cápsula criada com ID: \(newCapsule.id)")
             
-            // Salvar as Imagens (Submissions)
-            // Iteramos sobre as imagens carregadas e criamos uma submission para cada
-            for image in selectedImages {
+            var currentUser = try await userService.getCurrentUser()
+            currentUser.capsules.append(newCapsuleID)
+            
+            try await userService.updateUser(currentUser, name: currentUser.name, email: currentUser.email, capsules: currentUser.capsules)
+            print("✅ Usuário atualizado com a nova cápsula.")
+            
+            // Salvar as Imagens - Iteramos sobre as imagens carregadas e criamos uma submission para cada
+            for (index, image) in selectedImages.enumerated() {
                 let newSubmission = Submission(
                     id: UUID(),
                     imageURL: nil, // CloudKit gerencia a URL do asset
@@ -102,7 +125,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
                 
                 print("Enviando foto: \(image)...")
                 
-                try await (cloudKitService as? CloudKitService)?.createSubmission(
+                try await capsuleService.createSubmission(
                     submission: newSubmission,
                     capsuleID: newCapsuleID,
                     image: image
