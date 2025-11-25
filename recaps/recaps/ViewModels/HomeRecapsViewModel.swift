@@ -10,7 +10,7 @@ import AuthenticationServices
 import CloudKit
 
 @Observable
-class CreatingCapsuleTestViewModel {
+class HomeRecapsViewModel {
     private let userService = UserService()
     private let capsuleService = CapsuleService()
     
@@ -62,14 +62,9 @@ class CreatingCapsuleTestViewModel {
     
     
     func joinCapsule(code: String) async throws {
-        print("entro no join")
-        let allCapsules = try await capsuleService.fetchAllCapsules()
+        let allCapsules = try await capsuleService.fetchAllCapsulesWithoutSubmissions()
         
-        print("todas as capsulas")
         var user = try await userService.getCurrentUser()
-        print(user.capsules)
-        print(" ")
-        print(user)
         
         guard var capsule = allCapsules.first(where: { $0.code == code }) else {
             print("Nenhuma cápsula encontrada com esse código.")

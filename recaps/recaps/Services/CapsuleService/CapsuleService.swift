@@ -14,6 +14,7 @@ class CapsuleService: CapsuleServiceProtocol {
     init(database: CKDatabase = Database.shared.database) {
         self.database = database
     }
+    
     func createCapsule(capsule: Capsule) async throws -> UUID {
         let recordID = CKRecord.ID(recordName: capsule.id.uuidString)
         let record = CKRecord(recordType: "Capsule", recordID: recordID)
@@ -34,7 +35,6 @@ class CapsuleService: CapsuleServiceProtocol {
         
         return capsule.id
     }
-    
     
     func deleteCapsule(capsuleID: UUID) async throws {
         let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
@@ -70,10 +70,96 @@ class CapsuleService: CapsuleServiceProtocol {
                 let savedRecord = try await database.save(record)
                 print("Capsula salva: \(savedRecord)")
             } catch {
+                print("Erro ao atulizar a Capsula : \(error)")
+                throw error
+            }
+        } catch {
+            print("Erro ao atualizar a Capsula : \(error)")
+            throw error
+        }
+    }
+    
+    func updateLastSubmissionDate(capsuleID: UUID) async throws {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            record["lastSubmissionDate"] = Date() as CKRecordValue
+            
+            do {
+                let savedRecord = try await database.save(record)
+                print("Capsula salva: \(savedRecord)")
+            } catch {
                 print("Erro ao salvar a Capsula : \(error)")
                 throw error
             }
+        } catch {
+            print("Erro ao atualizar a Capsula : \(error)")
+            throw error
         }
+    }
+    
+    func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            guard
+                let lastSubmissionDate = record["lastSubmissionDate"] as? Date
+            else {
+                return false
+            }
+            
+            let serverTime = try await fetchUniversalTime()
+            
+            let difference = serverTime.timeIntervalSince(lastSubmissionDate)
+            
+            let twentyFourHours: TimeInterval = 24 * 60 * 60
+            
+            print("Horário Atual: \(serverTime)")
+            print("Diferenca de Tempo: \(difference / 60)")
+            return difference <= twentyFourHours
+            
+        } catch {
+            print("Erro ao verificar cápsula: \(error)")
+            throw error
+        }
+    }
+    
+    func consumeCapsuleLive(capsuleID: UUID) async throws -> Bool {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            if var capsuleLives = record["lives"] as? Int {
+                
+                if capsuleLives == 0 {
+                    return false
+                }
+                
+                capsuleLives = capsuleLives - 1
+                
+                record["lives"] = capsuleLives as CKRecordValue
+                
+                do {
+                    let savedRecord = try await database.save(record)
+                    print("Capsula com vida consumida: \(savedRecord)")
+                    return true
+                } catch {
+                    print("Erro ao consumir a vida da Capsula : \(error)")
+                    throw error
+                }
+            }
+            
+        } catch {
+            print("Erro ao verificar cápsula: \(error)")
+            throw error
+        }
+        
+        return false
     }
     
     func createSubmission(submission: Submission, capsuleID: UUID, image: UIImage) async throws {
@@ -284,5 +370,82 @@ class CapsuleService: CapsuleServiceProtocol {
         
         return capsules
     }
+    
+    func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule] {
+        let predicate = NSPredicate(value: true)
+        let query = CKQuery(recordType: "Capsule", predicate: predicate)
+        
+        let result = try await database.records(matching: query)
+        var capsules: [Capsule] = []
+        
+        for (_, recordResult) in result.matchResults {
+            switch recordResult {
+            case .success(let record):
+                guard
+                    let idString = record["id"] as? String,
+                    let id = UUID(uuidString: idString),
+                    let code = record["code"] as? String,
+                    let name = record["name"] as? String,
+                    let createdAt = record["createdAt"] as? Date,
+                    let offensive = record["offensive"] as? Int,
+                    let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
+                    let validOffensive = record["validOffensive"] as? Bool,
+                    let lives = record["lives"] as? Int,
+                    let ownerId = record["ownerId"] as? String,
+                    let statusRaw = record["status"] as? String,
+                    let status = CapsuleStatus(rawValue: statusRaw),
+                    let members = record["members"] as? [String]
+                else { continue }
+                
+                
+                let capsule = Capsule(
+                    id: id,
+                    code: code,
+                    submissions: [],
+                    name: name,
+                    createdAt: createdAt,
+                    offensive: offensive,
+                    lastSubmissionDate: lastSubmissionDate,
+                    validOffensive: validOffensive,
+                    lives: lives,
+                    members: members,
+                    ownerId: ownerId,
+                    status: status
+                )
+                
+                capsules.append(capsule)
+                
+            case .failure(let error):
+                print("Erro ao obter Capsule: \(error)")
+            }
+        }
+        
+        return capsules
+    }
+
+    func fetchUniversalTime() async throws -> Date {
+        let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+            throw NSError(domain: "TimeAPIError", code: -1)
+        }
+
+        let decoded = try JSONDecoder().decode(TimeResponse.self, from: data)
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+
+        guard let date = formatter.date(from: decoded.utc) else {
+            throw NSError(domain: "TimeAPIParse", code: -1)
+        }
+
+        return date
+    }
+}
+
+struct TimeResponse: Codable {
+    let utc: String
 }
 

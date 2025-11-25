@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeRecapsView: View {
-    var viewModel = CreatingCapsuleTestViewModel()
+    var viewModel = HomeRecapsViewModel()
     
     // Capsulas em progresso mockadas para avaliar visual.  Excluir quando não mais necessário
     private let inProgressRecaps: [Capsule] = [
@@ -50,6 +50,7 @@ struct HomeRecapsView: View {
                 HStack(spacing: 12) {
                     Button{
                         Task {
+                            //Aquie cria codigo e cápsula
                             let code = viewModel.generateCode()
                             try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
                         }
@@ -65,8 +66,8 @@ struct HomeRecapsView: View {
                     }
                     
                     Button {
+                        //Aqui tem que ter campo que pede código com pop up ou modela e esse que vai ser o code mandado para a função
                         Task {
-                            print("botao apertado")
                             try await viewModel.joinCapsule(code: "i1JzDF2D")
                         }
                     } label: {
@@ -81,6 +82,8 @@ struct HomeRecapsView: View {
                     }
                 }
             }
+            
+            
             .padding([.top, .horizontal], 16)
             
             
@@ -91,7 +94,12 @@ struct HomeRecapsView: View {
                 TabView {
                     ForEach(inProgressRecaps) { recap in
                         // Trocar pelo card correto atualizado quando o design de alta fidelidade estiver implementado ou atualizar este
-                        CapsuleCardComponent(capsule: recap)
+                        NavigationLink{
+                            InsideCapsule(capsule: recap)
+                        }label:{
+                            CapsuleCardComponent(capsule: recap)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
@@ -100,7 +108,7 @@ struct HomeRecapsView: View {
             .padding()
             
             VStack(alignment: .leading, spacing: 16) {
-                Text("Conclídas")
+                Text("Concluídas")
                 
                 let columns = [
                     GridItem(.flexible()),
@@ -120,7 +128,7 @@ struct HomeRecapsView: View {
         }
     }
 }
-    
-    #Preview {
-        HomeRecapsView()
-    }
+
+#Preview {
+    HomeRecapsView()
+}

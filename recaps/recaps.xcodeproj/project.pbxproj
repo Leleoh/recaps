@@ -21,6 +21,16 @@
 		D72F9B812ECCE53A00B1C949 /* recaps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = recaps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D7F9A8602ED4D0C7008513CC /* Exceptions for "recaps" folder in "recaps" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D72F9B802ECCE53A00B1C949 /* recaps */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		75E9FEFB2ECE471600D47F7F /* RecapsuleTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -29,6 +39,9 @@
 		};
 		D72F9B832ECCE53A00B1C949 /* recaps */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D7F9A8602ED4D0C7008513CC /* Exceptions for "recaps" folder in "recaps" target */,
+			);
 			path = recaps;
 			sourceTree = "<group>";
 		};
