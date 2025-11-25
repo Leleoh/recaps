@@ -18,7 +18,7 @@ class InputViewModel{
     var errorMessage: String? = nil
     var shouldDismiss: Bool = false
     
-    private let ckService = CloudKitService()
+    private let ckService = CapsuleService()
     
     @MainActor
     func saveMemory(capsuleID: UUID) async {
@@ -33,7 +33,7 @@ class InputViewModel{
             id: UUID(),
             imageURL: nil,
             description: caption,
-            authorId: UUID(),
+            authorId: "",
             date: Date(),
             capsuleID: capsuleID
         )

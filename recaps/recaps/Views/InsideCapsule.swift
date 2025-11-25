@@ -48,7 +48,7 @@ struct InsideCapsule: View {
                 .foregroundStyle(Color.blue)
         }
         .sheet(isPresented: $showInputModal) {
-            InputModal()
+            InputModal(capsuleID: capsule.id)
         }
     }
     
@@ -68,7 +68,7 @@ struct InsideCapsule: View {
         validOffensive: true,
         lives: 3,
         members: [],
-        ownerId: UUID(),
+        ownerId: "",
         status: .inProgress
     ))
 }

@@ -11,7 +11,7 @@ import PhotosUI
 struct InputModal: View {
     
     var capsuleID: UUID
-    private let ckService = CloudKitService()
+    private let ckService = CapsuleService()
     
     @Environment(\.dismiss) var dismiss
     
