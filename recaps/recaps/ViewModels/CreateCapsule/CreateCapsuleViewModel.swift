@@ -83,9 +83,10 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         )
         
         do {
+            print("Iniciando upload da cápsula: \(newCapsule.name)")
             // Salvar a Cápsula
             try await cloudKitService.createCapsule(capsule: newCapsule)
-            print("Cápsula criada com sucesso: \(newCapsule.name)")
+            print("Cápsula criada com ID: \(newCapsule.id)")
             
             // Salvar as Imagens (Submissions)
             // Iteramos sobre as imagens carregadas e criamos uma submission para cada
@@ -99,12 +100,17 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
                     capsuleID: newCapsuleID // Linkando com a cápsula criada
                 )
                 
+                print("Enviando foto: \(image)...")
+                
                 try await (cloudKitService as? CloudKitService)?.createSubmission(
                     submission: newSubmission,
                     capsuleID: newCapsuleID,
                     image: image
                 )
+                
+                print("Foto \(image) salva com sucesso!")
             }
+            print("Fluxo finalizado com Sucesso!")
             
             isLoading = false
             return true
