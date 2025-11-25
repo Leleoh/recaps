@@ -1,34 +1,21 @@
 //
-//  Empty.swift
+//  CapsuleService.swift
 //  recaps
 //
-//  Created by Leonel Ferraz Hernandez on 19/11/25.
+//  Created by Ana Carolina Poletto on 21/11/25.
 //
 
 import Foundation
 import CloudKit
 import UIKit
 
-protocol CKServiceProtocol {
-    func createCapsule(capsule: Capsule) async throws
-    func deleteCapsule(capsuleID: UUID) async throws
-    func updateCapsule(capsule: Capsule) async throws
-    
-}
-
-@Observable
-class CloudKitService: CKServiceProtocol {
-    
-    let container: CKContainer
-    let database: CKDatabase
-    
-    init() {
-        container = CKContainer(identifier: "iCloud.com.Recaps.app")
-        database = container.publicCloudDatabase
+class CapsuleService: CapsuleServiceProtocol {
+    private let database: CKDatabase
+    init(database: CKDatabase = Database.shared.database) {
+        self.database = database
     }
     
-    func createCapsule(capsule: Capsule) async throws {
-        //let record = CKRecord(recordType: "Capsule")
+    func createCapsule(capsule: Capsule) async throws -> UUID {
         let recordID = CKRecord.ID(recordName: capsule.id.uuidString)
         let record = CKRecord(recordType: "Capsule", recordID: recordID)
         
@@ -40,18 +27,13 @@ class CloudKitService: CKServiceProtocol {
         record["lastSubmissionDate"] = capsule.lastSubmissionDate as CKRecordValue
         record["validOffensive"] = capsule.validOffensive as CKRecordValue
         record["lives"] = capsule.lives as CKRecordValue
-        record["ownerId"] = capsule.ownerId.uuidString as CKRecordValue
+        record["ownerId"] = capsule.ownerId as CKRecordValue
         record["status"] = capsule.status.rawValue as CKRecordValue
-        record["members"] = capsule.members.map { $0.uuidString } as CKRecordValue
+        record["members"] = capsule.members.map { $0 } as CKRecordValue
         
-        do {
-            let savedRecord = try await database.save(record)
-            print("Capsula salva: \(savedRecord)")
-        } catch {
-            print("Erro ao salvar a Capsula : \(error)")
-            throw error
-        }
+        _ = try await database.save(record)
         
+        return capsule.id
     }
     
     func deleteCapsule(capsuleID: UUID) async throws {
@@ -76,12 +58,13 @@ class CloudKitService: CKServiceProtocol {
             record["name"] = capsule.name as CKRecordValue
             record["createdAt"] = capsule.createdAt as CKRecordValue
             record["offensive"] = capsule.offensive as CKRecordValue
-            record["lastSubmissionDate"] = capsule.lastSubmissionDate as CKRecordValue
+            record["lastSubmissionDate"] =
+            capsule.lastSubmissionDate as CKRecordValue
             record["validOffensive"] = capsule.validOffensive as CKRecordValue
             record["lives"] = capsule.lives as CKRecordValue
-            record["ownerId"] = capsule.ownerId.uuidString as CKRecordValue
+            record["ownerId"] = capsule.ownerId as CKRecordValue
             record["status"] = capsule.status.rawValue as CKRecordValue
-            record["members"] = capsule.members.map { $0.uuidString } as CKRecordValue
+            record["members"] = capsule.members.map { $0 } as CKRecordValue
             
             do {
                 let savedRecord = try await database.save(record)
@@ -218,13 +201,13 @@ class CloudKitService: CKServiceProtocol {
     
     func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
         let predicate = NSPredicate(format: "capsuleID == %@", capsuleID.uuidString)
-       // let predicate = NSPredicate(value: true)
+        // let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: "Submission", predicate: predicate)
-
+        
         var submissions: [Submission] = []
-
+        
         let result = try await database.records(matching: query)
-
+        
         for (_, recordResult) in result.matchResults {
             switch recordResult {
             case .success(let record):
@@ -235,9 +218,8 @@ class CloudKitService: CKServiceProtocol {
                 let description = record["description"] as? String
                 
                 let date = record["date"] as? Date ?? Date()
-
-                let authorIdString = record["authorId"] as? String
-                let authorId = UUID(uuidString: authorIdString ?? "") ?? UUID()
+                
+                let authorId = record["authorId"] as? String ?? ""
                 
                 let capsuleIDString = record["capsuleID"] as? String ?? ""
                 let capsuleID = UUID(uuidString: capsuleIDString) ?? UUID()
@@ -248,7 +230,7 @@ class CloudKitService: CKServiceProtocol {
                     
                     let localURL = FileManager.default.temporaryDirectory
                         .appendingPathComponent("\(UUID().uuidString).jpg")
-
+                    
                     do {
                         try FileManager.default.copyItem(at: fileURL, to: localURL)
                         imageURL = localURL
@@ -256,7 +238,7 @@ class CloudKitService: CKServiceProtocol {
                         print("Erro ao copiar asset: \(error)")
                     }
                 }
-
+                
                 let submission = Submission(
                     id: id,
                     imageURL: imageURL,
@@ -265,14 +247,14 @@ class CloudKitService: CKServiceProtocol {
                     date: date,
                     capsuleID: capsuleID
                 )
-
+                
                 submissions.append(submission)
-
+                
             case .failure(let error):
                 print("Erro ao obter registro: \(error)")
             }
         }
-
+        
         return submissions
     }
     
@@ -280,11 +262,11 @@ class CloudKitService: CKServiceProtocol {
         let recordNames = IDs.map { $0.uuidString }
         
         let referenceIDs = recordNames.map { CKRecord.ID(recordName: $0) }
-
+        
         var capsules: [Capsule] = []
-
+        
         let result = try await database.records(for: referenceIDs)
-
+        
         for (_, recordResult) in result {
             switch recordResult {
             case .success(let record):
@@ -293,7 +275,7 @@ class CloudKitService: CKServiceProtocol {
                     let idString = record["id"] as? String,
                     let id = UUID(uuidString: idString)
                 else { continue }
-
+                
                 let code = record["code"] as? String ?? ""
                 let name = record["name"] as? String ?? ""
                 let createdAt = record["createdAt"] as? Date ?? Date()
@@ -301,18 +283,16 @@ class CloudKitService: CKServiceProtocol {
                 let lastSubmissionDate = record["lastSubmissionDate"] as? Date ?? Date()
                 let validOffensive = record["validOffensive"] as? Bool ?? false
                 let lives = record["lives"] as? Int ?? 0
-
-                let ownerIdString = record["ownerId"] as? String ?? ""
-                let ownerId = UUID(uuidString: ownerIdString) ?? UUID()
-
+                
+                let ownerId = record["ownerId"] as? String ?? ""
+                
                 let statusRaw = record["status"] as? String ?? ""
                 let status = CapsuleStatus(rawValue: statusRaw) ?? .inProgress
-
-                let membersStrings = record["members"] as? [String] ?? []
-                let members = membersStrings.compactMap { UUID(uuidString: $0) }
-
+                
+                let members = record["members"] as? [String] ?? []
+                
                 let submissions = try await fetchSubmissions(capsuleID: id)
-
+                
                 let capsule = Capsule(
                     id: id,
                     code: code,
@@ -327,14 +307,119 @@ class CloudKitService: CKServiceProtocol {
                     ownerId: ownerId,
                     status: status
                 )
-
+                
                 capsules.append(capsule)
-
+                
             case .failure(let error):
                 print("Erro ao obter Capsule: \(error)")
             }
         }
-
+        
+        return capsules
+    }
+    
+    func fetchAllCapsules() async throws -> [Capsule] {
+        let predicate = NSPredicate(value: true)
+        let query = CKQuery(recordType: "Capsule", predicate: predicate)
+        
+        let result = try await database.records(matching: query)
+        var capsules: [Capsule] = []
+        
+        for (_, recordResult) in result.matchResults {
+            switch recordResult {
+            case .success(let record):
+                guard
+                    let idString = record["id"] as? String,
+                    let id = UUID(uuidString: idString),
+                    let code = record["code"] as? String,
+                    let name = record["name"] as? String,
+                    let createdAt = record["createdAt"] as? Date,
+                    let offensive = record["offensive"] as? Int,
+                    let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
+                    let validOffensive = record["validOffensive"] as? Bool,
+                    let lives = record["lives"] as? Int,
+                    let ownerId = record["ownerId"] as? String,
+                    let statusRaw = record["status"] as? String,
+                    let status = CapsuleStatus(rawValue: statusRaw),
+                    let members = record["members"] as? [String]
+                else { continue }
+                
+                let submissions = try await fetchSubmissions(capsuleID: id)
+                
+                let capsule = Capsule(
+                    id: id,
+                    code: code,
+                    submissions: submissions,
+                    name: name,
+                    createdAt: createdAt,
+                    offensive: offensive,
+                    lastSubmissionDate: lastSubmissionDate,
+                    validOffensive: validOffensive,
+                    lives: lives,
+                    members: members,
+                    ownerId: ownerId,
+                    status: status
+                )
+                
+                capsules.append(capsule)
+                
+            case .failure(let error):
+                print("Erro ao obter Capsule: \(error)")
+            }
+        }
+        
+        return capsules
+    }
+    
+    func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule] {
+        let predicate = NSPredicate(value: true)
+        let query = CKQuery(recordType: "Capsule", predicate: predicate)
+        
+        let result = try await database.records(matching: query)
+        var capsules: [Capsule] = []
+        
+        for (_, recordResult) in result.matchResults {
+            switch recordResult {
+            case .success(let record):
+                guard
+                    let idString = record["id"] as? String,
+                    let id = UUID(uuidString: idString),
+                    let code = record["code"] as? String,
+                    let name = record["name"] as? String,
+                    let createdAt = record["createdAt"] as? Date,
+                    let offensive = record["offensive"] as? Int,
+                    let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
+                    let validOffensive = record["validOffensive"] as? Bool,
+                    let lives = record["lives"] as? Int,
+                    let ownerId = record["ownerId"] as? String,
+                    let statusRaw = record["status"] as? String,
+                    let status = CapsuleStatus(rawValue: statusRaw),
+                    let members = record["members"] as? [String]
+                else { continue }
+                
+                
+                let capsule = Capsule(
+                    id: id,
+                    code: code,
+                    submissions: [],
+                    name: name,
+                    createdAt: createdAt,
+                    offensive: offensive,
+                    lastSubmissionDate: lastSubmissionDate,
+                    validOffensive: validOffensive,
+                    lives: lives,
+                    members: members,
+                    ownerId: ownerId,
+                    status: status
+                )
+                
+                capsules.append(capsule)
+                
+            case .failure(let error):
+                print("Erro ao obter Capsule: \(error)")
+            }
+        }
+        
         return capsules
     }
 
@@ -363,3 +448,4 @@ class CloudKitService: CKServiceProtocol {
 struct TimeResponse: Codable {
     let utc: String
 }
+
