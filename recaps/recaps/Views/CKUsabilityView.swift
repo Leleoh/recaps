@@ -7,7 +7,10 @@ struct CKUsabilityView: View {
     
     @State private var message: String = ""
     
+    @State private var selectedCapsule: Capsule?
     
+    @State private var capsules: [Capsule] = []
+        
     private let CKService = CapsuleService()
 
     var body: some View {
@@ -64,17 +67,14 @@ struct CKUsabilityView: View {
             Button {
                 Task {
                     do {
-                        let capsules = try await CKService.fetchCapsules(IDs: idsToFetch)
-                        let id = capsules.first?.id ?? nil
-                        let lastSubmissionDate = capsules.first?.lastSubmissionDate
-                        
-                        print("Capsula ID: \(id) \n LastSubmission: \(lastSubmissionDate)")
+                        capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
+                        print("Sucesso!")
                     } catch {
-                        print("Erro ao buscar cápsula: \(error)")
+                        print("Erro ao buscar cápsulas: \(error)")
                     }
                 }
             } label: {
-                Text("Buscar Capsula")
+                Text("Buscar Capsulas")
             }
             .buttonStyle(.borderedProminent)
     
@@ -82,14 +82,10 @@ struct CKUsabilityView: View {
     
                 Task {
                     do {
-                        try await CKService.updateLastSubmissionDate(capsuleID: idsToFetch.first!)
-                        let capsules = try await CKService.fetchCapsules(IDs: idsToFetch)
-                        let id = capsules.first?.id ?? nil
-                        let lastSubmissionDate = capsules.first?.lastSubmissionDate
-                        print("Atualizado!")
-                        print("Capsula ID: \(id) \n LastSubmission: \(lastSubmissionDate)")
-                        await MainActor.run {
-                            message = "Capsula atualizada com sucesso! \n\(mockCapsule)"
+                        if let selectedCapsule = selectedCapsule {
+                            try await CKService.updateLastSubmissionDate(capsuleID: selectedCapsule.id)
+                            capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
+                            print("Atualizado!")
                         }
                     } catch {
                         await MainActor.run {
@@ -102,6 +98,64 @@ struct CKUsabilityView: View {
             }
             .buttonStyle(.borderedProminent)
             
+            Button {
+    
+                Task {
+                    do {
+                        if let selectedCapsule = selectedCapsule {
+                            let validOffensive = try await CKService.checkIfCapsuleIsValidOffensive(capsuleID: selectedCapsule.id)
+                            if !validOffensive {
+                                let succeded = try await CKService.consumeCapsuleLive(capsuleID: selectedCapsule.id)
+                                if succeded {
+                                    capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
+                                    print("Consumido com sucesso!")
+                                } else {
+                                    print("Não há vidas para consumir")
+                                }
+                            }
+                            print("Capsula válida: \(validOffensive)")
+                        }
+                        
+//                        await MainActor.run {
+//                            message = "Capsula atualizada com sucesso! \n\(mockCapsule)"
+//                        }
+                    } catch {
+                        await MainActor.run {
+                            message = "Erro ao atualizar last submissiond a capsula: \(error.localizedDescription)"
+                        }
+                    }
+                }
+            } label: {
+                Text("Verificar se ValidOffensive é válido")
+            }
+            .buttonStyle(.borderedProminent)
+            
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(capsules) { capsule in
+                        
+                        Button {
+                            selectedCapsule = capsule
+                        } label: {
+                            HStack {
+                                Text(capsule.id.uuidString)
+                                Text(capsule.lastSubmissionDate, style: .date)
+                                Text("\(capsule.lives)")
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                selectedCapsule?.id == capsule.id
+                                ? Color.blue.opacity(0.1)
+                                : Color.gray.opacity(0.1)
+                            )
+                            .cornerRadius(8)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding()
+            }
 
             if !message.isEmpty {
                 Text(message)
