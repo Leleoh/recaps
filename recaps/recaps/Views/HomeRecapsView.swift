@@ -26,96 +26,103 @@ struct HomeRecapsView: View {
     ]
     
     var body: some View {
-        VStack (spacing: 40) {
-            VStack(alignment: .leading, spacing: 16) {
-                // Cabeçalho da página
-                HStack(alignment: .center) {
-                    
-                    Text("Minhas recaps")
-                        .font(.system(size: 34, weight: .bold))
-                    Spacer()
-                    
-                    // Botão de perfil.
-                    Button {
-                        // Chamar view aqui
-                    } label: {
-                        Image(systemName: "person.crop.circle.fill")
-                            .resizable()
-                            .frame(width: 38, height: 38)
-                    }
-                    .buttonStyle(.plain)
-                }
-                
-                HStack(spacing: 12) {
-                    Button{
-                        Task {
-                                let code = viewModel.generateCode()
-                                try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
-                            }
-                    } label: {
-                        Text("Novo recap")
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.accentColor.opacity(0.15))
-                            )
-                    }
-                    
-                    Button {
-                        Task {
-                            print("botao apertado")
-                            try await viewModel.joinCapsule(code: "i1JzDF2D")
+        NavigationStack{
+            VStack (spacing: 40) {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Cabeçalho da página
+                    HStack(alignment: .center) {
+                        
+                        Text("Minhas recaps")
+                            .font(.system(size: 34, weight: .bold))
+                        Spacer()
+                        
+                        // Botão de perfil.
+                        Button {
+                            // Chamar view aqui
+                        } label: {
+                            Image(systemName: "person.crop.circle.fill")
+                                .resizable()
+                                .frame(width: 38, height: 38)
                         }
-                    } label: {
-                            Text("Juntar-se")
+                        .buttonStyle(.plain)
+                    }
+                    
+                    HStack(spacing: 12) {
+                        Button{
+                            Task {
+                                    let code = viewModel.generateCode()
+                                    try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
+                                }
+                        } label: {
+                            Text("Novo recap")
                                 .fontWeight(.medium)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
                                 .background(
                                     RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.accentColor, lineWidth: 1.5)
+                                        .fill(Color.accentColor.opacity(0.15))
                                 )
-                    }
-                }
-            }
-            .padding([.top, .horizontal], 16)
-            
-            
-            // Capsulas em andamento.
-            VStack(alignment: .leading, spacing: 24) {
-                Text("Em Andamento")
-                
-                TabView {
-                    ForEach(inProgressRecaps) { recap in
-                        // Trocar pelo card correto atualizado quando o design de alta fidelidade estiver implementado ou atualizar este
-                        CapsuleCardComponent(capsule: recap)
-                    }
-                }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
-            }
-            .frame(maxHeight: 296)
-            .padding()
-            
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Conclídas")
-                
-                let columns = [
-                    GridItem(.flexible()),
-                    GridItem(.flexible())
-                ]
-                
-                ScrollView {
-                    LazyVGrid(columns: columns, spacing: 16) {
-                        ForEach(completedRecaps) { recap in
-                            CapsuleCardComponent(capsule: recap)
-                                .frame(maxWidth: 169, maxHeight: 131)
+                        }
+                        
+                        Button {
+                            Task {
+                                print("botao apertado")
+                                try await viewModel.joinCapsule(code: "i1JzDF2D")
+                            }
+                        } label: {
+                                Text("Juntar-se")
+                                    .fontWeight(.medium)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.accentColor, lineWidth: 1.5)
+                                    )
                         }
                     }
                 }
+                .padding([.top, .horizontal], 16)
+                
+                
+                // Capsulas em andamento.
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("Em Andamento")
+                    
+                    TabView {
+                        ForEach(inProgressRecaps) { recap in
+                            // Trocar pelo card correto atualizado quando o design de alta fidelidade estiver implementado ou atualizar este
+                            NavigationLink{
+                                InsideCapsule(capsule: recap)
+                            }label:{
+                                CapsuleCardComponent(capsule: recap)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                }
+                .frame(maxHeight: 296)
+                .padding()
+                
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Concluídas")
+                    
+                    let columns = [
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ]
+                    
+                    ScrollView {
+                        LazyVGrid(columns: columns, spacing: 16) {
+                            ForEach(completedRecaps) { recap in
+                                CapsuleCardComponent(capsule: recap)
+                                    .frame(maxWidth: 169, maxHeight: 131)
+                            }
+                        }
+                    }
+                }
+                .padding()
             }
-            .padding()
         }
     }
 }
