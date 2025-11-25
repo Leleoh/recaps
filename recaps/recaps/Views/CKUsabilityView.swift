@@ -7,14 +7,17 @@ struct CKUsabilityView: View {
     
     @State private var message: String = ""
     
-    private let CKService = CloudKitService()
+    
+    private let CKService = CapsuleService()
 
     var body: some View {
+        let mockId = UUID()
+
         let mockUser = User(
-            id: UUID(),
+            id: "mock-user-id",
             name: "Leonel Hernandez",
-            mail: "leonel@example.com",
-            capsulesIDs: [UUID()]
+            email: "leonel@example.com",
+            capsules: [mockId]
         )
         let mockCapsule = Capsule(
             id: createdID,
@@ -106,6 +109,7 @@ struct CKUsabilityView: View {
             }
 
             Spacer()
+            
         }
         .padding()
     }

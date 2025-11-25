@@ -18,7 +18,7 @@ struct Capsule: Codable, Identifiable {
     var lastSubmissionDate: Date
     var validOffensive: Bool
     var lives: Int
-    var members: [UUID]
-    var ownerId: UUID
+    var members: [String]
+    var ownerId: String
     var status: CapsuleStatus
 }
