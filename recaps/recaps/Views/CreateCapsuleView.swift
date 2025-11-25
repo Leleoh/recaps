@@ -92,6 +92,14 @@ struct CreateCapsuleView: View {
                     )
                 }
                 
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                
                 Spacer()
             }
             .padding(.horizontal, 16)

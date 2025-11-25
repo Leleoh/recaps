@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct HomeRecapsView: View {
-    var viewModel = CreatingCapsuleTestViewModel()
     
     @State private var viewModel = HomeRecapsViewModel()
     
@@ -65,7 +64,7 @@ struct HomeRecapsView: View {
                     Button {
                         Task {
                             print("botao apertado")
-                            try await viewModel.joinCapsule(code: "i1JzDF2D")
+                            await viewModel.joinCapsule(code: "CODIGO_TESTE")
                         }
                     } label: {
                             Text("Juntar-se")
@@ -81,14 +80,13 @@ struct HomeRecapsView: View {
             }
             .padding([.top, .horizontal], 16)
             
-            
             // Capsulas em andamento.
             VStack(alignment: .leading, spacing: 24) {
                 Text("Em Andamento")
                 
                 TabView {
                     ForEach(inProgressRecaps) { recap in
-                        // Trocar pelo card correto atualizado quando o design de alta fidelidade estiver implementado ou atualizar este
+                        // Card aguardando implementação em alta fidelidade
                         CapsuleCardComponent(capsule: recap)
                     }
                 }
