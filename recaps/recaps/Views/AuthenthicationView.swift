@@ -9,12 +9,12 @@ import AuthenticationServices
 import SwiftUI
 
 struct AuthenthicationView: View {
-    @State var viewModel = AuthenthicationViewModel()
+    var viewModel = AuthenthicationViewModel()
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Group {
-            if viewModel.isSignedIn {
+            if viewModel.isSignedIn || viewModel.hasUser {
                 HomeRecapsView()
             } else {
                 NavigationView {
@@ -22,7 +22,7 @@ struct AuthenthicationView: View {
                         SignInWithAppleButton(.continue) { request in
                             request.requestedScopes = [.email, .fullName]
                         } onCompletion: { result in
-                            Task {
+                            Task { @MainActor in
                                 await viewModel.handleAuthResult(result)
                             }
                         }

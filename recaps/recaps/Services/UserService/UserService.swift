@@ -42,13 +42,11 @@ class UserService: UserServiceProtocol {
     func createUser(user: User) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
         let record = CKRecord(recordType: "User", recordID: recordID)
-
-        //preencher dados do User
+        
         record["id"] = user.id as CKRecordValue
         record["email"] = user.email as CKRecordValue
         record["name"] = user.name as CKRecordValue
 
-        //salvar usuário
         do {
             let savedRecord = try await database.save(record)
             print("Usuário salvo:", savedRecord.recordID.recordName)

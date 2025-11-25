@@ -12,12 +12,14 @@ import CloudKit
 @Observable
 class AuthenthicationViewModel {
     private let userService = UserService()
-    var isLoading = false
     
     var isSignedIn: Bool {
         !userService.userId.isEmpty
     }
     
+    var hasUser = false
+    
+    @MainActor
     func handleAuthResult(_ result: Result<ASAuthorization, Error>) async {
         switch result {
         case .success(let auth):
@@ -27,15 +29,13 @@ class AuthenthicationViewModel {
             let newEmail = credential.email ?? ""
             let newName = credential.fullName?.givenName ?? ""
             
-            userService.userId = newUserId
+            userService.saveUserId(newUserId)
+            self.hasUser = true
             
             do {
-                userService.saveUserId(userService.userId)
-                
-                let _ = try await userService.getCurrentUser()
-                
+                _ = try await userService.getCurrentUser()
+    
                 print("Usuário encontrado no CloudKit")
-                
                 
             } catch {
                 print("Usuário não existe. Criando no CloudKit...")
@@ -52,7 +52,6 @@ class AuthenthicationViewModel {
                 
                 _ = try? await userService.createUser(user: newUser)
                 
-                userService.saveUserId(userService.userId)
                 
                 print("Novo usuário criado no CloudKit")
             }
