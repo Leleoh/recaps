@@ -28,6 +28,7 @@ struct HomeRecapsView: View {
     var body: some View {
         VStack (spacing: 40) {
             VStack(alignment: .leading, spacing: 16) {
+                
                 // Cabeçalho da página
                 HStack(alignment: .center) {
                     
@@ -49,9 +50,9 @@ struct HomeRecapsView: View {
                 HStack(spacing: 12) {
                     Button{
                         Task {
-                                let code = viewModel.generateCode()
-                                try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
-                            }
+                            let code = viewModel.generateCode()
+                            try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
+                        }
                     } label: {
                         Text("Novo recap")
                             .fontWeight(.medium)
@@ -69,14 +70,14 @@ struct HomeRecapsView: View {
                             try await viewModel.joinCapsule(code: "i1JzDF2D")
                         }
                     } label: {
-                            Text("Juntar-se")
-                                .fontWeight(.medium)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .stroke(Color.accentColor, lineWidth: 1.5)
-                                )
+                        Text("Juntar-se")
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.accentColor, lineWidth: 1.5)
+                            )
                     }
                 }
             }
@@ -119,7 +120,7 @@ struct HomeRecapsView: View {
         }
     }
 }
-
-#Preview {
-    HomeRecapsView()
-}
+    
+    #Preview {
+        HomeRecapsView()
+    }

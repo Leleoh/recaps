@@ -77,18 +77,16 @@ class UserService: UserServiceProtocol {
         }
 
         if let capsules = capsules {
-            let refs: [CKRecord.Reference] = capsules.map { id in
-                let recordID = CKRecord.ID(recordName: id.uuidString)
-                return CKRecord.Reference(recordID: recordID, action: .none)
+            let refs = capsules.map {
+                CKRecord.Reference(recordID: CKRecord.ID(recordName: $0.uuidString), action: .none)
             }
             record["capsules"] = refs as CKRecordValue
         }
 
-
         let saved = try await database.save(record)
 
         let savedRefs = saved["capsules"] as? [CKRecord.Reference] ?? []
-        let savedCapsules = savedRefs.map { UUID(uuidString: $0.recordID.recordName)! }
+        let savedCapsules = savedRefs.compactMap { UUID(uuidString: $0.recordID.recordName) }
 
         return User(
             id: saved.recordID.recordName,
@@ -97,6 +95,7 @@ class UserService: UserServiceProtocol {
             capsules: savedCapsules
         )
     }
+
 
     
     //Salvar localmente  usuário logado

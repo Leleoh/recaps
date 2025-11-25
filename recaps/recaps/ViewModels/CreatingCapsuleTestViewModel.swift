@@ -35,26 +35,31 @@ class CreatingCapsuleTestViewModel {
                 ownerId: userService.getUserId(),
                 status: .inProgress
             )
-            
+
             print("AAAA >>> Criando cápsula")
 
             let newCapsuleID = try await capsuleService.createCapsule(capsule: capsule)
 
+            // busca user
             var currentUser = try await userService.getCurrentUser()
             currentUser.capsules.append(newCapsuleID)
+            
+            print(capsule)
+            print("Usuário:  ", currentUser)
 
-            try await userService.updateUser(
+            // atualiza user com referências
+            let updatedUser = try await userService.updateUser(
                 currentUser,
                 capsules: currentUser.capsules
             )
 
-            print("Capsule", capsule)
-            print("User", currentUser)
+            print("User atualizado:", updatedUser)
 
         } catch {
             print("Erro ao criar a Capsula", error)
         }
     }
+
 
     
     func joinCapsule(code: String) async throws {
