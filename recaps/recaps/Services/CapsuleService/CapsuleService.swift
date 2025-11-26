@@ -5,9 +5,8 @@
 //  Created by Ana Carolina Poletto on 21/11/25.
 //
 
-import Foundation
 import CloudKit
-import UIKit
+import SwiftUI
 
 class CapsuleService: CapsuleServiceProtocol {
     private let database: CKDatabase
@@ -30,7 +29,7 @@ class CapsuleService: CapsuleServiceProtocol {
         record["lives"] = capsule.lives as CKRecordValue
         record["ownerId"] = capsule.ownerId as CKRecordValue
         record["status"] = capsule.status.rawValue as CKRecordValue
-        record["members"] = capsule.members.map { $0 } as CKRecordValue
+        record["members"] = capsule.members as CKRecordValue
         
         _ = try await database.save(record)
         
@@ -65,7 +64,7 @@ class CapsuleService: CapsuleServiceProtocol {
             record["lives"] = capsule.lives as CKRecordValue
             record["ownerId"] = capsule.ownerId as CKRecordValue
             record["status"] = capsule.status.rawValue as CKRecordValue
-            record["members"] = capsule.members.map { $0 } as CKRecordValue
+            record["members"] = capsule.members as CKRecordValue
             
             do {
                 let savedRecord = try await database.save(record)
