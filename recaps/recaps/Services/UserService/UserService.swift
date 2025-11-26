@@ -21,24 +21,34 @@ class UserService: UserServiceProtocol {
 
     // MARK: Get Current User
     func getCurrentUser() async throws -> User {
-        let recordID = CKRecord.ID(recordName: getUserId())
-        let record = try await database.record(for: recordID)
-
-        let name = record["name"] as? String ?? ""
-        let email = record["email"] as? String ?? ""
-
-        let references = record["capsules"] as? [CKRecord.Reference] ?? []
-
-        let capsuleUUIDs: [UUID] = references.compactMap { ref in
-            UUID(uuidString: ref.recordID.recordName)
+        guard !userId.isEmpty else {
+            print("Erro: Tentativa de buscar usuário sem ID local (Não logado).")
+            throw NSError(domain: "UserService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Usuário não logado."])
         }
-
-        return User(
-            id: userId,
-            name: name,
-            email: email,
-            capsules: capsuleUUIDs
-        )
+        
+        let recordID = CKRecord.ID(recordName: userId)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            let name = record["name"] as? String ?? ""
+            let email = record["email"] as? String ?? ""
+            let capsulesRecords = record["capsules"] as? [CKRecord.ID] ?? []
+            
+            let capsules: [UUID] = capsulesRecords.compactMap { recordID in
+                UUID(uuidString: recordID.recordName)
+            }
+            
+            return User(
+                id: userId,
+                name: name,
+                email: email,
+                capsules: capsules
+            )
+        } catch {
+            print("Erro ao buscar o usuário:", error)
+            throw error
+        }
     }
 
     // MARK: Create User
@@ -58,15 +68,25 @@ class UserService: UserServiceProtocol {
             throw error
         }
     }
-
-    // MARK: Update User
-    func updateUser(_ user: User, capsules: [UUID]? = nil) async throws {
+    
+    func updateUser(
+        _ user: User,
+        name: String? = nil,
+        email: String? = nil,
+        capsules: [UUID]? = nil
+    ) async throws -> User {
+        
         let recordID = CKRecord.ID(recordName: user.id)
         let record = try await database.record(for: recordID)
-
-        record["name"] = user.name as CKRecordValue
-        record["email"] = user.email as CKRecordValue
-
+        
+        if let name = name {
+            record["name"] = name as CKRecordValue
+        }
+        
+        if let email = email {
+            record["email"] = email as CKRecordValue
+        }
+        
         if let capsules = capsules {
             let capsuleRefs = capsules.map { uuid in
                 CKRecord.Reference(
