@@ -18,7 +18,7 @@ class UserService: UserServiceProtocol {
         self.userId = getUserId()
     }
     var userId: String = ""
-
+    
     // MARK: Get Current User
     func getCurrentUser() async throws -> User {
         guard !userId.isEmpty else {
@@ -50,7 +50,7 @@ class UserService: UserServiceProtocol {
             throw error
         }
     }
-
+    
     // MARK: Create User
     func createUser(user: User) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
@@ -59,7 +59,7 @@ class UserService: UserServiceProtocol {
         record["id"] = user.id as CKRecordValue
         record["email"] = user.email as CKRecordValue
         record["name"] = user.name as CKRecordValue
-
+        
         do {
             let savedRecord = try await database.save(record)
             print("Usuário salvo:", savedRecord.recordID.recordName)
@@ -96,10 +96,20 @@ class UserService: UserServiceProtocol {
             }
             record["capsules"] = capsuleRefs as CKRecordValue
         }
-
-        _ = try await database.save(record)
+        
+        let saved = try await database.save(record)
+        
+        let savedRefs = saved["capsules"] as? [CKRecord.Reference] ?? []
+        let savedCapsules = savedRefs.map { UUID(uuidString: $0.recordID.recordName)! }
+        
+        return User(
+            id: saved.recordID.recordName,
+            name: saved["name"] as? String ?? "",
+            email: saved["email"] as? String ?? "",
+            capsules: savedCapsules
+        )
     }
-
+    
     // MARK: Local Persistence (Current User)
     func loadUserId() -> String {
         return UserDefaults.standard.string(forKey: "userId") ?? ""
@@ -113,5 +123,5 @@ class UserService: UserServiceProtocol {
     func logout() {
         defaults.removeObject(forKey: "userId")
     }
-
+    
 }
