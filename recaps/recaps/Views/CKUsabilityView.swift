@@ -133,10 +133,15 @@ struct CKUsabilityView: View {
                         Button {
                             selectedCapsule = capsule
                         } label: {
-                            HStack {
+                            VStack (alignment: .leading) {
                                 Text(capsule.id.uuidString)
-                                Text(Self.dateTimeFormatter.string(from: capsule.lastSubmissionDate))
-                                Text("\(capsule.lives)")
+                                    .font(.system(size: 8, weight: .regular))
+                                
+                                HStack {
+                                    Text("\(capsule.offensive)")
+                                    Text(Self.dateTimeFormatter.string(from: capsule.lastSubmissionDate))
+                                    Text("\(capsule.lives)")
+                                }
                             }
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)
