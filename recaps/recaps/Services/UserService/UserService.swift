@@ -9,14 +9,17 @@ import CloudKit
 import Foundation
 
 class UserService: UserServiceProtocol {
+    // MARK: Properties
     private let database: CKDatabase
     private let defaults = UserDefaults.standard
+    // MARK: Init
     init(database: CKDatabase = Database.shared.database) {
         self.database = database
         self.userId = getUserId()
     }
     var userId: String = ""
 
+    // MARK: Get Current User
     func getCurrentUser() async throws -> User {
         let recordID = CKRecord.ID(recordName: getUserId())
         let record = try await database.record(for: recordID)
@@ -38,7 +41,7 @@ class UserService: UserServiceProtocol {
         )
     }
 
-
+    // MARK: Create User
     func createUser(user: User) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
         let record = CKRecord(recordType: "User", recordID: recordID)
@@ -56,6 +59,7 @@ class UserService: UserServiceProtocol {
         }
     }
 
+    // MARK: Update User
     func updateUser(_ user: User, capsules: [UUID]? = nil) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
         let record = try await database.record(for: recordID)
@@ -76,9 +80,7 @@ class UserService: UserServiceProtocol {
         _ = try await database.save(record)
     }
 
-
-
-    //Salvar localmente  usuário logado
+    // MARK: Local Persistence (Current User)
     func loadUserId() -> String {
         return UserDefaults.standard.string(forKey: "userId") ?? ""
     }
