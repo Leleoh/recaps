@@ -389,6 +389,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RX54746WSR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = recaps/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need to take photos to add them to our app";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need to access your photos to add them to our app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -429,6 +430,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RX54746WSR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = recaps/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need to take photos to add them to our app";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need to access your photos to add them to our app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
