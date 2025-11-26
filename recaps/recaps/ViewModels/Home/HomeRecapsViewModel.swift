@@ -92,5 +92,19 @@ class HomeRecapsViewModel {
         print("Capsule:", capsule)
     }
     
+    func getAllOpenCapsules() async throws -> [Capsule] {
+        let capsulesIDs = try await userService.getCurrentUser().capsules
+        let userCapsules = try await capsuleService.fetchCapsules(IDs: capsulesIDs)
+        
+        return userCapsules.filter { $0.status == .opened }
+        
+    }
+    
+    func getAllCloseCapsules() async throws -> [Capsule] {
+        let capsulesIDs = try await userService.getCurrentUser().capsules
+        let userCapsules = try await capsuleService.fetchCapsules(IDs: capsulesIDs)
+        
+        return userCapsules.filter { $0.status == .inProgress || $0.status == .completed }
+    }
     
 }
