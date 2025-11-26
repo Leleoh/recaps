@@ -5,19 +5,21 @@
 //  Created by Ana Carolina Poletto on 21/11/25.
 //
 
-import Foundation
 import CloudKit
+import Foundation
 
 class UserService: UserServiceProtocol {
+    // MARK: Properties
     private let database: CKDatabase
     private let defaults = UserDefaults.standard
+    // MARK: Init
     init(database: CKDatabase = Database.shared.database) {
         self.database = database
         self.userId = getUserId()
     }
     var userId: String = ""
     
-    
+    // MARK: Get Current User
     func getCurrentUser() async throws -> User {
         guard !userId.isEmpty else {
             print("Erro: Tentativa de buscar usuário sem ID local (Não logado).")
@@ -49,16 +51,15 @@ class UserService: UserServiceProtocol {
         }
     }
     
+    // MARK: Create User
     func createUser(user: User) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
         let record = CKRecord(recordType: "User", recordID: recordID)
         
-        //preencher dados do User
         record["id"] = user.id as CKRecordValue
         record["email"] = user.email as CKRecordValue
         record["name"] = user.name as CKRecordValue
         
-        //salvar usuário
         do {
             let savedRecord = try await database.save(record)
             print("Usuário salvo:", savedRecord.recordID.recordName)
@@ -87,13 +88,14 @@ class UserService: UserServiceProtocol {
         }
         
         if let capsules = capsules {
-            let refs: [CKRecord.Reference] = capsules.map { id in
-                let recordID = CKRecord.ID(recordName: id.uuidString)
-                return CKRecord.Reference(recordID: recordID, action: .none)
+            let capsuleRefs = capsules.map { uuid in
+                CKRecord.Reference(
+                    recordID: CKRecord.ID(recordName: uuid.uuidString),
+                    action: .none
+                )
             }
-            record["capsules"] = refs as CKRecordValue
+            record["capsules"] = capsuleRefs as CKRecordValue
         }
-        
         
         let saved = try await database.save(record)
         
@@ -108,8 +110,7 @@ class UserService: UserServiceProtocol {
         )
     }
     
-    
-    //Salvar localmente  usuário logado
+    // MARK: Local Persistence (Current User)
     func loadUserId() -> String {
         return UserDefaults.standard.string(forKey: "userId") ?? ""
     }

@@ -14,7 +14,7 @@ struct AuthenthicationView: View {
     
     var body: some View {
         Group {
-            if viewModel.isSignedIn {
+            if viewModel.isSignedIn || viewModel.hasUser {
                 HomeRecapsView()
             } else {
                 NavigationView {
@@ -22,7 +22,7 @@ struct AuthenthicationView: View {
                         SignInWithAppleButton(.continue) { request in
                             request.requestedScopes = [.email, .fullName]
                         } onCompletion: { result in
-                            Task {
+                            Task { @MainActor in
                                 await viewModel.handleAuthResult(result)
                             }
                         }
