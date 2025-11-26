@@ -29,7 +29,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         do {
             print("Buscando cápsula com código: \(code)")
             
-            let allCapsules = try await capsuleService.fetchAllCapsules()
+            let allCapsules = try await capsuleService.fetchAllCapsulesWithoutSubmissions()
             var user = try await userService.getCurrentUser()
             
             guard var capsule = allCapsules.first(where: { $0.code == code }) else {
