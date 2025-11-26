@@ -24,6 +24,7 @@ class CapsuleService: CapsuleServiceProtocol {
         record["name"] = capsule.name as CKRecordValue
         record["createdAt"] = capsule.createdAt as CKRecordValue
         record["offensive"] = capsule.offensive as CKRecordValue
+        record["offensiveTarget"] = capsule.offensiveTarget as CKRecordValue
         record["lastSubmissionDate"] = capsule.lastSubmissionDate as CKRecordValue
         record["validOffensive"] = capsule.validOffensive as CKRecordValue
         record["lives"] = capsule.lives as CKRecordValue
@@ -58,8 +59,8 @@ class CapsuleService: CapsuleServiceProtocol {
             record["name"] = capsule.name as CKRecordValue
             record["createdAt"] = capsule.createdAt as CKRecordValue
             record["offensive"] = capsule.offensive as CKRecordValue
-            record["lastSubmissionDate"] =
-            capsule.lastSubmissionDate as CKRecordValue
+            record["offensiveTarget"] = capsule.offensiveTarget as CKRecordValue
+            record["lastSubmissionDate"] = capsule.lastSubmissionDate as CKRecordValue
             record["validOffensive"] = capsule.validOffensive as CKRecordValue
             record["lives"] = capsule.lives as CKRecordValue
             record["ownerId"] = capsule.ownerId as CKRecordValue
@@ -366,6 +367,7 @@ class CapsuleService: CapsuleServiceProtocol {
                 let name = record["name"] as? String ?? ""
                 let createdAt = record["createdAt"] as? Date ?? Date()
                 let offensive = record["offensive"] as? Int ?? 0
+                let offensiveTarget = record["offensiveTarget"] as? Int ?? 0
                 let lastSubmissionDate = record["lastSubmissionDate"] as? Date ?? Date()
                 let validOffensive = record["validOffensive"] as? Bool ?? false
                 let lives = record["lives"] as? Int ?? 0
@@ -386,6 +388,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     name: name,
                     createdAt: createdAt,
                     offensive: offensive,
+                    offensiveTarget: offensiveTarget,
                     lastSubmissionDate: lastSubmissionDate,
                     validOffensive: validOffensive,
                     lives: lives,
@@ -421,6 +424,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     let name = record["name"] as? String,
                     let createdAt = record["createdAt"] as? Date,
                     let offensive = record["offensive"] as? Int,
+                    let offensiveTarget = record["offensiveTarget"] as? Int,
                     let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
                     let validOffensive = record["validOffensive"] as? Bool,
                     let lives = record["lives"] as? Int,
@@ -439,6 +443,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     name: name,
                     createdAt: createdAt,
                     offensive: offensive,
+                    offensiveTarget: offensiveTarget,
                     lastSubmissionDate: lastSubmissionDate,
                     validOffensive: validOffensive,
                     lives: lives,
@@ -474,6 +479,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     let name = record["name"] as? String,
                     let createdAt = record["createdAt"] as? Date,
                     let offensive = record["offensive"] as? Int,
+                    let offensiveTarget = record["offensiveTarget"] as? Int,
                     let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
                     let validOffensive = record["validOffensive"] as? Bool,
                     let lives = record["lives"] as? Int,
@@ -491,6 +497,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     name: name,
                     createdAt: createdAt,
                     offensive: offensive,
+                    offensiveTarget: offensiveTarget,
                     lastSubmissionDate: lastSubmissionDate,
                     validOffensive: validOffensive,
                     lives: lives,

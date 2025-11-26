@@ -36,6 +36,7 @@ struct CKUsabilityView: View {
             name: "Festa de Reveillon 2025",
             createdAt: Date(),
             offensive: 0,
+            offensiveTarget: 50,
             lastSubmissionDate: Date(),
             validOffensive: true,
             lives: 3,
