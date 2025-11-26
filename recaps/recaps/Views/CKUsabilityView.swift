@@ -186,7 +186,7 @@ struct CKUsabilityView: View {
                                     HStack {
                                         Text("Streak: \(capsule.offensive)")
                                         Text(Self.dateTimeFormatter.string(from: capsule.lastSubmissionDate))
-                                        Text("Vidas: \(capsule.lives)")
+                                        Text("Status: \(capsule.status)")
                                     }
                                 }
                                 .padding()
