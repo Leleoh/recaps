@@ -13,17 +13,17 @@ struct HomeRecapsView: View {
     
     // Capsulas em progresso mockadas para avaliar visual.  Excluir quando não mais necessário
     private let inProgressRecaps: [Capsule] = [
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "11111", status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste1", createdAt: Date(), offensive: 20, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "222", status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste2", createdAt: Date(), offensive: 80, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "3333", status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste3", createdAt: Date(), offensive: 99, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "44444", status: CapsuleStatus.inProgress)
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "11111", status: CapsuleStatus.inProgress),
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste1", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "222", status: CapsuleStatus.inProgress),
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste2", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "3333", status: CapsuleStatus.inProgress),
+        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste3", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "44444", status: CapsuleStatus.inProgress)
     ]
     
     // Capsulas abertas mockadas para avaliar visual. Excluir quando não mais necessário
     private let completedRecaps: [Capsule] = [
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste1", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "55555", status: CapsuleStatus.completed),
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste2", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "66666", status: CapsuleStatus.completed),
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste3", createdAt: Date(), offensive: 100, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "77777", status: CapsuleStatus.completed)
+        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste1", createdAt: Date(), offensive: 50, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "55555", status: CapsuleStatus.completed),
+        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste2", createdAt: Date(), offensive: 50, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "66666", status: CapsuleStatus.completed),
+        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste3", createdAt: Date(), offensive: 50, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "77777", status: CapsuleStatus.completed)
     ]
     
     var body: some View {
@@ -50,6 +50,7 @@ struct HomeRecapsView: View {
                     
                     HStack(spacing: 12) {
                         Button{
+
                             viewModel.didTapNewRecap()
                         } label: {
                             Text("Novo recap")

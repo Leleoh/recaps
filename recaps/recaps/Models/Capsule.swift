@@ -15,6 +15,7 @@ struct Capsule: Codable, Identifiable {
     var name: String
     var createdAt: Date
     var offensive: Int
+    var offensiveTarget: Int
     var lastSubmissionDate: Date
     var validOffensive: Bool
     var lives: Int

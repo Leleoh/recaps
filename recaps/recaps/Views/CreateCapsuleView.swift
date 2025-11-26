@@ -79,7 +79,7 @@ struct CreateCapsuleView: View {
                     
                     Spacer()
                     
-                    Picker("", selection: $viewModel.offensiveDuration) {
+                    Picker("", selection: $viewModel.offensiveTarget) {
                         ForEach(1...365, id: \.self) { days in
                             Text("\(days)").tag(days)
                         }
