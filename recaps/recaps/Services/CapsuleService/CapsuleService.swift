@@ -126,6 +126,12 @@ class CapsuleService: CapsuleServiceProtocol {
         do {
             let record = try await database.record(for: recordID)
             
+            let isCapsuleCompleted = try await isCapsuleCompleted(record: record)
+            
+            if isCapsuleCompleted {
+                return true
+            }
+            
             guard
                 let lastSubmissionDate = record["lastSubmissionDate"] as? Date
             else {
@@ -157,6 +163,26 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
+    func checkIfCapsuleIsCompleted(capsuleID: UUID) async throws -> Bool {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            let isCapsuleCompleted = try await isCapsuleCompleted(record: record)
+            
+            if isCapsuleCompleted {
+                return true
+            }
+            
+            return false
+            
+        } catch {
+            print("Erro ao verificar se cápsula está Completa: \(error)")
+            throw error
+        }
+    }
+    
     private func increaseStreak(record: CKRecord) async throws {
         
         if var offensive = record["offensive"] as? Int {
@@ -169,6 +195,41 @@ class CapsuleService: CapsuleServiceProtocol {
             print("Capsula salva: \(savedRecord)")
         } catch {
             print("Erro ao atulizar a Capsula : \(error)")
+            throw error
+        }
+    }
+    
+    private func isCapsuleCompleted(record: CKRecord) async throws -> Bool {
+        
+        if let status = record["status"] as? String, let statusEnum = CapsuleStatus(rawValue: status) {
+            if statusEnum == .completed  {
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func isStreakCompleted(record: CKRecord) async throws -> Bool {
+        
+        if let offensive = record["offensive"] as? Int,
+            let offensiveTarget = record["offensiveTarget"] as? Int {
+            if offensive >= offensiveTarget {
+                try await changeCapsuleToCompleted(record: record)
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func changeCapsuleToCompleted(record: CKRecord) async throws {
+        
+        record["status"] = CapsuleStatus.completed.rawValue as CKRecordValue
+        
+        do {
+            let savedRecord = try await database.save(record)
+            print("Status da Capsula alterado para Completed: \(savedRecord)")
+        } catch {
+            print("Erro ao atulizar Status da Capsula : \(error)")
             throw error
         }
     }
@@ -186,7 +247,7 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
-    func consumeCapsuleLive(record: CKRecord) async throws -> Bool {
+    private func consumeCapsuleLive(record: CKRecord) async throws -> Bool {
             
         if var capsuleLives = record["lives"] as? Int {
             

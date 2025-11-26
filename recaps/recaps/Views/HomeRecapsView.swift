@@ -51,7 +51,7 @@ struct HomeRecapsView: View {
                         Button{
                             Task {
                                     let code = viewModel.generateCode()
-                                    try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
+                                    try? await viewModel.creatingCapsule(code: code, name: "Teste", offensiveTarget: 10)
                                 }
                         } label: {
                             Text("Novo recap")
