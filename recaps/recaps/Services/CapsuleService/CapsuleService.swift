@@ -5,9 +5,8 @@
 //  Created by Ana Carolina Poletto on 21/11/25.
 //
 
-import Foundation
 import CloudKit
-import UIKit
+import SwiftUI
 
 class CapsuleService: CapsuleServiceProtocol {
     private let database: CKDatabase

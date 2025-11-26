@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct HomeRecapsView: View {
-    var viewModel = CreatingCapsuleTestViewModel()
+    
+    @State private var viewModel = HomeRecapsViewModel()
     
     // Capsulas em progresso mockadas para avaliar visual.  Excluir quando não mais necessário
     private let inProgressRecaps: [Capsule] = [
@@ -49,10 +50,7 @@ struct HomeRecapsView: View {
                     
                     HStack(spacing: 12) {
                         Button{
-                            Task {
-                                    let code = viewModel.generateCode()
-                                    try? await viewModel.creatingCapsule(code: code, name: "Teste", offensive: 10)
-                                }
+                            viewModel.didTapNewRecap()
                         } label: {
                             Text("Novo recap")
                                 .fontWeight(.medium)
@@ -67,17 +65,17 @@ struct HomeRecapsView: View {
                         Button {
                             Task {
                                 print("botao apertado")
-                                try await viewModel.joinCapsule(code: "i1JzDF2D")
+                                await viewModel.joinCapsule(code: "i1JzDF2D")
                             }
                         } label: {
-                                Text("Juntar-se")
-                                    .fontWeight(.medium)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color.accentColor, lineWidth: 1.5)
-                                    )
+                            Text("Juntar-se")
+                                .fontWeight(.medium)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.accentColor, lineWidth: 1.5)
+                                )
                         }
                     }
                 }
@@ -90,7 +88,7 @@ struct HomeRecapsView: View {
                     
                     TabView {
                         ForEach(inProgressRecaps) { recap in
-                            // Trocar pelo card correto atualizado quando o design de alta fidelidade estiver implementado ou atualizar este
+                            // Card aguardando implementação em alta fidelidade
                             NavigationLink{
                                 InsideCapsule(capsule: recap)
                             }label:{
@@ -123,6 +121,9 @@ struct HomeRecapsView: View {
                 }
                 .padding()
             }
+        }
+        .sheet(isPresented: $viewModel.showCreateCapsule) {
+            CreateCapsuleView()
         }
     }
 }
