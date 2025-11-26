@@ -138,9 +138,9 @@ struct CKUsabilityView: View {
                                     .font(.system(size: 8, weight: .regular))
                                 
                                 HStack {
-                                    Text("\(capsule.offensive)")
+                                    Text("Streak: \(capsule.offensive)")
                                     Text(Self.dateTimeFormatter.string(from: capsule.lastSubmissionDate))
-                                    Text("\(capsule.lives)")
+                                    Text("Vidas: \(capsule.lives)")
                                 }
                             }
                             .padding()
