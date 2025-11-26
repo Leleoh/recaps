@@ -12,6 +12,13 @@ struct CKUsabilityView: View {
     @State private var capsules: [Capsule] = []
         
     private let CKService = CapsuleService()
+    
+    private static let dateTimeFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.dateStyle = .short
+        df.timeStyle = .short
+        return df
+    }()
 
     var body: some View {
         let mockId = UUID()
@@ -83,7 +90,7 @@ struct CKUsabilityView: View {
                 Task {
                     do {
                         if let selectedCapsule = selectedCapsule {
-                            try await CKService.updateLastSubmissionDate(capsuleID: selectedCapsule.id)
+                            try await CKService.createSubmission(submission: mockSubmission, capsuleID: selectedCapsule.id, image: UIImage(named: "monkey") ?? UIImage())
                             capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
                             print("Atualizado!")
                         }
@@ -94,7 +101,7 @@ struct CKUsabilityView: View {
                     }
                 }
             } label: {
-                Text("Atualizar Cápsula")
+                Text("Enviar Submission para Cápsula")
             }
             .buttonStyle(.borderedProminent)
             
@@ -104,21 +111,10 @@ struct CKUsabilityView: View {
                     do {
                         if let selectedCapsule = selectedCapsule {
                             let validOffensive = try await CKService.checkIfCapsuleIsValidOffensive(capsuleID: selectedCapsule.id)
-                            if !validOffensive {
-                                let succeded = try await CKService.consumeCapsuleLive(capsuleID: selectedCapsule.id)
-                                if succeded {
-                                    capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
-                                    print("Consumido com sucesso!")
-                                } else {
-                                    print("Não há vidas para consumir")
-                                }
+                            capsules = try await CKService.fetchAllCapsulesWithoutSubmissions()
+                            
                             }
-                            print("Capsula válida: \(validOffensive)")
-                        }
-                        
-//                        await MainActor.run {
-//                            message = "Capsula atualizada com sucesso! \n\(mockCapsule)"
-//                        }
+
                     } catch {
                         await MainActor.run {
                             message = "Erro ao atualizar last submissiond a capsula: \(error.localizedDescription)"
@@ -137,10 +133,15 @@ struct CKUsabilityView: View {
                         Button {
                             selectedCapsule = capsule
                         } label: {
-                            HStack {
+                            VStack (alignment: .leading) {
                                 Text(capsule.id.uuidString)
-                                Text(capsule.lastSubmissionDate, style: .date)
-                                Text("\(capsule.lives)")
+                                    .font(.system(size: 8, weight: .regular))
+                                
+                                HStack {
+                                    Text("Streak: \(capsule.offensive)")
+                                    Text(Self.dateTimeFormatter.string(from: capsule.lastSubmissionDate))
+                                    Text("Vidas: \(capsule.lives)")
+                                }
                             }
                             .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)
