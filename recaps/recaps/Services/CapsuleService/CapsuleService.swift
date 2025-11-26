@@ -79,13 +79,15 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
-    func updateLastSubmissionDate(capsuleID: UUID) async throws {
-        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+    private func updateLastSubmissionDate(record: CKRecord) async throws {
         
         do {
-            let record = try await database.record(for: recordID)
             
-            record["lastSubmissionDate"] = Date() as CKRecordValue
+            let brtTime = try await fetchBrazilianTime()
+            
+            let midnightTime = dateAtMidnight(from: brtTime)
+            
+            record["lastSubmissionDate"] = midnightTime as CKRecordValue
             
             do {
                 let savedRecord = try await database.save(record)
@@ -100,6 +102,23 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
+    private func timeDifferenceFromNow(from date: Date) async throws -> TimeInterval {
+        
+        // Converter lastSubmissionDate para BRT
+        let tz = TimeZone(identifier: "America/Sao_Paulo")!
+        let offset = TimeInterval(tz.secondsFromGMT(for: date))
+        let lastSubmissionDateBRT = Date(timeInterval: offset, since: date)
+        
+        let brtServerTime = try await fetchBrazilianTime()
+                    
+        let difference = brtServerTime.timeIntervalSince(lastSubmissionDateBRT)
+        
+        print("Horário Atual: \(brtServerTime)")
+        print("Diferenca de Tempo: \(difference / 60 / 60)")
+        
+        return difference
+    }
+    
     func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool {
         let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
         
@@ -112,15 +131,24 @@ class CapsuleService: CapsuleServiceProtocol {
                 return false
             }
             
-            let serverTime = try await fetchUniversalTime()
+            let difference = try await timeDifferenceFromNow(from: lastSubmissionDate)
+                                    
+            let FortyEightHours: TimeInterval = 48 * 60 * 60
             
-            let difference = serverTime.timeIntervalSince(lastSubmissionDate)
+            print("Horas: \(FortyEightHours / 60 / 60)")
             
-            let twentyFourHours: TimeInterval = 24 * 60 * 60
             
-            print("Horário Atual: \(serverTime)")
-            print("Diferenca de Tempo: \(difference / 60)")
-            return difference <= twentyFourHours
+            if difference >= FortyEightHours {
+                print("diferenca maior que 48h")
+                let hasRemainingLives = try await consumeCapsuleLive(record: record)
+                if !hasRemainingLives {
+                    print("Não há mais vidas, resetando contador...")
+                    try await resetStreakCounter(record: record)
+                    try await updateLastSubmissionDate(record: record)
+                }
+            }
+            
+            return difference < FortyEightHours
             
         } catch {
             print("Erro ao verificar cápsula: \(error)")
@@ -128,35 +156,55 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
-    func consumeCapsuleLive(capsuleID: UUID) async throws -> Bool {
-        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+    private func increaseStreak(record: CKRecord) async throws {
+        
+        if var offensive = record["offensive"] as? Int {
+            offensive = offensive + 1
+            record["offensive"] = offensive as CKRecordValue
+        }
         
         do {
-            let record = try await database.record(for: recordID)
+            let savedRecord = try await database.save(record)
+            print("Capsula salva: \(savedRecord)")
+        } catch {
+            print("Erro ao atulizar a Capsula : \(error)")
+            throw error
+        }
+    }
+    
+    private func resetStreakCounter(record: CKRecord) async throws {
+    
+        record["offensive"] = 0 as CKRecordValue
+        
+        do {
+            let savedRecord = try await database.save(record)
+            print("Streak Resetado e Capsula Salva: \(savedRecord)")
+        } catch {
+            print("Erro ao atulizar a Capsula : \(error)")
+            throw error
+        }
+    }
+    
+    func consumeCapsuleLive(record: CKRecord) async throws -> Bool {
             
-            if var capsuleLives = record["lives"] as? Int {
-                
-                if capsuleLives == 0 {
-                    return false
-                }
-                
-                capsuleLives = capsuleLives - 1
-                
-                record["lives"] = capsuleLives as CKRecordValue
-                
-                do {
-                    let savedRecord = try await database.save(record)
-                    print("Capsula com vida consumida: \(savedRecord)")
-                    return true
-                } catch {
-                    print("Erro ao consumir a vida da Capsula : \(error)")
-                    throw error
-                }
+        if var capsuleLives = record["lives"] as? Int {
+            
+            if capsuleLives == 0 {
+                return false
             }
             
-        } catch {
-            print("Erro ao verificar cápsula: \(error)")
-            throw error
+            capsuleLives = capsuleLives - 1
+            
+            record["lives"] = capsuleLives as CKRecordValue
+            
+            do {
+                let savedRecord = try await database.save(record)
+                print("Capsula com vida consumida: \(savedRecord)")
+                return true
+            } catch {
+                print("Erro ao consumir a vida da Capsula : \(error)")
+                throw error
+            }
         }
         
         return false
@@ -191,12 +239,50 @@ class CapsuleService: CapsuleServiceProtocol {
         
         do {
             let savedRecord = try await database.save(record)
+            try await checkIfIncreasesStreak(capsuleID: capsuleID)
             print("Submission salva: \(savedRecord)")
         } catch {
             print("Erro ao salvar a Submission: \(error)")
             throw error
         }
         
+    }
+    
+    func checkIfIncreasesStreak(capsuleID: UUID) async throws {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            if let lastSubmissionDate = record["lastSubmissionDate"] as? Date {
+                
+                let difference = try await timeDifferenceFromNow(from: lastSubmissionDate)
+                
+                let FortyEightHours: TimeInterval = 48 * 60 * 60
+                let TwentyFourHours: TimeInterval = 24 * 60 * 60
+                                
+                if difference >= FortyEightHours {
+                    print("diferenca maior que 48h")
+                    let hasRemainingLives = try await consumeCapsuleLive(record: record)
+                    if !hasRemainingLives {
+                        print("Não há mais vidas, resetando contador...")
+                        try await resetStreakCounter(record: record)
+                    }
+                    try await updateLastSubmissionDate(record: record)
+                }
+                
+                if difference >= TwentyFourHours {
+                    print("diferenca maior que 24h")
+                    try await increaseStreak(record: record)
+                    try await updateLastSubmissionDate(record: record)
+                }
+                
+            }
+            
+        } catch {
+            print("Erro ao verificar cápsula: \(error)")
+            throw error
+        }
     }
     
     func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
@@ -423,7 +509,7 @@ class CapsuleService: CapsuleServiceProtocol {
         return capsules
     }
 
-    func fetchUniversalTime() async throws -> Date {
+    private func fetchBrazilianTime() async throws -> Date {
         let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
 
         let (data, response) = try await URLSession.shared.data(from: url)
@@ -437,11 +523,24 @@ class CapsuleService: CapsuleServiceProtocol {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
 
-        guard let date = formatter.date(from: decoded.utc) else {
+        guard let utcDate = formatter.date(from: decoded.utc) else {
             throw NSError(domain: "TimeAPIParse", code: -1)
         }
 
-        return date
+        let tz = TimeZone(identifier: "America/Sao_Paulo")!
+        let offset = TimeInterval(tz.secondsFromGMT(for: utcDate))
+        let brasiliaDate = Date(timeInterval: offset, since: utcDate)
+
+        return brasiliaDate
+    }
+    
+    private func dateAtMidnight(from utcDate: Date) -> Date {
+        
+        let calendar = Calendar(identifier: .gregorian)
+
+        let components = calendar.dateComponents([.year, .month, .day], from: utcDate)
+
+        return calendar.date(from: components)!
     }
 }
 
