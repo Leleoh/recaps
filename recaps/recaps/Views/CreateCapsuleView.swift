@@ -10,8 +10,8 @@ import PhotosUI
 
 struct CreateCapsuleView: View {
     @Environment(\.dismiss) var dismiss
-    @State private var showPopup = false
-    @State private var code: String = ""
+    var onFinish: (String) -> Void = { _ in }
+    
     @State private var viewModel = CreateCapsuleViewModel()
     
     var body: some View {
@@ -128,10 +128,11 @@ struct CreateCapsuleView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         Task {
-                            let success = await viewModel.createCapsule()
+                            viewModel.code = viewModel.generateCode()
+                            let success = await viewModel.createCapsule(code: viewModel.code)
                             if success {
-                                showPopup = true
                                 dismiss()
+                                onFinish(viewModel.code)
                             }
                         }
                     } label: {
@@ -147,15 +148,6 @@ struct CreateCapsuleView: View {
                 }
             }
         }
-                .alert("Invite Friends", isPresented: $showPopup) {
-                    Button("Confirm", role: .close) {
-                    }
-                    Button("Cancel", role: .cancel) {
-                    }
-                } message: {
-                    Text(code)
-
-                }
     }
 }
 

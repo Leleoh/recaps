@@ -2,92 +2,97 @@
 //  InvitePopUp.swift
 //  recaps
 //
-//  Created by Ana Poletto on 26/11/25.
+//  Created by Ana Poletto on 27/11/25.
 //
 
 import SwiftUI
 
 struct InvitePopUp: View {
     @Binding var isShowing: Bool
-    let join: (String) -> Void
-
-    @State private var code: String = ""
-    private let numberOfCells: Int = 5
+    let code: String
 
     var body: some View {
         ZStack {
             // Fundo escuro
-            Color.black.opacity(0.5)
+            Color.black.opacity(0.6)
                 .ignoresSafeArea()
                 .onTapGesture { isShowing = false }
-
-            VStack(alignment: .leading, spacing: 20) {
+            
+            popupContent
+        }
+    }
+    
+    private var popupContent: some View {
+        let content = VStack(spacing: 29) {
+            VStack(alignment: .leading, spacing: 34) {
                 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Join Recapsule")
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Your Recapsule is ready")
                         .font(.headline)
-
-                    Text("Insert invite code to join.")
+                    
+                    Text("Copy code to invite friends.")
                         .font(.subheadline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(.secondary)
                 }
-
-                // TEXT FIELD ESTILIZADO
-                TextField("Code", text: $code)
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 28)
-                            .fill(Color.secondary.opacity(0.15))
-                    )
-
-                HStack(spacing: 12) {
-
-                    // CANCEL
-                    Button {
-                        isShowing = false
-                    } label: {
-                        Text("Cancel")
+                
+                // TEXTFIELD
+                HStack(spacing: 8) {
+                    ForEach(Array(code), id: \.self) { char in
+                        Text(String(char))
                             .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 48)
-                            .foregroundColor(.primary)
+                            .frame(width: 48, height: 52)
                             .background(
-                                RoundedRectangle(cornerRadius: 28)
-                                    .fill(Color.secondary.opacity(0.2))
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(.darkSecondary)
                             )
                     }
-
-                    // JOIN
-                    Button {
-                        join(code)
-                    } label: {
-                        Text("Join")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 48)
-                            .foregroundColor(.primary)
-                            .background(
-                                RoundedRectangle(cornerRadius: 28)
-                                    .fill(
-                                        code.count < numberOfCells
-                                        ? Color.secondary.opacity(0.3)
-                                        : Color.accentColor
-                                    )
-                            )
-                    }
-                    .disabled(code.count < numberOfCells)
                 }
-
-                Text("We couldn't find this Recapsule, check the code and try again.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
             }
-            .padding(14)
-            .frame(maxWidth: 360)
-            .background(
-                RoundedRectangle(cornerRadius: 32)
-                    .fill(.ultraThinMaterial) 
-            )
-            .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
+            
+            HStack(spacing: 12) {
+                
+                Button {
+                    isShowing = false
+                } label: {
+                    Text("Later")
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 28)
+                                .fill(.fillsSecondary)
+                        )
+                        .foregroundColor(.primary)
+                }
+                
+                Button {
+                    UIPasteboard.general.string = code
+                    isShowing = false
+                } label: {
+                    Text("Copy")
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .background(
+                            RoundedRectangle(cornerRadius: 28)
+                                .fill(Color.accentColor)
+                        )
+                        .foregroundColor(.primary)
+                }
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(22)
+        .frame(maxWidth: 300)
+        
+        return Group {
+            if #available(iOS 18.0, *) {
+                content
+                    .glassEffect(in: .rect(cornerRadius: 32))
+            } else {
+                content
+                    .background(
+                        RoundedRectangle(cornerRadius: 32)
+                            .fill(.ultraThinMaterial)
+                    )
+            }
+        }
+        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
