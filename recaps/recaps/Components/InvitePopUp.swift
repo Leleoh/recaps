@@ -33,7 +33,7 @@ struct InvitePopUp: View {
                     Text("Copy code to invite friends.")
                         .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.labelPrimary)
                 }
                 
                 // TEXTFIELD
@@ -44,7 +44,7 @@ struct InvitePopUp: View {
                             .frame(width: 48, height: 52)
                             .background(
                                 RoundedRectangle(cornerRadius: 14)
-                                    .fill(.darkSecondary)
+                                    .fill(.fillDarkSecondary)
                             )
                     }
                 }
@@ -61,8 +61,9 @@ struct InvitePopUp: View {
                             RoundedRectangle(cornerRadius: 28)
                                 .fill(.fillsSecondary)
                         )
-                        .foregroundColor(.primary)
+                        .foregroundColor(.labelPrimary)
                 }
+                .glassEffect()
                 
                 Button {
                     UIPasteboard.general.string = code
@@ -72,10 +73,11 @@ struct InvitePopUp: View {
                         .frame(maxWidth: .infinity, minHeight: 48)
                         .background(
                             RoundedRectangle(cornerRadius: 28)
-                                .fill(Color.accentColor)
+                                .fill(.sweetNSour)
                         )
-                        .foregroundColor(.primary)
+                        .foregroundColor(.labelPrimary)
                 }
+                .glassEffect()
             }
         }
         .padding(22)

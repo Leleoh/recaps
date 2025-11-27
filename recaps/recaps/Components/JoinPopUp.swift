@@ -42,23 +42,23 @@ struct JoinPopUp: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Join Recapsule")
                             .font(.headline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.labelPrimary)
                         
                         Text("Insert invite code to join.")
                             .font(.body)
-                            .foregroundColor(.primary)
+                            .foregroundColor(.labelPrimary)
                     }
                     
                     HStack(spacing: 8) {
                         ForEach(0..<numberOfCells, id: \.self) { index in
                             Text(index < code.count ?
                                  String(code[code.index(code.startIndex, offsetBy: index)]) : "")
-                                .font(.headline)
-                                .frame(width: 48, height: 52)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(.darkSecondary)
-                                )
+                            .font(.headline)
+                            .frame(width: 48, height: 52)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(.fillDarkSecondary)
+                            )
                         }
                     }
                     .overlay(
@@ -74,13 +74,15 @@ struct JoinPopUp: View {
                             }
                             .frame(width: 0, height: 0)
                     )
-                    .onAppear { isTextFieldFocused = true }
+                    .onAppear { isTextFieldFocused = true
+                        code = ""
+                        joinErrorMessage = nil}
                 }
                 
                 if let errorCode = joinErrorMessage {
                     Text(errorMessage(errorCode))
                         .font(.subheadline)
-                        .foregroundColor(.accentColor)
+                        .foregroundColor(.sweetNSour)
                         .frame(maxWidth: 272)
                 }
             }
@@ -97,8 +99,9 @@ struct JoinPopUp: View {
                             RoundedRectangle(cornerRadius: 28)
                                 .fill(.fillsSecondary)
                         )
-                        .foregroundColor(.primary)
+                        .foregroundColor(.labelPrimary)
                 }
+                .glassEffect()
                 
                 Button {
                     join(code)
@@ -109,15 +112,13 @@ struct JoinPopUp: View {
                             RoundedRectangle(cornerRadius: 28)
                                 .fill(code.count < numberOfCells ? .fillsSecondary : Color.accentColor)
                         )
-                        .foregroundColor(.primary)
+                        .foregroundColor(.labelPrimary)
                 }
                 .disabled(code.count < numberOfCells)
             }
         }
-        .padding(.vertical, 22)
-        .padding(.horizontal, 14)
-        
-        // 🔥 aplica glassEffect ou fallback conforme iOS
+            .padding(.vertical, 22)
+            .padding(.horizontal, 14)
         return Group {
             if #available(iOS 18.0, *) {
                 content
