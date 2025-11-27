@@ -10,6 +10,8 @@ import PhotosUI
 
 struct CreateCapsuleView: View {
     @Environment(\.dismiss) var dismiss
+    @State private var showPopup = false
+    @State private var code: String = ""
     @State private var viewModel = CreateCapsuleViewModel()
     
     var body: some View {
@@ -128,6 +130,7 @@ struct CreateCapsuleView: View {
                         Task {
                             let success = await viewModel.createCapsule()
                             if success {
+                                showPopup = true
                                 dismiss()
                             }
                         }
@@ -144,6 +147,15 @@ struct CreateCapsuleView: View {
                 }
             }
         }
+                .alert("Invite Friends", isPresented: $showPopup) {
+                    Button("Confirm", role: .close) {
+                    }
+                    Button("Cancel", role: .cancel) {
+                    }
+                } message: {
+                    Text(code)
+
+                }
     }
 }
 
