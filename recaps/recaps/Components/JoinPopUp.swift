@@ -101,7 +101,6 @@ struct JoinPopUp: View {
                         )
                         .foregroundColor(.labelPrimary)
                 }
-                .glassEffect()
                 
                 Button {
                     join(code)

@@ -63,7 +63,6 @@ struct InvitePopUp: View {
                         )
                         .foregroundColor(.labelPrimary)
                 }
-                .glassEffect()
                 
                 Button {
                     UIPasteboard.general.string = code
@@ -77,7 +76,6 @@ struct InvitePopUp: View {
                         )
                         .foregroundColor(.labelPrimary)
                 }
-                .glassEffect()
             }
         }
         .padding(22)
