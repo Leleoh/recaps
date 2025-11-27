@@ -14,7 +14,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     
     // MARK: - Properties
     var capsuleName: String = ""
-    var offensiveTarget: Int = 50
+    var offensiveTarget: Int = 30
     var showPopup = false
     var code: String = ""
     

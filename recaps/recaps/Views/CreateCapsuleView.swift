@@ -21,77 +21,61 @@ struct CreateCapsuleView: View {
                 // MARK: - Área de Seleção de Fotos
                 PhotosPicker(
                     selection: $viewModel.selectedPickerItems,
-                    maxSelectionCount: nil,
+                    maxSelectionCount: 3,
                     matching: .images
                 ) {
-                    VStack(spacing: 12) {
-                        if viewModel.selectedImages.isEmpty {
-                            // EmtyState
-                            Image(systemName: "camera.fill")
-                                .font(.title)
-                            Text("Escolha pelo menos 3 fotos")
-                                .font(.headline)
-                        } else {
-                            // Estado com Fotos Selecionadas (Carrossel)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    ForEach(viewModel.selectedImages, id: \.self) { image in
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 100, height: 140)
-                                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                                            .clipped()
-                                    }
-                                }
-                                .padding(.horizontal)
-                            }
-                            .frame(height: 160)
+                    
+                    if viewModel.selectedImages.isEmpty {
+                        
+                        InitialPhotosComponent()
+                           
+                        
+                    } else {
+                        // Estado com Fotos Selecionadas
+                        FilledPhotos(images: viewModel.selectedImages)
                             
-                            Text("\(viewModel.selectedImages.count) fotos selecionadas")
-                                .font(.caption)
-                                .foregroundStyle(viewModel.selectedImages.count >= 3 ? .green : .red)
-                        }
                     }
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 200)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(12)
                 }
+                .frame(height: 362)
+                .padding(.top, 90)
                 
                 // Input de Nome
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Nome:")
-                        .foregroundStyle(.black)
                     
-                    TextField("Nome da cápsula", text: $viewModel.capsuleName)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 26)
-                                .fill(Color.white)
-                                .shadow(radius: 2, y: 2)
-                        )
+                    NameComponent(text: $viewModel.capsuleName)
+                    //                        .padding(.top, 83)
+                    
                 }
                 
                 // Input de Ofensiva
-                HStack(alignment: .center, spacing: 16) {
-                    Text("Tempo de ofensiva:")
-                        .foregroundStyle(.black)
-                    
-                    Spacer()
-                    
-                    Picker("", selection: $viewModel.offensiveTarget) {
-                        ForEach(1...365, id: \.self) { days in
-                            Text("\(days)").tag(days)
+                VStack{
+                    HStack(alignment: .center, spacing: 16) {
+                        Text("Streak days")
+                            .foregroundColor(Color(.label))
+                        
+                        Spacer()
+                        
+                        Picker("", selection: $viewModel.offensiveTarget) {
+                            ForEach([1,7,30,60,90,180,360], id: \.self) { days in
+                                Text("\(days)").tag(days)
+                                    .tag(days)
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .tint(.sweetnSour)
+                        .background(
+                            RoundedRectangle(cornerRadius: 26)
+                                .fill(Color("SheetBackground"))
+                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
+                        )
                     }
-                    .pickerStyle(.menu)
-                    .background(
-                        RoundedRectangle(cornerRadius: 26)
-                            .fill(Color.white)
-                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
-                    )
+                    .padding(.top, 24)
+                    
+                    Text("Streak days is the number of consecutive days saving memories that will be required for the Recapsule to open.")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(nil)
+                        .foregroundStyle(.secondary)
                 }
                 
                 if let errorMessage = viewModel.errorMessage {
@@ -147,6 +131,9 @@ struct CreateCapsuleView: View {
                     .disabled(!viewModel.isValidToSave || viewModel.isLoading)
                 }
             }
+        }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
 }
