@@ -35,16 +35,9 @@ struct InitialPhotosComponent: View {
                         .shadow(radius: 10)
                         .padding()
                     
-                    
-                    Button{
-//                        addInitialPhotos()
-                    }label:{
-                        Image(systemName: "plus")
-                            .font(.system(size: 36))
-                            .foregroundStyle(Color.sweetnSour)
-                    }
-                    
-                    
+                    Image(systemName: "plus")
+                        .font(.system(size: 36))
+                        .foregroundStyle(Color.sweetnSour)
                 }
                 
             }

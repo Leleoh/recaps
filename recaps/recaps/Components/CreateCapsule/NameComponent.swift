@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NameComponent: View {
     
-    @State private var text: String = ""
+    @Binding var text: String
     @State var lineLimiter = 1
     
     @FocusState private var isFocused: Bool
@@ -18,11 +18,12 @@ struct NameComponent: View {
     var body: some View {
     
         TextField("Name your recapsule", text: $text, axis: .vertical)
+            .environment(\.colorScheme, .light)
             .font(.system(size: 18))
             .multilineTextAlignment(.center)
             .rotationEffect(.degrees(-2))
-            .foregroundStyle(.secondary) //Label
-            .frame(maxWidth: 250)
+            .foregroundStyle(.black) //Label
+            .frame(maxWidth: 250, minHeight: 44)
             .lineLimit(2)
             .padding(.horizontal, 8)
             .background(Color.clear)
@@ -52,6 +53,6 @@ struct NameComponent: View {
 #Preview {
     ZStack {
         Color.gray.ignoresSafeArea()
-        NameComponent()
+        NameComponent(text: .constant(""))
     }
 }

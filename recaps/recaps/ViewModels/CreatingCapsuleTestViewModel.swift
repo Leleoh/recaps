@@ -19,7 +19,7 @@ class CreatingCapsuleTestViewModel {
         return String((0..<8).map { _ in chars.randomElement()! })
     }
     
-    func creatingCapsule(code: String, name: String, offensive: Int) async {
+    func creatingCapsule(code: String, name: String, offensiveTarget: Int) async {
         do {
             let capsule = Capsule(
                 id: UUID(),
@@ -27,7 +27,8 @@ class CreatingCapsuleTestViewModel {
                 submissions: [],
                 name: name,
                 createdAt: Date(),
-                offensive: offensive,
+                offensive: 0,
+                offensiveTarget: offensiveTarget,
                 lastSubmissionDate: Date(),
                 validOffensive: true,
                 lives: 3,
