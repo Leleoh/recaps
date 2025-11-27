@@ -23,6 +23,7 @@ class CapsuleService: CapsuleServiceProtocol {
         record["name"] = capsule.name as CKRecordValue
         record["createdAt"] = capsule.createdAt as CKRecordValue
         record["offensive"] = capsule.offensive as CKRecordValue
+        record["offensiveTarget"] = capsule.offensiveTarget as CKRecordValue
         record["lastSubmissionDate"] = capsule.lastSubmissionDate as CKRecordValue
         record["validOffensive"] = capsule.validOffensive as CKRecordValue
         record["lives"] = capsule.lives as CKRecordValue
@@ -57,8 +58,8 @@ class CapsuleService: CapsuleServiceProtocol {
             record["name"] = capsule.name as CKRecordValue
             record["createdAt"] = capsule.createdAt as CKRecordValue
             record["offensive"] = capsule.offensive as CKRecordValue
-            record["lastSubmissionDate"] =
-            capsule.lastSubmissionDate as CKRecordValue
+            record["offensiveTarget"] = capsule.offensiveTarget as CKRecordValue
+            record["lastSubmissionDate"] = capsule.lastSubmissionDate as CKRecordValue
             record["validOffensive"] = capsule.validOffensive as CKRecordValue
             record["lives"] = capsule.lives as CKRecordValue
             record["ownerId"] = capsule.ownerId as CKRecordValue
@@ -124,6 +125,12 @@ class CapsuleService: CapsuleServiceProtocol {
         do {
             let record = try await database.record(for: recordID)
             
+            let isCapsuleCompleted = try await isCapsuleCompleted(record: record)
+            
+            if isCapsuleCompleted {
+                return true
+            }
+            
             guard
                 let lastSubmissionDate = record["lastSubmissionDate"] as? Date
             else {
@@ -155,6 +162,26 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
+    func checkIfCapsuleIsCompleted(capsuleID: UUID) async throws -> Bool {
+        let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
+        
+        do {
+            let record = try await database.record(for: recordID)
+            
+            let isCapsuleCompleted = try await isCapsuleCompleted(record: record)
+            
+            if isCapsuleCompleted {
+                return true
+            }
+            
+            return false
+            
+        } catch {
+            print("Erro ao verificar se cápsula está Completa: \(error)")
+            throw error
+        }
+    }
+    
     private func increaseStreak(record: CKRecord) async throws {
         
         if var offensive = record["offensive"] as? Int {
@@ -167,6 +194,41 @@ class CapsuleService: CapsuleServiceProtocol {
             print("Capsula salva: \(savedRecord)")
         } catch {
             print("Erro ao atulizar a Capsula : \(error)")
+            throw error
+        }
+    }
+    
+    private func isCapsuleCompleted(record: CKRecord) async throws -> Bool {
+        
+        if let status = record["status"] as? String, let statusEnum = CapsuleStatus(rawValue: status) {
+            if statusEnum == .completed  {
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func isStreakCompleted(record: CKRecord) async throws -> Bool {
+        
+        if let offensive = record["offensive"] as? Int,
+            let offensiveTarget = record["offensiveTarget"] as? Int {
+            if offensive >= offensiveTarget {
+                try await changeCapsuleToCompleted(record: record)
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func changeCapsuleToCompleted(record: CKRecord) async throws {
+        
+        record["status"] = CapsuleStatus.completed.rawValue as CKRecordValue
+        
+        do {
+            let savedRecord = try await database.save(record)
+            print("Status da Capsula alterado para Completed: \(savedRecord)")
+        } catch {
+            print("Erro ao atulizar Status da Capsula : \(error)")
             throw error
         }
     }
@@ -184,7 +246,7 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
-    func consumeCapsuleLive(record: CKRecord) async throws -> Bool {
+    private func consumeCapsuleLive(record: CKRecord) async throws -> Bool {
             
         if var capsuleLives = record["lives"] as? Int {
             
@@ -365,6 +427,7 @@ class CapsuleService: CapsuleServiceProtocol {
                 let name = record["name"] as? String ?? ""
                 let createdAt = record["createdAt"] as? Date ?? Date()
                 let offensive = record["offensive"] as? Int ?? 0
+                let offensiveTarget = record["offensiveTarget"] as? Int ?? 0
                 let lastSubmissionDate = record["lastSubmissionDate"] as? Date ?? Date()
                 let validOffensive = record["validOffensive"] as? Bool ?? false
                 let lives = record["lives"] as? Int ?? 0
@@ -385,6 +448,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     name: name,
                     createdAt: createdAt,
                     offensive: offensive,
+                    offensiveTarget: offensiveTarget,
                     lastSubmissionDate: lastSubmissionDate,
                     validOffensive: validOffensive,
                     lives: lives,
@@ -420,6 +484,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     let name = record["name"] as? String,
                     let createdAt = record["createdAt"] as? Date,
                     let offensive = record["offensive"] as? Int,
+                    let offensiveTarget = record["offensiveTarget"] as? Int,
                     let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
                     let validOffensive = record["validOffensive"] as? Bool,
                     let lives = record["lives"] as? Int,
@@ -438,6 +503,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     name: name,
                     createdAt: createdAt,
                     offensive: offensive,
+                    offensiveTarget: offensiveTarget,
                     lastSubmissionDate: lastSubmissionDate,
                     validOffensive: validOffensive,
                     lives: lives,
@@ -473,6 +539,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     let name = record["name"] as? String,
                     let createdAt = record["createdAt"] as? Date,
                     let offensive = record["offensive"] as? Int,
+                    let offensiveTarget = record["offensiveTarget"] as? Int,
                     let lastSubmissionDate = record["lastSubmissionDate"] as? Date,
                     let validOffensive = record["validOffensive"] as? Bool,
                     let lives = record["lives"] as? Int,
@@ -490,6 +557,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     name: name,
                     createdAt: createdAt,
                     offensive: offensive,
+                    offensiveTarget: offensiveTarget,
                     lastSubmissionDate: lastSubmissionDate,
                     validOffensive: validOffensive,
                     lives: lives,

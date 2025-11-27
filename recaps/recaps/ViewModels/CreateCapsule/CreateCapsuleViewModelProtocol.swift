@@ -11,7 +11,7 @@ import SwiftUI
 
 protocol CreateCapsuleViewModelProtocol {
     var capsuleName: String { get set }
-    var offensiveDuration: Int { get set }
+    var offensiveTarget: Int { get set }
     var selectedPickerItems: [PhotosPickerItem] { get set }
     var selectedImages: [UIImage] { get set }
     var isLoading: Bool { get }

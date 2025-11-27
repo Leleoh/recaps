@@ -14,7 +14,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     
     // MARK: - Properties
     var capsuleName: String = ""
-    var offensiveDuration: Int = 1
+    var offensiveTarget: Int = 50
     
     // Controle do PhotosUI
     var selectedPickerItems: [PhotosPickerItem] = [] {
@@ -91,7 +91,8 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
             submissions: [],
             name: capsuleName,
             createdAt: Date(),
-            offensive: offensiveDuration,
+            offensive: 0,
+            offensiveTarget: offensiveTarget,
             lastSubmissionDate: Date(),
             validOffensive: true,
             lives: 3,
