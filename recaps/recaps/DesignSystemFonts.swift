@@ -12,7 +12,6 @@ import SwiftUI
 extension Font {
     
     // MARK: - SF Pro (System Fonts)
-    // Mapeando exatamente a imagem que você mandou:
     
     /// SF Pro | Light | 34px
     static let appLargeTitle = Font.system(size: 34, weight: .light)
