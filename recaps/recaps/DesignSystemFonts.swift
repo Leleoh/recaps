@@ -51,8 +51,8 @@ extension Font {
     // MARK: - Covered By Your Grace (Custom Fonts)
     
     /// Covered By Your Grace | Regular | 32px
-    static let handwrittenTitle = Font.custom("Covered By Your Grace", size: 32)
+    static let coveredByYourGraceTitle = Font.custom("Covered By Your Grace", size: 32)
     
     /// Covered By Your Grace | Regular | 22px
-    static let handwrittenSignature = Font.custom("Covered By Your Grace", size: 22)
+    static let coveredByYourGraceSignature = Font.custom("Covered By Your Grace", size: 22)
 }
