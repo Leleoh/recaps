@@ -10,6 +10,8 @@ import PhotosUI
 
 struct CreateCapsuleView: View {
     @Environment(\.dismiss) var dismiss
+    var onFinish: (String) -> Void = { _ in }
+    
     @State private var viewModel = CreateCapsuleViewModel()
     
     var body: some View {
@@ -110,9 +112,11 @@ struct CreateCapsuleView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         Task {
-                            let success = await viewModel.createCapsule()
+                            viewModel.code = viewModel.generateCode()
+                            let success = await viewModel.createCapsule(code: viewModel.code)
                             if success {
                                 dismiss()
+                                onFinish(viewModel.code)
                             }
                         }
                     } label: {
