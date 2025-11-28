@@ -11,47 +11,39 @@ struct HomeRecapsView: View {
     
     @State private var viewModel = HomeRecapsViewModel()
     
-    // Capsulas em progresso mockadas para avaliar visual.  Excluir quando não mais necessário
-    private let inProgressRecaps: [Capsule] = [
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "11111", status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste1", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "222", status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste2", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "3333", status: CapsuleStatus.inProgress),
-        .init(id: UUID(), code: "F5GX3", submissions: [], name: "Teste3", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: "44444", status: CapsuleStatus.inProgress)
-    ]
-    
-    // Capsulas abertas mockadas para avaliar visual. Excluir quando não mais necessário
-    private let completedRecaps: [Capsule] = [
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste1", createdAt: Date(), offensive: 50, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "55555", status: CapsuleStatus.completed),
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste2", createdAt: Date(), offensive: 50, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "66666", status: CapsuleStatus.completed),
-        .init(id: UUID(), code: "SAKJ2", submissions: [], name: "Teste3", createdAt: Date(), offensive: 50, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: true, lives: 3, members: [], ownerId: "77777", status: CapsuleStatus.completed)
-    ]
-    
     var body: some View {
-        ZStack{
-            NavigationStack{
-                VStack (spacing: 40) {
+        ZStack {
+            NavigationStack {
+                VStack() {
+                    
+                    // MARK: Cabeçalho DA PÁGINA
                     VStack(alignment: .leading, spacing: 16) {
-                        // Cabeçalho da página
                         HStack(alignment: .center) {
                             
                             Text("Minhas recaps")
-                                .font(.system(size: 34, weight: .bold))
+                                .font(.appLargeTitle)
+                            
                             Spacer()
                             
-                            // Botão de perfil.
+                            // MARK: Botão de perfil
                             Button {
-                                // Chamar view aqui
+                                // TODO: Chamar view do perfil quando implementada
                             } label: {
-                                Image(systemName: "person.crop.circle.fill")
+                                Image(systemName: "person.fill")
                                     .resizable()
-                                    .frame(width: 38, height: 38)
+                                    .scaledToFit()
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 10.5)
+                                    .padding(.vertical, 13)
                             }
+                            .frame(width: 48, height: 48)
+                            .applyLiquidGlass(shape: Circle())
                             .buttonStyle(.plain)
                         }
                         
+                        // MARK: Botões Novo Recap / Juntar-se
                         HStack(spacing: 12) {
-                            Button{
-                                
+                            Button {
                                 viewModel.didTapNewRecap()
                             } label: {
                                 Text("Novo recap")
@@ -65,10 +57,7 @@ struct HomeRecapsView: View {
                             }
                             
                             Button {
-                                Task {
-                                    print("botao apertado")
-                                    viewModel.showJoinPopup = true
-                                }
+                                viewModel.showJoinPopup = true
                             } label: {
                                 Text("Juntar-se")
                                     .fontWeight(.medium)
@@ -84,39 +73,54 @@ struct HomeRecapsView: View {
                     .padding([.top, .horizontal], 16)
                     
                     
-                    // Capsulas em andamento.
+                    // MARK: Cápsulas em andamento
                     VStack(alignment: .leading, spacing: 24) {
                         Text("Em Andamento")
                         
-                        TabView {
-                            ForEach(inProgressRecaps) { recap in
-                                // Card aguardando implementação em alta fidelidade
-                                NavigationLink{
-                                    InsideCapsule(capsule: recap)
-                                }label:{
-                                    CapsuleCardComponent(capsule: recap)
+                        if viewModel.inProgressCapsules.isEmpty {
+                            Text("Nenhuma cápsula em andamento")
+                                .foregroundStyle(.gray)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding()
+                        } else {
+                            TabView {
+                                ForEach(viewModel.inProgressCapsules) { recap in
+                                    NavigationLink {
+                                        InsideCapsule(capsule: recap)
+                                    } label: {
+                                        CloseCapsule(capsule: recap)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
+                            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
                         }
-                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
                     }
                     .frame(maxHeight: 296)
                     .padding()
                     
+                    
+                    // MARK: Cápsulas concluídas
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Concluídas")
                         
-                        let columns = [
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ]
-                        
-                        ScrollView {
-                            LazyVGrid(columns: columns, spacing: 16) {
-                                ForEach(completedRecaps) { recap in
-                                    CapsuleCardComponent(capsule: recap)
-                                        .frame(maxWidth: 169, maxHeight: 131)
+                        if viewModel.completedCapsules.isEmpty {
+                            Text("Nenhuma cápsula concluída ainda")
+                                .foregroundStyle(.gray)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .padding()
+                        } else {
+                            let columns = [
+                                GridItem(.flexible()),
+                                GridItem(.flexible())
+                            ]
+                            
+                            ScrollView {
+                                LazyVGrid(columns: columns, spacing: 16) {
+                                    ForEach(viewModel.completedCapsules) { recap in
+                                        OpenCapsule(capsule: recap)
+                                            .frame(maxWidth: .infinity, maxHeight: 131)
+                                    }
                                 }
                             }
                         }
@@ -124,6 +128,8 @@ struct HomeRecapsView: View {
                     .padding()
                 }
             }
+            
+            // MARK: Popup de join
             if viewModel.showJoinPopup {
                 JoinPopUp(
                     isShowing: $viewModel.showJoinPopup,
@@ -135,6 +141,8 @@ struct HomeRecapsView: View {
                     joinErrorMessage: $viewModel.joinErrorMessage
                 )
             }
+            
+            // MARK: Popup de invite
             if viewModel.showPopup {
                 InvitePopUp(
                     isShowing: $viewModel.showPopup,
@@ -142,7 +150,12 @@ struct HomeRecapsView: View {
                 )
             }
         }
-        .sheet(isPresented: $viewModel.showCreateCapsule) {
+        .task {
+            await viewModel.fetchCapsules()
+        }
+        .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
+            Task { await viewModel.fetchCapsules() }
+        }) {
             CreateCapsuleView { code in
                 viewModel.inviteCode = code
                 viewModel.showPopup = true
