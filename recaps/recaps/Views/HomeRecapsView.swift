@@ -12,21 +12,22 @@ struct HomeRecapsView: View {
     @State private var viewModel = HomeRecapsViewModel()
     
     var body: some View {
-        NavigationStack{
-            VStack () {
-                VStack(alignment: .leading, spacing: 16) {
-                    // MARK: Cabeçalho da página
-//                    HStack(alignment: .center) {
-                        
-                        Text("Minhas recaps")
-                            .font(.appLargeTitle)
-//                        Spacer()
-                        
+        ZStack {
+            NavigationStack {
+                VStack() {
                     
-                        HStack{
-                            // MARK: Botão de perfil.
+                    // MARK: Cabeçalho DA PÁGINA
+                    VStack(alignment: .leading, spacing: 16) {
+                        HStack(alignment: .center) {
+                            
+                            Text("Minhas recaps")
+                                .font(.appLargeTitle)
+                            
+                            Spacer()
+                            
+                            // MARK: Botão de perfil
                             Button {
-                                // TODO: Chamar view do perfil aqui, quando implementada.
+                                // TODO: Chamar view do perfil quando implementada
                             } label: {
                                 Image(systemName: "person.fill")
                                     .resizable()
@@ -37,44 +38,42 @@ struct HomeRecapsView: View {
                             }
                             .frame(width: 48, height: 48)
                             .applyLiquidGlass(shape: Circle())
+                            .buttonStyle(.plain)
+                        }
+                        
+                        // MARK: Botões Novo Recap / Juntar-se
+                        HStack(spacing: 12) {
+                            Button {
+                                viewModel.didTapNewRecap()
+                            } label: {
+                                Text("Novo recap")
+                                    .fontWeight(.medium)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.accentColor.opacity(0.15))
+                                    )
+                            }
                             
-                            HStack(spacing: 12) {
-                                Button{
-                                    viewModel.didTapNewRecap()
-                                } label: {
-                                    Text("Novo recap")
-                                        .fontWeight(.medium)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .fill(Color.accentColor.opacity(0.15))
-                                        )
-                                }
-                                
-                                Button {
-                                    Task {
-                                        // TODO: Invocar view de capsule join quando implementada. Por enquanto hardcoded para teste.
-                                        print("botao apertado")
-                                        await viewModel.joinCapsule(code: "i1JzDF2D")
-                                    }
-                                } label: {
-                                    Text("Juntar-se")
-                                        .fontWeight(.medium)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(.vertical, 12)
-                                        .background(
-                                            RoundedRectangle(cornerRadius: 12)
-                                                .stroke(Color.accentColor, lineWidth: 1.5)
-                                        )
-                                }
+                            Button {
+                                viewModel.showJoinPopup = true
+                            } label: {
+                                Text("Juntar-se")
+                                    .fontWeight(.medium)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.accentColor, lineWidth: 1.5)
+                                    )
                             }
                         }
-//                    }
-//                    .padding([.top, .horizontal], 16)
+                    }
+                    .padding([.top, .horizontal], 16)
                     
                     
-                    // Capsulas em andamento.
+                    // MARK: Cápsulas em andamento
                     VStack(alignment: .leading, spacing: 24) {
                         Text("Em Andamento")
                         
@@ -86,9 +85,9 @@ struct HomeRecapsView: View {
                         } else {
                             TabView {
                                 ForEach(viewModel.inProgressCapsules) { recap in
-                                    NavigationLink{
+                                    NavigationLink {
                                         InsideCapsule(capsule: recap)
-                                    }label:{
+                                    } label: {
                                         CloseCapsule(capsule: recap)
                                     }
                                     .buttonStyle(.plain)
@@ -100,7 +99,8 @@ struct HomeRecapsView: View {
                     .frame(maxHeight: 296)
                     .padding()
                     
-                    // Capsulas em abertas ou prontas para serem abertas.
+                    
+                    // MARK: Cápsulas concluídas
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Concluídas")
                         
@@ -128,19 +128,42 @@ struct HomeRecapsView: View {
                     .padding()
                 }
             }
-            .task {
-                await viewModel.fetchCapsules()
+            
+            // MARK: Popup de join
+            if viewModel.showJoinPopup {
+                JoinPopUp(
+                    isShowing: $viewModel.showJoinPopup,
+                    join: { code in
+                        Task {
+                            await viewModel.joinCapsule(code: code)
+                        }
+                    },
+                    joinErrorMessage: $viewModel.joinErrorMessage
+                )
             }
-            .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
-                Task {
-                    await viewModel.fetchCapsules()
-                }
-            }) {
-                CreateCapsuleView()
+            
+            // MARK: Popup de invite
+            if viewModel.showPopup {
+                InvitePopUp(
+                    isShowing: $viewModel.showPopup,
+                    code: viewModel.inviteCode
+                )
+            }
+        }
+        .task {
+            await viewModel.fetchCapsules()
+        }
+        .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
+            Task { await viewModel.fetchCapsules() }
+        }) {
+            CreateCapsuleView { code in
+                viewModel.inviteCode = code
+                viewModel.showPopup = true
             }
         }
     }
 }
+
 #Preview {
     HomeRecapsView()
 }

@@ -12,6 +12,10 @@ import SwiftUI
 class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
     var showCreateCapsule: Bool = false
+    var showPopup = false
+    var showJoinPopup = false
+    var inviteCode: String = ""
+    var joinErrorMessage: String? = nil
     
     var inProgressCapsules: [Capsule] = []
     var completedCapsules: [Capsule] = []
@@ -57,18 +61,19 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
     func joinCapsule(code: String) async {
         do {
+            joinErrorMessage = nil
             print("Buscando cápsula com código: \(code)")
             
             let allCapsules = try await capsuleService.fetchAllCapsulesWithoutSubmissions()
             var user = try await userService.getCurrentUser()
             
             guard var capsule = allCapsules.first(where: { $0.code == code }) else {
-                print("Nenhuma cápsula encontrada com esse código.")
+                joinErrorMessage = "NotFound"
                 return
             }
             
             if capsule.members.contains(user.id) {
-                print("Usuário já é membro.")
+                joinErrorMessage = "AlreadyMember"
                 return
             }
             
@@ -90,6 +95,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             await fetchCapsules()
             
         } catch {
+            joinErrorMessage = "Unknown"
             print("❌ Erro ao entrar na cápsula: \(error)")
         }
     }

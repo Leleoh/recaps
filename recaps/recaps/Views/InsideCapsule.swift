@@ -30,8 +30,6 @@ struct InsideCapsule: View {
                 
                 Text("Informações da capsula")
                     .foregroundStyle(.white)
-                
-                
             }
             
             Spacer()
