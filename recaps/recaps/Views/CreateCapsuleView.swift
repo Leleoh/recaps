@@ -98,7 +98,7 @@ struct CreateCapsuleView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .foregroundColor(.black)
-                            .padding(8)
+//                            .padding(8)
                     }
                 }
                 
@@ -123,13 +123,19 @@ struct CreateCapsuleView: View {
                         if viewModel.isLoading {
                             ProgressView()
                         } else {
-                            Image(systemName: "arrow.up")
-                                .foregroundColor(viewModel.isValidToSave ? Color.black : Color.gray)
+                            Image(systemName: "checkmark")
+                                .foregroundColor(viewModel.isValidToSave ? Color("SweetnSour"): Color.black)
+                                
                         }
                     }
                     // Desabilita o botão se a validação falhar ou estiver carregando
                     .disabled(!viewModel.isValidToSave || viewModel.isLoading)
+//                    .buttonStyle(.borderedProminent)
+//                    .tint(viewModel.isValidToSave ? Color("SweetnSour") : Color(.gray))
+//                    .foregroundColor(.white)
                 }
+                
+                
             }
         }
         .onTapGesture {
