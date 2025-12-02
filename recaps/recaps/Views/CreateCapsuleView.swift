@@ -43,7 +43,7 @@ struct CreateCapsuleView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     
                     NameComponent(text: $viewModel.capsuleName)
-                    //                        .padding(.top, 83)
+                        .padding(.top, -32)
                     
                 }
                 
@@ -69,7 +69,7 @@ struct CreateCapsuleView: View {
                                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
                         )
                     }
-                    .padding(.top, 24)
+                    .padding(.top, 8)
                     
                     Text("Streak days is the number of consecutive days saving memories that will be required for the Recapsule to open.")
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -97,7 +97,7 @@ struct CreateCapsuleView: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
-                            .foregroundColor(.black)
+                            .foregroundColor(.white)
 //                            .padding(8)
                     }
                 }
@@ -110,26 +110,42 @@ struct CreateCapsuleView: View {
                 
                 // Botão Salvar (Direita)
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        Task {
-                            viewModel.code = viewModel.generateCode()
-                            let success = await viewModel.createCapsule(code: viewModel.code)
-                            if success {
-                                dismiss()
-                                onFinish(viewModel.code)
+                    if viewModel.isValidToSave {
+                        Button {
+                            Task {
+                                viewModel.code = viewModel.generateCode()
+                                let success = await viewModel.createCapsule(code: viewModel.code)
+                                if success {
+                                    dismiss()
+                                    onFinish(viewModel.code)
+                                }
+                            }
+                        } label: {
+                            if viewModel.isLoading {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.white)
                             }
                         }
-                    } label: {
-                        if viewModel.isLoading {
-                            ProgressView()
-                        } else {
-                            Image(systemName: "checkmark")
-                                .foregroundColor(viewModel.isValidToSave ? Color("SweetnSour"): Color.black)
-                                
+                        .buttonStyle(.borderedProminent)
+                    } else {
+                        Button {
+                            
+                        } label: {
+                            if viewModel.isLoading {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.white)
+                            }
                         }
+                        
+                        // Desabilita o botão se a validação falhar ou estiver carregando
+                        .disabled(!viewModel.isValidToSave || viewModel.isLoading)
                     }
-                    // Desabilita o botão se a validação falhar ou estiver carregando
-                    .disabled(!viewModel.isValidToSave || viewModel.isLoading)
+                    
+                    
 //                    .buttonStyle(.borderedProminent)
 //                    .tint(viewModel.isValidToSave ? Color("SweetnSour") : Color(.gray))
 //                    .foregroundColor(.white)

@@ -46,7 +46,7 @@ struct NameComponent: View {
                     text = String(newValue.dropLast()) // Remove o \n
                     isFocused = false // Fecha o teclado
                 }
-                else if newValue.count > 40 {
+                else if newValue.count > 38 {
                     text = oldValue
                 }
             }
