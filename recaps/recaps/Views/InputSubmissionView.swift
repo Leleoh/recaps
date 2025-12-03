@@ -12,13 +12,13 @@ struct InputSubmissionView: View {
     @Environment(\.dismiss) var dismiss
     
     private let cardWidth: CGFloat = 300
-    private let cardHeight: CGFloat = 240
+    private let cardHeight: CGFloat = 244
     
     var body: some View {
         NavigationStack {
             VStack {
                 GeometryReader { geometry in
-                    VStack(spacing:5) {
+                    VStack(spacing:0) {
                         
                         // Dot indicator
                         HStack(spacing: 8) {
@@ -28,13 +28,13 @@ struct InputSubmissionView: View {
                                     .frame(width: 8, height: 8)
                             }
                         }
-                        .padding(.top, 130)
+                        .padding(.top, 100)
                         
                         Spacer()
                         
                         ZStack {
                             ForEach(0..<viewModel.images.count, id: \.self) { index in
-                                VStack(spacing: 16) {
+                                VStack(spacing: 5) {
                                     VStack {
                                         Image(uiImage: viewModel.images[index])
                                             .resizable()
@@ -51,10 +51,15 @@ struct InputSubmissionView: View {
                                         .frame(width: cardWidth)
                                     }
                                     
-                                    TextField("Write a message \n (If you want)", text: $viewModel.messages[index])
+                                    TextField("Write a message", text: $viewModel.messages[index], axis: .vertical)
                                         .font(.coveredByYourGraceTitle)
+                                        .lineLimit(2)
+                                        .frame(maxWidth: 300)
+                                        .frame(height: 108)
+                                        .padding(8)
                                         .multilineTextAlignment(.center)
                                         .foregroundColor(.white)
+
                                 }
                                 .offset(
                                     x: (CGFloat(index - selectedIndex) * (cardWidth + 30)) + dragOffset,
@@ -87,7 +92,7 @@ struct InputSubmissionView: View {
                         
                         Spacer()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: 343)
+                    .frame(maxWidth: .infinity, maxHeight: 403)
                 }
             }
             .padding(.top, 100)
@@ -129,6 +134,16 @@ struct InputSubmissionView: View {
                     .buttonStyle(.borderedProminent)
                 }
             }
+            .onTapGesture {
+                UIApplication.shared.dismissKeyboard()
+            }
+            .gesture(
+                DragGesture().onChanged { value in
+                    if value.translation.height > 20 {
+                        UIApplication.shared.dismissKeyboard()
+                    }
+                }
+            )
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -136,4 +151,10 @@ struct InputSubmissionView: View {
 
 #Preview {
    // InputSubmissionView()
+}
+
+extension UIApplication {
+    func dismissKeyboard() {
+        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
 }
