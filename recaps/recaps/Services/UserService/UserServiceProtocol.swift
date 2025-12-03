@@ -11,7 +11,7 @@ protocol UserServiceProtocol {
     
     func getCurrentUser() async throws -> User
     func createUser(user: User) async throws
-    func updateUser(_ user: User, name: String?, email: String?, capsules: [UUID]?) async throws -> User
+    func updateUser(_ user: User, name: String?, email: String?, capsules: [UUID]?, openCapsules: [UUID]?) async throws -> User
     func loadUserId() -> String
     func saveUserId(_ id: String)
     func getUserId() -> String

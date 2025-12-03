@@ -53,7 +53,8 @@ class AuthenthicationViewModel {
                     id: newUserId,
                     name: newName,
                     email: newEmail,
-                    capsules: []
+                    capsules: [],
+                    openCapsules: []
                 )
                 
                 print(newUser.name)

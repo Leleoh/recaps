@@ -34,8 +34,13 @@ class UserService: UserServiceProtocol {
             let name = record["name"] as? String ?? ""
             let email = record["email"] as? String ?? ""
             let capsulesRefs = record["capsules"] as? [CKRecord.Reference] ?? []
+            let openCapsulesRefs = record["openCapsules"] as? [CKRecord.Reference] ?? []
             
             let capsules: [UUID] = capsulesRefs.compactMap { ref in
+                UUID(uuidString: ref.recordID.recordName)
+            }
+            
+            let openCapsules: [UUID] = openCapsulesRefs.compactMap { ref in
                 UUID(uuidString: ref.recordID.recordName)
             }
             
@@ -43,7 +48,8 @@ class UserService: UserServiceProtocol {
                 id: userId,
                 name: name,
                 email: email,
-                capsules: capsules
+                capsules: capsules,
+                openCapsules: openCapsules
             )
         } catch {
             print("Erro ao buscar o usuário:", error)
@@ -73,7 +79,8 @@ class UserService: UserServiceProtocol {
         _ user: User,
         name: String? = nil,
         email: String? = nil,
-        capsules: [UUID]? = nil
+        capsules: [UUID]? = nil,
+        openCapsules: [UUID]? = nil
     ) async throws -> User {
         
         let recordID = CKRecord.ID(recordName: user.id)
@@ -97,16 +104,30 @@ class UserService: UserServiceProtocol {
             record["capsules"] = capsuleRefs as CKRecordValue
         }
         
+        if let openCapsules = openCapsules {
+            let openCapsuleRefs = openCapsules.map { uuid in
+                CKRecord.Reference(
+                    recordID: CKRecord.ID(recordName: uuid.uuidString),
+                    action: .none
+                )
+            }
+            record["openCapsules"] = openCapsuleRefs as CKRecordValue
+        }
+        
         let saved = try await database.save(record)
         
         let savedRefs = saved["capsules"] as? [CKRecord.Reference] ?? []
         let savedCapsules = savedRefs.map { UUID(uuidString: $0.recordID.recordName)! }
         
+        let savedOpenCapsulesRefs = saved["openCapsules"] as? [CKRecord.Reference] ?? []
+        let savedOpenCapsules = savedOpenCapsulesRefs.map { UUID(uuidString: $0.recordID.recordName)! }
+        
         return User(
             id: saved.recordID.recordName,
             name: saved["name"] as? String ?? "",
             email: saved["email"] as? String ?? "",
-            capsules: savedCapsules
+            capsules: savedCapsules,
+            openCapsules: savedOpenCapsules
         )
     }
     
