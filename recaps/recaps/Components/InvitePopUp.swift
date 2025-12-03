@@ -18,81 +18,66 @@ struct InvitePopUp: View {
                 .ignoresSafeArea()
                 .onTapGesture { isShowing = false }
             
-            popupContent
-        }
-    }
-    
-    private var popupContent: some View {
-        let content = VStack(spacing: 29) {
-            VStack(alignment: .leading, spacing: 34) {
+            VStack(spacing: 29) {
                 
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Your Recapsule is ready")
-                        .font(.headline)
+                VStack(alignment: .leading, spacing: 34) {
                     
-                    Text("Copy code to invite friends.")
-                        .font(.subheadline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(.labelPrimary)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Your Recapsule is ready")
+                            .font(.headline)
+                        
+                        Text("Copy code to invite friends.")
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(.labelPrimary)
+                    }
+                    
+                    // CODE CELLS
+                    HStack(spacing: 8) {
+                        ForEach(Array(code), id: \.self) { char in
+                            Text(String(char))
+                                .font(.headline)
+                                .frame(width: 48, height: 52)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14)
+                                        .fill(.fillDarkSecondary)
+                                )
+                        }
+                    }
                 }
                 
-                // TEXTFIELD
-                HStack(spacing: 8) {
-                    ForEach(Array(code), id: \.self) { char in
-                        Text(String(char))
-                            .font(.headline)
-                            .frame(width: 48, height: 52)
+                // ACTION BUTTONS
+                HStack(spacing: 12) {
+                    
+                    Button {
+                        isShowing = false
+                    } label: {
+                        Text("Later")
+                            .frame(maxWidth: .infinity, minHeight: 48)
                             .background(
-                                RoundedRectangle(cornerRadius: 14)
-                                    .fill(.fillDarkSecondary)
+                                RoundedRectangle(cornerRadius: 28)
+                                    .fill(.fillsSecondary.opacity(0.35))
                             )
+                            .foregroundColor(.labelPrimary)
+                    }
+                    
+                    Button {
+                        UIPasteboard.general.string = code
+                        isShowing = false
+                    } label: {
+                        Text("Copy")
+                            .frame(maxWidth: .infinity, minHeight: 48)
+                            .background(
+                                RoundedRectangle(cornerRadius: 28)
+                                    .fill(.sweetNSour)
+                            )
+                            .foregroundColor(.labelPrimary)
                     }
                 }
             }
-            
-            HStack(spacing: 12) {
-                
-                Button {
-                    isShowing = false
-                } label: {
-                    Text("Later")
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .background(
-                            RoundedRectangle(cornerRadius: 28)
-                                .fill(.fillsSecondary)
-                        )
-                        .foregroundColor(.labelPrimary)
-                }
-                
-                Button {
-                    UIPasteboard.general.string = code
-                    isShowing = false
-                } label: {
-                    Text("Copy")
-                        .frame(maxWidth: .infinity, minHeight: 48)
-                        .background(
-                            RoundedRectangle(cornerRadius: 28)
-                                .fill(.sweetNSour)
-                        )
-                        .foregroundColor(.labelPrimary)
-                }
-            }
+            .padding(22)
+            .frame(maxWidth: 300)
+            .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
         }
-        .padding(22)
-        .frame(maxWidth: 300)
-        
-        return Group {
-            if #available(iOS 18.0, *) {
-                content
-                    .glassEffect(in: .rect(cornerRadius: 32))
-            } else {
-                content
-                    .background(
-                        RoundedRectangle(cornerRadius: 32)
-                            .fill(.ultraThinMaterial)
-                    )
-            }
-        }
-        .shadow(color: .black.opacity(0.2), radius: 20, x: 0, y: 10)
     }
 }
