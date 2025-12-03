@@ -118,8 +118,19 @@ struct HomeRecapsView: View {
                             ScrollView {
                                 LazyVGrid(columns: columns, spacing: 16) {
                                     ForEach(viewModel.completedCapsules) { recap in
-                                        OpenCapsule(capsule: recap)
-                                            .frame(maxWidth: .infinity, maxHeight: 131)
+                                        
+                                        NavigationLink(destination:
+                                               
+                                            //Tela
+                                            OpenedCapsule(capsule: recap)){
+                                            
+                                            //Componente
+                                            OpenCapsule(isPink: false, capsule: recap)
+                                            
+                                        }
+                                        
+//                                        OpenCapsule(capsule: recap)
+//                                            .frame(maxWidth: .infinity, maxHeight: 131)
                                     }
                                 }
                             }

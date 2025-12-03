@@ -346,6 +346,8 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
+    
+    //MARK: Fetch Submissions
     func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
         let predicate = NSPredicate(format: "capsuleID == %@", capsuleID.uuidString)
         // let predicate = NSPredicate(value: true)
