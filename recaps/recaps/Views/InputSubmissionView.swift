@@ -18,7 +18,7 @@ struct InputSubmissionView: View {
         NavigationStack {
             VStack {
                 GeometryReader { geometry in
-                    VStack(spacing:0) {
+                    VStack(spacing:5) {
                         
                         // Dot indicator
                         HStack(spacing: 8) {
@@ -34,7 +34,7 @@ struct InputSubmissionView: View {
                         
                         ZStack {
                             ForEach(0..<viewModel.images.count, id: \.self) { index in
-                                VStack(spacing: 5) {
+                                VStack(spacing: 0) {
                                     VStack {
                                         Image(uiImage: viewModel.images[index])
                                             .resizable()
