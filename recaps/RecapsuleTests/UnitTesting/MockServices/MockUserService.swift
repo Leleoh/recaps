@@ -10,6 +10,22 @@ import CloudKit
 @testable import recaps
 
 class MockUserService: UserServiceProtocol {
+    var userId: String = ""
+    
+    func updateUser(_ user: recaps.User, name: String?, email: String?, capsules: [UUID]?) async throws -> recaps.User {
+        var updated = user
+        if let name = name {
+            updated.name = name
+        }
+        if let email = email {
+            updated.email = email
+        }
+        if let capsules = capsules {
+            updated.capsules = capsules
+        }
+        return updated
+    }
+    
     // MARK: - Flags para verificação
     var didCreate = false
     var didGetCurrentUser = false

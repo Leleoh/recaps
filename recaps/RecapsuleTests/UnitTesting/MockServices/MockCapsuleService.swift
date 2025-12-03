@@ -8,12 +8,17 @@
 import Foundation
 import CloudKit
 @testable import recaps
+import UIKit
 
 class MockCapsuleService: CapsuleServiceProtocol {
+    
+    
     // MARK: - Trackers
     var didCreate = false
     var didDelete = false
     var didUpdate = false
+    var mockSubmissionsToReturn: [Submission] = []
+    var shouldReturnError: Bool = false
     
     var createdCapsule: Capsule?
     var updatedCapsule: Capsule?
@@ -42,7 +47,10 @@ class MockCapsuleService: CapsuleServiceProtocol {
     // MARK: - Simulated fetching
 
     func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
-        return storedSubmissions[capsuleID] ?? []
+        if shouldReturnError {
+            throw NSError(domain: "TestError", code: 500, userInfo: [NSLocalizedDescriptionKey: "Erro simulado"])
+        }
+        return mockSubmissionsToReturn
     }
 
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule] {
@@ -58,5 +66,23 @@ class MockCapsuleService: CapsuleServiceProtocol {
     // MARK: - Helpers para testes
     func addSubmission(_ submission: Submission) {
         storedSubmissions[submission.capsuleID, default: []].append(submission)
+    }
+    
+    //Testar essas 3 abaixo posteriormente
+    func createSubmission(submission: recaps.Submission, capsuleID: UUID, image: UIImage) async throws {
+        
+    }
+    
+    func fetchAllCapsules() async throws -> [recaps.Capsule] {
+        var result: [Capsule] = []
+        for (id, var capsule) in storedCapsules {
+            capsule.submissions = try await fetchSubmissions(capsuleID: id)
+            result.append(capsule)
+        }
+        return result
+    }
+    
+    func fetchAllCapsulesWithoutSubmissions() async throws -> [recaps.Capsule] {
+        return Array(storedCapsules.values)
     }
 }

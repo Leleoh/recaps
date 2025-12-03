@@ -15,9 +15,11 @@ struct CloudKitServiceTests {
     let mockCapsule = Capsule(
         id: UUID(),
         code: "ABCDE",
+        submissions: [],
         name: "Teste",
         createdAt: .now,
         offensive: 0,
+        offensiveTarget: 0,
         lastSubmissionDate: .now,
         validOffensive: true,
         lives: 3,
@@ -58,7 +60,7 @@ struct CloudKitServiceTests {
     @Test("Teste: fetchSubmissions retorna corretamente")
     func testFetchSubmissions() async throws {
 
-        let mock = MockCKService()
+        let mock = MockCapsuleService()
 
         let capsuleID = UUID()
 
@@ -66,7 +68,7 @@ struct CloudKitServiceTests {
             id: UUID(),
             imageURL: nil,
             description: "Foto 1",
-            authorId: UUID(),
+            authorId: UUID().uuidString,
             date: .now,
             capsuleID: capsuleID
         )
@@ -75,7 +77,7 @@ struct CloudKitServiceTests {
             id: UUID(),
             imageURL: nil,
             description: "Foto 2",
-            authorId: UUID(),
+            authorId: UUID().uuidString,
             date: .now,
             capsuleID: capsuleID
         )
@@ -86,21 +88,22 @@ struct CloudKitServiceTests {
         let result = try await mock.fetchSubmissions(capsuleID: capsuleID)
 
         #expect(result.count == 2)
-        #expect(result.map(\.description) == ["Foto 1", "Foto 2"])
+        #expect(result.map { $0.description } == ["Foto 1", "Foto 2"])
     }
     
     @Test("Teste: fetchCapsules retorna vazio para IDs inexistentes")
-    func testFetchCapsulesEmpty() async throws {
-        let mock = MockCKService()
+        func testFetchCapsulesEmpty() async throws {
+            let mock = MockCapsuleService()
 
-        let result = try await mock.fetchCapsules(IDs: [UUID()])
+            // CORREÇÃO: Passamos uma lista com um UUID novo direto aqui
+            let result = try await mock.fetchCapsules(IDs: [UUID()])
 
-        #expect(result.isEmpty)
-    }
+            #expect(result.isEmpty)
+        }
     
     @Test("Teste: updateCapsule realmente altera os valores")
     func testUpdateCapsuleChangesValues() async throws {
-        let mock = MockCKService()
+        let mock = MockCapsuleService()
 
         var capsule = Capsule(
             id: UUID(),
@@ -109,11 +112,12 @@ struct CloudKitServiceTests {
             name: "Original",
             createdAt: .now,
             offensive: 0,
+            offensiveTarget: 0,
             lastSubmissionDate: .now,
             validOffensive: true,
             lives: 3,
             members: [],
-            ownerId: UUID(),
+            ownerId: UUID().uuidString,
             status: .inProgress
         )
 
@@ -130,3 +134,4 @@ struct CloudKitServiceTests {
     
     
 }
+
