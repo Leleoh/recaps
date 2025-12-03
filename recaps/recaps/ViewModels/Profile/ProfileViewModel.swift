@@ -50,7 +50,7 @@ class ProfileViewModel: ProfileViewModelProtocol {
                 capsule.members.removeAll { $0 == user.id }
                 try await capsuleService.updateCapsule(capsule: capsule)
             }
-            let cap = try await capsuleService.fetchCapsules(IDs: user.capsules)
+            _ = try await capsuleService.fetchCapsules(IDs: user.capsules)
             
             
         } catch {
