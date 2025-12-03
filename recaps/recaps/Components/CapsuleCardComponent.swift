@@ -65,5 +65,5 @@ struct CapsuleCardComponent: View {
 }
 
 #Preview {
-    CapsuleCardComponent(capsule: .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: " ", status: CapsuleStatus.inProgress))
+    CapsuleCardComponent(capsule: .init(id: UUID(), code: "F5GX3", submissions: [], name: "Academy", createdAt: Date(), offensive: 0, offensiveTarget: 50, lastSubmissionDate: Date(), validOffensive: false, lives: 3, members: [], ownerId: " ", status: CapsuleStatus.inProgress, blacklisted: []))
 }
