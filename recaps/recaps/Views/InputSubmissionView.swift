@@ -8,7 +8,7 @@ struct InputSubmissionView: View {
     @State private var selectedIndex = 0
     @GestureState private var dragOffset: CGFloat = 0
     
-    
+    @State private var isSubmitting = false
     @Environment(\.dismiss) var dismiss
     
     private let cardWidth: CGFloat = 300
@@ -120,17 +120,29 @@ struct InputSubmissionView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
                         Task {
+                            isSubmitting = true
                             do {
                                 try await viewModel.submit()
                                 dismiss()
                             } catch {
                                 print("Erro ao enviar: \(error)")
                             }
+                            isSubmitting = false
                         }
                     } label: {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(.white)
+                        Group {
+                            if isSubmitting {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                    .frame(width: 20, height: 20)
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .frame(width: 44, height: 28)
                     }
+                    .disabled(isSubmitting)
                     .buttonStyle(.borderedProminent)
                 }
             }

@@ -15,8 +15,6 @@ protocol HomeRecapsViewModelProtocol {
     func didTapNewRecap()
     func joinCapsule(code: String) async
     func fetchCapsules() async
-<<<<<<< HEAD
-=======
+
     func leaveCapsule(capsule: Capsule) async
->>>>>>> dev
 }
