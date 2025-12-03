@@ -26,6 +26,7 @@ struct ProfileView: View {
             HStack {
                 Button("Logout") {
                     viewModel.logout()
+                    dismiss()
                 }
 
                 Button("Delete Account") {
