@@ -132,5 +132,39 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             print("❌ Erro ao entrar na cápsula: \(error)")
         }
     }
+    
+    func leaveCapsule(capsule: Capsule) async {
+        do {
+            var user = try await userService.getCurrentUser()
+
+            print("ANTES de Apagar:")
+            print(user)
+            print(capsule)
+            
+            user.capsules.removeAll(where: { $0 == capsule.id })
+
+            var updatedCapsule = capsule
+            updatedCapsule.members.removeAll(where: { $0 == user.id })
+
+            try await capsuleService.updateCapsule(capsule: updatedCapsule)
+
+            _ = try await userService.updateUser(
+                user,
+                name: user.name,
+                email: user.email,
+                capsules: user.capsules
+            )
+
+            print("DEPOIS de Apagar:")
+            let refreshedUser = try await userService.getCurrentUser()
+            let refreshedCapsule = try await capsuleService.fetchCapsules(IDs: [capsule.id])
+
+            print(refreshedUser)
+            print(refreshedCapsule)
+
+        } catch {
+            print("Erro ao apagar cápsula: \(error.localizedDescription)")
+        }
+    }
 }
 
