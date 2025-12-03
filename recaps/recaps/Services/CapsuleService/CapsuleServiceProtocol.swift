@@ -21,4 +21,5 @@ protocol CapsuleServiceProtocol {
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule]
     func fetchAllCapsules() async throws -> [Capsule]
     func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule]
+    func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool
 }
