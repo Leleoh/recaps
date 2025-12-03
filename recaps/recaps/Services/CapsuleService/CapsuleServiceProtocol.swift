@@ -21,6 +21,7 @@ protocol CapsuleServiceProtocol {
     func deleteCapsule(capsuleID: UUID) async throws
     func updateCapsule(capsule: Capsule) async throws
     func createSubmission(submission: Submission, capsuleID: UUID, image: UIImage) async throws
+    func createCapsuleWithSubmissions(capsule: Capsule, submissions: [Submission], images: [UIImage]) async throws -> UUID
 
     // MARK: - Verification
     func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool

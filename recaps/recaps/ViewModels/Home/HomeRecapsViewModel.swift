@@ -12,6 +12,13 @@ import SwiftUI
 class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
     var showCreateCapsule: Bool = false
+    var showPopup = false
+    var showJoinPopup = false
+    var inviteCode: String = ""
+    var joinErrorMessage: String? = nil
+    
+    var inProgressCapsules: [Capsule] = []
+    var completedCapsules: [Capsule] = []
     
     private let capsuleService: CapsuleServiceProtocol
     private let userService: UserServiceProtocol
@@ -21,24 +28,52 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         self.userService = userService
     }
     
+    // MARK: - Fetch Data Logic
+    @MainActor
+    func fetchCapsules() async {
+        do {
+            // Pega o usuário logado para acessar a lista de IDs de cápsulas
+            let currentUser = try await userService.getCurrentUser()
+            let capsuleIDs = currentUser.capsules
+            
+            guard !capsuleIDs.isEmpty else {
+                print("Usuário não possui cápsulas.")
+                return
+            }
+            
+            // Busca os objetos Capsule no CloudKit usando os IDs
+            let allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
+            
+            // Filtra as cápsulas por status
+            self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
+            
+            // Consideramos completed ou opened como "Concluídas" na Home
+            self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
+            
+        } catch {
+            print("Erro ao carregar dados da Home: \(error.localizedDescription)")
+        }
+    }
+    
     func didTapNewRecap() {
         showCreateCapsule = true
     }
     
     func joinCapsule(code: String) async {
         do {
+            joinErrorMessage = nil
             print("Buscando cápsula com código: \(code)")
             
             let allCapsules = try await capsuleService.fetchAllCapsulesWithoutSubmissions()
             var user = try await userService.getCurrentUser()
             
             guard var capsule = allCapsules.first(where: { $0.code == code }) else {
-                print("Nenhuma cápsula encontrada com esse código.")
+                joinErrorMessage = "NotFound"
                 return
             }
             
             if capsule.members.contains(user.id) {
-                print("Usuário já é membro.")
+                joinErrorMessage = "AlreadyMember"
                 return
             }
             
@@ -57,9 +92,10 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             print("✅ Sucesso! Entrou na cápsula: \(capsule.name)")
             
-            // Aqui você poderia disparar um refresh da lista da Home
+            await fetchCapsules()
             
         } catch {
+            joinErrorMessage = "Unknown"
             print("❌ Erro ao entrar na cápsula: \(error)")
         }
     }

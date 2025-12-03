@@ -2,18 +2,14 @@ import SwiftUI
 
 struct InputSubmissionView: View {
     
+    
+    @State var viewModel: InputSubmissionViewModel
+    
     @State private var selectedIndex = 0
     @GestureState private var dragOffset: CGFloat = 0
     
-    let cards = [
-        "monkey",
-        "CloseCapsule",
-        "verticalImage",
-    ]
     
-    @State private var messages: [String] = ["","",""]
-    
-    var onTapItem: ((Int) -> Void)? = nil
+    @Environment(\.dismiss) var dismiss
     
     private let cardWidth: CGFloat = 300
     private let cardHeight: CGFloat = 240
@@ -23,9 +19,10 @@ struct InputSubmissionView: View {
             VStack {
                 GeometryReader { geometry in
                     VStack(spacing:5) {
+                        
                         // Dot indicator
                         HStack(spacing: 8) {
-                            ForEach(0..<cards.count, id: \.self) { index in
+                            ForEach(0..<viewModel.images.count, id: \.self) { index in
                                 Circle()
                                     .fill(selectedIndex == index ? Color.white : Color.white.opacity(0.4))
                                     .frame(width: 8, height: 8)
@@ -36,33 +33,28 @@ struct InputSubmissionView: View {
                         Spacer()
                         
                         ZStack {
-                            ForEach(0..<cards.count, id: \.self) { index in
-                                VStack(spacing: 40) {
+                            ForEach(0..<viewModel.images.count, id: \.self) { index in
+                                VStack(spacing: 16) {
                                     VStack {
-                                        Image(cards[index])
+                                        Image(uiImage: viewModel.images[index])
                                             .resizable()
                                             .scaledToFit()
                                             .frame(width: cardWidth, height: cardHeight)
                                             .rotationEffect(.degrees(-2))
                                         
                                         HStack {
-                                                Spacer()
-                                                Text("22/11/25")
-                                                .font(.system(size: 18))
+                                            Spacer()
+                                            Text(Date.now.formatted(date: .numeric, time: .omitted))
+                                                .font(.coveredByYourGraceSignature)
                                                 .rotationEffect(.degrees(-2))
-                                            }
-                                            .frame(width: cardWidth)
-                                            
+                                        }
+                                        .frame(width: cardWidth)
                                     }
                                     
-                                    TextField("Write a message \n (If you want)", text: $messages[index])
-                                        .font(.system(size: 32))
+                                    TextField("Write a message \n (If you want)", text: $viewModel.messages[index])
+                                        .font(.coveredByYourGraceTitle)
                                         .multilineTextAlignment(.center)
                                         .foregroundColor(.white)
-                                        .font(.headline)
-                                }
-                                .onTapGesture {
-                                    onTapItem?(index)
                                 }
                                 .offset(
                                     x: (CGFloat(index - selectedIndex) * (cardWidth + 30)) + dragOffset,
@@ -85,7 +77,7 @@ struct InputSubmissionView: View {
                                         newIndex -= 1
                                     }
                                     
-                                    newIndex = max(0, min(cards.count - 1, newIndex))
+                                    newIndex = max(0, min(viewModel.images.count - 1, newIndex))
                                     
                                     withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                                         selectedIndex = newIndex
@@ -110,32 +102,38 @@ struct InputSubmissionView: View {
             .navigationBarTitleDisplayMode(.inline)
             
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        
-                    }) {
-                        HStack {
-                            Image(systemName: "chevron.left")
-                        }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .foregroundStyle(.white)
                     }
                 }
                 
+                
                 ToolbarItem(placement: .confirmationAction) {
-                    Button() {
-                        print("Confirmed with messages: \(messages)")
+                    Button {
+                        Task {
+                            do {
+                                try await viewModel.submit()
+                                dismiss()
+                            } catch {
+                                print("Erro ao enviar: \(error)")
+                            }
+                        }
                     } label: {
                         Image(systemName: "checkmark")
-                            .foregroundStyle(.red)
-                            
-                           
+                            .foregroundStyle(.white)
                     }
+                    .buttonStyle(.borderedProminent)
                 }
             }
         }
-        
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
-    InputSubmissionView()
+   // InputSubmissionView()
 }

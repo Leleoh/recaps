@@ -9,7 +9,10 @@ import Foundation
 
 protocol HomeRecapsViewModelProtocol {
     var showCreateCapsule: Bool { get set }
+    var inProgressCapsules: [Capsule] { get }
+    var completedCapsules: [Capsule] { get }
     
     func didTapNewRecap()
     func joinCapsule(code: String) async
+    func fetchCapsules() async
 }

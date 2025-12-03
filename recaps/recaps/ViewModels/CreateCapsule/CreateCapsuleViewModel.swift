@@ -14,7 +14,9 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     
     // MARK: - Properties
     var capsuleName: String = ""
-    var offensiveTarget: Int = 50
+    var offensiveTarget: Int = 30
+    var showPopup = false
+    var code: String = ""
     
     // Controle do PhotosUI
     var selectedPickerItems: [PhotosPickerItem] = [] {
@@ -44,9 +46,9 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     }
     
     // MARK: Helpers
-    private func generateCode() -> String {
-        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return String((0..<6).map { _ in chars.randomElement()! })
+    func generateCode() -> String {
+        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz"
+        return String((0..<5).map { _ in chars.randomElement()! })
     }
     
     // MARK: - Image Loading
@@ -66,7 +68,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     }
     
     // MARK: - Main Actor
-    func createCapsule() async -> Bool {
+    func createCapsule(code: String) async -> Bool {
         guard isValidToSave else { return false }
         
         isLoading = true
@@ -87,7 +89,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         // Criar o Objeto Cápsula
         let newCapsule = Capsule(
             id: newCapsuleID,
-            code: generateCode(),
+            code: code,
             submissions: [],
             name: capsuleName,
             createdAt: Date(),
@@ -102,21 +104,15 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         )
         
         do {
-            print("Iniciando upload da cápsula: \(newCapsule.name)")
+            
             // Salvar a Cápsula
-            _ = try await capsuleService.createCapsule(capsule: newCapsule)
-            print("Cápsula criada com ID: \(newCapsule.id)")
             
-            var currentUser = try await userService.getCurrentUser()
-            currentUser.capsules.append(newCapsuleID)
             
-            _ = try await userService.updateUser(
-                currentUser,
-                name: currentUser.name,
-                email: currentUser.email,
-                capsules: currentUser.capsules
-            )
-            print("✅ Usuário atualizado com a nova cápsula.")
+            
+           // _ = try await capsuleService.createCapsule(capsule: newCapsule)
+            //print("Cápsula criada com ID: \(newCapsule.id)")
+            
+            var submissionsArray: [Submission] = []
             
             // Salvar as Imagens - Iteramos sobre as imagens carregadas e criamos uma submission para cada
             for image in selectedImages {
@@ -129,17 +125,34 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
                     capsuleID: newCapsuleID // Linkando com a cápsula criada
                 )
                 
-                print("Enviando foto: \(image)...")
+                submissionsArray.append(newSubmission)
                 
-                try await capsuleService.createSubmission(
-                    submission: newSubmission,
-                    capsuleID: newCapsuleID,
-                    image: image
-                )
+               // print("Enviando foto: \(image)...")
                 
-                print("Foto \(image) salva com sucesso!")
+//                try await capsuleService.createSubmission(
+//                    submission: newSubmission,
+//                    capsuleID: newCapsuleID,
+//                    image: image
+//                )
+                
+              //  print("Foto \(image) salva com sucesso!")
             }
+            print("Iniciando upload da cápsula: \(newCapsule.name)")
+            
+            try await capsuleService.createCapsuleWithSubmissions(capsule: newCapsule, submissions: submissionsArray, images: selectedImages)
+            
             print("Fluxo finalizado com Sucesso!")
+            
+            var currentUser = try await userService.getCurrentUser()
+            currentUser.capsules.append(newCapsuleID)
+            
+            _ = try await userService.updateUser(
+                currentUser,
+                name: currentUser.name,
+                email: currentUser.email,
+                capsules: currentUser.capsules
+            )
+            print("✅ Usuário atualizado com a nova cápsula.")
             
             isLoading = false
             return true

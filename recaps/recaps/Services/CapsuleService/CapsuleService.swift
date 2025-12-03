@@ -36,6 +36,129 @@ class CapsuleService: CapsuleServiceProtocol {
         return capsule.id
     }
     
+    func createCapsuleWithSubmissions(capsule: Capsule, submissions: [Submission], images: [UIImage]) async throws -> UUID {
+        
+        print("\n🚀 [DEBUG] Iniciando createCapsuleWithSubmissions")
+        print("📊 Dados recebidos: \(submissions.count) submissions e \(images.count) imagens")
+        
+        // 1. Validação inicial
+        if submissions.count != images.count {
+            print("⚠️ [ALERTA] O número de submissions difere do número de imagens!")
+        }
+
+        var recordsToSave: [CKRecord] = []
+        
+        // 1. CAPSULE RECORD
+        print("📦 Preparando Capsule Record: \(capsule.id.uuidString)")
+        let capsuleRecordID = CKRecord.ID(recordName: capsule.id.uuidString)
+        let capsuleRecord = CKRecord(recordType: "Capsule", recordID: capsuleRecordID)
+
+        capsuleRecord["id"] = capsule.id.uuidString as CKRecordValue
+        capsuleRecord["code"] = capsule.code as CKRecordValue
+        capsuleRecord["name"] = capsule.name as CKRecordValue
+        capsuleRecord["createdAt"] = capsule.createdAt as CKRecordValue
+        capsuleRecord["offensive"] = capsule.offensive as CKRecordValue
+        capsuleRecord["offensiveTarget"] = capsule.offensiveTarget as CKRecordValue
+        capsuleRecord["lastSubmissionDate"] = capsule.lastSubmissionDate as CKRecordValue
+        capsuleRecord["validOffensive"] = capsule.validOffensive as CKRecordValue
+        capsuleRecord["lives"] = capsule.lives as CKRecordValue
+        capsuleRecord["ownerId"] = capsule.ownerId as CKRecordValue
+        capsuleRecord["status"] = capsule.status.rawValue as CKRecordValue
+        capsuleRecord["members"] = capsule.members as CKRecordValue
+        
+        recordsToSave.append(capsuleRecord)
+        
+
+        // 2. SUBMISSION RECORDS
+        for (index, submission) in submissions.enumerated() {
+            print("🔹 Processando submission \(index + 1)/\(submissions.count) - ID: \(submission.id)")
+            
+            let submissionRecordID = CKRecord.ID(recordName: submission.id.uuidString)
+            let submissionRecord = CKRecord(recordType: "Submission", recordID: submissionRecordID)
+
+            submissionRecord["id"] = submission.id.uuidString as CKRecordValue
+            submissionRecord["authorId"] = submission.authorId as CKRecordValue
+            submissionRecord["date"] = submission.date as CKRecordValue
+            submissionRecord["capsuleID"] = capsule.id.uuidString as CKRecordValue
+
+            if let desc = submission.description {
+                submissionRecord["description"] = desc as CKRecordValue
+            }
+
+            // 💾 salvar imagem temporária
+            let fileName = "\(UUID().uuidString).jpg"
+            
+            // Verificação de segurança de índice
+            if index < images.count {
+                if let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(fileName),
+                   let data = images[index].jpegData(compressionQuality: 0.3) // ⚠️ 1.0 gera arquivos grandes
+                {
+                    do {
+                        try data.write(to: url)
+                        submissionRecord["image"] = CKAsset(fileURL: url)
+                        print("   ✅ Imagem convertida e salva em temp: \(fileName)")
+                        print("   📏 Tamanho do arquivo: \(ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file))")
+                    } catch {
+                        print("   ❌ Erro ao escrever arquivo no disco: \(error)")
+                    }
+                } else {
+                    print("   ❌ FALHA: Não foi possível gerar jpegData para a imagem \(index)")
+                }
+            } else {
+                 print("   ❌ ERRO CRÍTICO: Índice \(index) fora dos limites do array de imagens!")
+            }
+
+            recordsToSave.append(submissionRecord)
+        }
+
+        print("📤 Enviando operação para o CloudKit com \(recordsToSave.count) records...")
+        
+        // 3. ÚNICA OPERAÇÃO: salvar tudo junto
+        return try await withCheckedThrowingContinuation { continuation in
+            let operation = CKModifyRecordsOperation(recordsToSave: recordsToSave, recordIDsToDelete: nil)
+
+            operation.savePolicy = .allKeys
+            operation.isAtomic = false  // se alguma falhar, tenta salvar as outras
+
+            operation.modifyRecordsCompletionBlock = { saved, deleted, error in
+                
+                // Log de Sucesso (parcial ou total)
+                if let savedRecords = saved {
+                    print("✅ CloudKit confirmou o salvamento de \(savedRecords.count) records.")
+                    for record in savedRecords {
+                        print("   Reconfirmado: \(record.recordType) - \(record.recordID.recordName)")
+                    }
+                }
+
+                if let error = error {
+                    print("❌ ERRO NO CLOUDKIT: \(error.localizedDescription)")
+                    
+                    // 🕵️‍♂️ DEBUG DE ERRO PARCIAL (Muito Importante)
+                    if let ckError = error as? CKError {
+                        if ckError.code == .partialFailure {
+                            print("⚠️ O erro foi PARCIAL. Alguns itens falharam:")
+                            if let partialErrors = ckError.partialErrorsByItemID {
+                                for (id, err) in partialErrors {
+                                    print("   💀 Falha no ID \(id): \(err)")
+                                }
+                            }
+                        } else if ckError.code == .limitExceeded {
+                            print("⚠️ O payload total é muito grande para uma única requisição.")
+                        }
+                    }
+                    
+                    continuation.resume(throwing: error)
+                    return
+                }
+
+                print("🏁 Operação finalizada com sucesso total.")
+                continuation.resume(returning: capsule.id)
+            }
+
+            database.add(operation)
+        }
+    }
+    
     func deleteCapsule(capsuleID: UUID) async throws {
         let recordID = CKRecord.ID(recordName: capsuleID.uuidString)
         
@@ -276,6 +399,7 @@ class CapsuleService: CapsuleServiceProtocol {
         let record = CKRecord(recordType: "Submission", recordID: recordID)
         
         record["id"] = submission.id.uuidString as CKRecordValue
+        record["authorId"] = submission.authorId as CKRecordValue
         
         if let description = submission.description {
             record["description"] = description as CKRecordValue
@@ -307,6 +431,82 @@ class CapsuleService: CapsuleServiceProtocol {
             throw error
         }
         
+    }
+    
+    func createMultipleSubmissions(submissions: [Submission], capsuleID: UUID, images: [UIImage]) async throws {
+        
+        guard submissions.count == images.count else {
+            print("Erro: número de submissions != número de imagens")
+            return
+        }
+        
+        var records: [CKRecord] = []
+        var tempFiles: [URL] = []
+        
+        for (index, submission) in submissions.enumerated() {
+            let image = images[index]
+            
+            let recordID = CKRecord.ID(recordName: submission.id.uuidString)
+            let record = CKRecord(recordType: "Submission", recordID: recordID)
+            
+            record["id"] = submission.id.uuidString as CKRecordValue
+            record["authorId"] = submission.authorId as CKRecordValue
+            
+            if let description = submission.description {
+                record["description"] = description as CKRecordValue
+            }
+            
+            // Salvar imagem temporariamente
+            let fileName = "\(UUID().uuidString).jpg"
+            guard
+                let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)
+                    .first?
+                    .appendingPathComponent(fileName),
+                let data = image.jpegData(compressionQuality: 1.0)
+            else { continue }
+            
+            do {
+                try data.write(to: url)
+                let asset = CKAsset(fileURL: url)
+                record["image"] = asset
+                tempFiles.append(url)
+            } catch {
+                print("Erro ao escrever imagem: \(error)")
+            }
+            
+            record["date"] = submission.date as CKRecordValue
+            record["capsuleID"] = capsuleID.uuidString as CKRecordValue
+            
+            records.append(record)
+        }
+        
+        // ----------- SALVANDO EM LOTE -----------
+        
+        let operation = CKModifyRecordsOperation(recordsToSave: records, recordIDsToDelete: nil)
+        operation.savePolicy = .allKeys
+        operation.isAtomic = false  // se 1 falhar, as outras ainda salvam
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            operation.modifyRecordsResultBlock = { result in
+                switch result {
+                case .success:
+                    Task {
+                        try? await self.checkIfIncreasesStreak(capsuleID: capsuleID)
+                    }
+                    
+                    // Remover arquivos temporários
+                    tempFiles.forEach { try? FileManager.default.removeItem(at: $0) }
+                    
+                    continuation.resume()
+                    
+                case .failure(let error):
+                    print("Erro ao salvar submissions em lote: \(error)")
+                    continuation.resume(throwing: error)
+                }
+            }
+            
+            database.add(operation)
+        }
     }
     
     func checkIfIncreasesStreak(capsuleID: UUID) async throws {
