@@ -6,17 +6,19 @@
 //
 
 import Foundation
-import CloudKit
 @testable import recaps
 
 class MockUserService: UserServiceProtocol {
-    var userId: String = "teste"
-    
-    func loadUserId() -> String? {
-        return userId
-    }
-    
-    // MARK: - Flags para verificação
+
+    // MARK: - Mocked state / configurable returns
+    var userId: String = "mock-user-id"
+    var mockCurrentUser: User?
+    var mockFetchedUser: User?
+
+    var shouldThrowOnGetCurrent = false
+    var shouldThrowOnUpdate = false
+
+    // MARK: - Flags
     var didCreate = false
     var didGetCurrentUser = false
     var didGetUser = false
@@ -26,28 +28,27 @@ class MockUserService: UserServiceProtocol {
     var didSaveUserId = false
     var didLogout = false
 
-    // MARK: - Valores capturados
+    // MARK: - Captured values (para asserts nos testes)
     var createdUser: User?
     var updatedUser: (user: User, name: String?, email: String?, capsules: [UUID]?)?
     var deletedUserId: String?
     var fetchedUserId: String?
     var savedUserId: String?
 
-    // MARK: - Valores configuráveis para retorno
-    var mockCurrentUser: User?
-    var mockFetchedUser: User?
-    var mockUserId: String = "mock-user-id"
-
-    // MARK: - Métodos do protocolo
+    // MARK: - User ops
 
     func getCurrentUser() async throws -> User {
         didGetCurrentUser = true
 
-        if let mockCurrentUser = mockCurrentUser {
-            return mockCurrentUser
+        if shouldThrowOnGetCurrent {
+            throw NSError(domain: "MockUserService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Forced error on getCurrentUser"])
         }
 
-        throw NSError(domain: "MockUserService", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+        if let user = mockCurrentUser {
+            return user
+        }
+
+        return User(id: userId, name: "Mock name", email: "mock@mock.com", capsules: [])
     }
 
     func getUser(with id: String) async throws -> User {
@@ -70,7 +71,10 @@ class MockUserService: UserServiceProtocol {
         didUpdateUser = true
         updatedUser = (user, name, email, capsules)
 
-        // Retorna uma cópia simulada do usuário atualizado
+        if shouldThrowOnUpdate {
+            throw NSError(domain: "MockUserService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Forced error on updateUser"])
+        }
+
         return User(
             id: user.id,
             name: name ?? user.name,
@@ -81,22 +85,25 @@ class MockUserService: UserServiceProtocol {
 
     func deleteUser() async throws {
         didDeleteUser = true
-        deletedUserId = mockUserId
+        deletedUserId = userId
     }
 
-    func loadUserId() -> String {
+    // MARK: - User ID handling
+
+    func loadUserId() -> String? {
         didLoadUserId = true
-        return mockUserId
+        return userId
     }
 
     func saveUserId(_ id: String) {
         didSaveUserId = true
         savedUserId = id
+        userId = id
     }
 
     func getUserId() -> String {
         didLoadUserId = true
-        return mockUserId
+        return userId
     }
 
     func logout() {
