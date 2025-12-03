@@ -18,6 +18,7 @@ class MockCapsuleService: CapsuleServiceProtocol {
     var didUpdate = false
     var didFetchCapsules = false
     var didCreateSubmission = false
+    var didCheckValidOffensive = false
     
     var createdCapsule: Capsule?
     var updatedCapsule: Capsule?
@@ -58,6 +59,7 @@ class MockCapsuleService: CapsuleServiceProtocol {
         // Também atualizar a capsule com a submission se existir
         if var capsule = storedCapsules[capsuleID] {
             capsule.submissions.append(submission)
+            capsule.lastSubmissionDate = submission.date
             storedCapsules[capsuleID] = capsule
         }
     }
@@ -70,10 +72,12 @@ class MockCapsuleService: CapsuleServiceProtocol {
     }
     
     func fetchAllCapsules() async throws -> [Capsule] {
+        didFetchCapsules = true
         return Array(storedCapsules.values)
     }
 
     func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule] {
+        didFetchCapsules = true
         return storedCapsules.values.map { capsule in
             Capsule(
                 id: capsule.id,
@@ -97,9 +101,31 @@ class MockCapsuleService: CapsuleServiceProtocol {
         return storedSubmissions[capsuleID] ?? []
     }
     
+    // MARK: - Implementação do método exigido pelo protocolo
+    // Retorna `true` se a cápsula existir e tiver `lastSubmissionDate` dentro das últimas 48 horas.
+    // Esse comportamento é simples e suficiente para testes unitários; ajuste conforme necessário.
+    func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool {
+        didCheckValidOffensive = true
+        
+        guard let capsule = storedCapsules[capsuleID] else {
+            return false
+        }
+        
+        let last = capsule.lastSubmissionDate
+        
+        let difference = Date().timeIntervalSince(last)
+        let fortyEightHours: TimeInterval = 48 * 60 * 60
+        return difference < fortyEightHours
+    }
+    
     // MARK: - Helpers de teste
     func addSubmission(_ submission: Submission) {
         storedSubmissions[submission.capsuleID, default: []].append(submission)
+        if var capsule = storedCapsules[submission.capsuleID] {
+            capsule.submissions.append(submission)
+            capsule.lastSubmissionDate = submission.date
+            storedCapsules[submission.capsuleID] = capsule
+        }
     }
     
     func resetTrackers() {
@@ -108,6 +134,7 @@ class MockCapsuleService: CapsuleServiceProtocol {
         didUpdate = false
         didFetchCapsules = false
         didCreateSubmission = false
+        didCheckValidOffensive = false
         createdCapsule = nil
         updatedCapsule = nil
         deletedCapsuleID = nil
@@ -115,4 +142,3 @@ class MockCapsuleService: CapsuleServiceProtocol {
         createdSubmission = nil
     }
 }
-
