@@ -51,6 +51,27 @@ class UserService: UserServiceProtocol {
         }
     }
     
+    // MARK: Get User
+    func getUser(with id: String) async throws -> User {
+        let recordID = CKRecord.ID(recordName: id)
+        let record = try await database.record(for: recordID)
+        
+        let id = record.recordID.recordName
+        let name = record["name"] as? String ?? ""
+        let email = record["email"] as? String ?? ""
+        let capsulesStrings = record["capsules"] as? [String] ?? []
+        let capsules = capsulesStrings.compactMap { UUID(uuidString: $0) }
+
+        return User(
+            id: id,
+            name: name,
+            email: email,
+            capsules: capsules
+        )
+
+    }
+
+    
     // MARK: Create User
     func createUser(user: User) async throws {
         let recordID = CKRecord.ID(recordName: user.id)
@@ -99,20 +120,34 @@ class UserService: UserServiceProtocol {
         
         let saved = try await database.save(record)
         
-        let savedRefs = saved["capsules"] as? [CKRecord.Reference] ?? []
-        let savedCapsules = savedRefs.map { UUID(uuidString: $0.recordID.recordName)! }
+        let savedCaps = (saved["capsules"] as? [CKRecord.Reference] ?? [])
+                    .compactMap { UUID(uuidString: $0.recordID.recordName) }
         
         return User(
             id: saved.recordID.recordName,
             name: saved["name"] as? String ?? "",
             email: saved["email"] as? String ?? "",
-            capsules: savedCapsules
+            capsules: savedCaps
         )
     }
     
+    func deleteUser() async throws {
+            let id = getUserId()
+            
+            guard !id.isEmpty else { return }
+            
+            let recordID = CKRecord.ID(recordName: id)
+            
+            try await database.deleteRecord(withID: recordID)
+            
+            print("Usuário deletado:", id)
+            logout()
+        }
+
+    
     // MARK: Local Persistence (Current User)
-    func loadUserId() -> String {
-        return UserDefaults.standard.string(forKey: "userId") ?? ""
+    func loadUserId() -> String? {
+        UserDefaults.standard.string(forKey: "userId")
     }
     func saveUserId(_ id: String) {
         defaults.set(id, forKey: "userId")
