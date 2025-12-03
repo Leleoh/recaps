@@ -45,18 +45,13 @@ class ProfileViewModel: ProfileViewModelProtocol {
         guard let user = user else { return }
         do {
             let capsulesWithUser = try await capsuleService.fetchCapsules(IDs: user.capsules)
-            print(capsulesWithUser)
             
             for var capsule in capsulesWithUser {
                 capsule.members.removeAll { $0 == user.id }
                 try await capsuleService.updateCapsule(capsule: capsule)
             }
-            
-            print("DEPOIS")
             let cap = try await capsuleService.fetchCapsules(IDs: user.capsules)
-            print(cap)
             
-            print("Usuário removido de todas as cápsulas.")
             
         } catch {
             print("Erro ao remover usuário das cápsulas: \(error)")
