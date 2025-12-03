@@ -17,117 +17,106 @@ struct JoinPopUp: View {
     @FocusState private var isTextFieldFocused: Bool
     
     var body: some View {
-        ZStack{
+        ZStack {
             Color.black.opacity(0.6)
                 .ignoresSafeArea()
                 .onTapGesture { isShowing = false }
             
-            popupContainer
+            VStack(alignment: .leading, spacing: 29) {
+                
+                VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 34) {
+                        
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Join Recapsule")
+                                .font(.headline)
+                                .foregroundColor(.labelPrimary)
+                            
+                            Text("Insert invite code to join.")
+                                .font(.body)
+                                .foregroundColor(.labelPrimary)
+                        }
+                        
+                        // MARK: - Células do código
+                        HStack(spacing: 8) {
+                            ForEach(0..<numberOfCells, id: \.self) { index in
+                                Text(index < code.count ?
+                                     String(code[code.index(code.startIndex, offsetBy: index)]) : "")
+                                .font(.headline)
+                                .frame(width: 48, height: 52)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(.fillDarkSecondary)
+                                )
+                            }
+                        }
+                        .overlay(
+                            TextField("", text: $code)
+                                .focused($isTextFieldFocused)
+                                .foregroundColor(.clear)
+                                .accentColor(.clear)
+                                .onChange(of: code) { _, newValue in
+                                    if newValue.count > numberOfCells {
+                                        code = String(newValue.prefix(numberOfCells))
+                                    }
+                                    joinErrorMessage = nil
+                                }
+                                .frame(width: 0, height: 0)
+                        )
+                        .onAppear {
+                            isTextFieldFocused = true
+                            code = ""
+                            joinErrorMessage = nil
+                        }
+                    }
+                    
+                    // MARK: - Mensagem de erro
+                    if let errorCode = joinErrorMessage {
+                        Text(errorMessage(errorCode))
+                            .font(.subheadline)
+                            .foregroundColor(.sweetNSour)
+                            .frame(maxWidth: 272)
+                    }
+                }
+                
+                // MARK: - Botões Cancel / Join
+                HStack(spacing: 12) {
+                    Button {
+                        isShowing = false
+                        code = ""
+                        joinErrorMessage = nil
+                    } label: {
+                        Text("Cancel")
+                            .frame(maxWidth: 128, minHeight: 48)
+                            .background(
+                                RoundedRectangle(cornerRadius: 28)
+                                    .fill(.fillsSecondary)
+                            )
+                            .foregroundColor(.labelPrimary)
+                    }
+                    
+                    Button {
+                        join(code)
+                    } label: {
+                        Text("Join")
+                            .frame(maxWidth: 128, minHeight: 48)
+                            .background(
+                                RoundedRectangle(cornerRadius: 28)
+                                    .fill(code.count < numberOfCells ? .fillsSecondary : Color.accentColor)
+                            )
+                            .foregroundColor(.labelPrimary)
+                    }
+                    .disabled(code.count < numberOfCells)
+                }
+            }
+            .padding(.vertical, 22)
+            .padding(.horizontal, 14)
+            .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
         }
         .onChange(of: isShowing) { _, newValue in
             if !newValue {
                 code = ""
                 joinErrorMessage = nil
-            }
-        }
-    }
-    
-    // MARK: - Popup content com glassEffect condicional
-    private var popupContainer: some View {
-        
-        let content = VStack(alignment: .leading, spacing: 29) {
-            
-            VStack(alignment: .leading, spacing: 10) {
-                VStack(alignment: .leading, spacing: 34){
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Join Recapsule")
-                            .font(.headline)
-                            .foregroundColor(.labelPrimary)
-                        
-                        Text("Insert invite code to join.")
-                            .font(.body)
-                            .foregroundColor(.labelPrimary)
-                    }
-                    
-                    HStack(spacing: 8) {
-                        ForEach(0..<numberOfCells, id: \.self) { index in
-                            Text(index < code.count ?
-                                 String(code[code.index(code.startIndex, offsetBy: index)]) : "")
-                            .font(.headline)
-                            .frame(width: 48, height: 52)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(.fillDarkSecondary)
-                            )
-                        }
-                    }
-                    .overlay(
-                        TextField("", text: $code)
-                            .focused($isTextFieldFocused)
-                            .foregroundColor(.clear)
-                            .accentColor(.clear)
-                            .onChange(of: code) { _, newValue in
-                                if newValue.count > numberOfCells {
-                                    code = String(newValue.prefix(numberOfCells))
-                                }
-                                joinErrorMessage = nil
-                            }
-                            .frame(width: 0, height: 0)
-                    )
-                    .onAppear { isTextFieldFocused = true
-                        code = ""
-                        joinErrorMessage = nil}
-                }
-                
-                if let errorCode = joinErrorMessage {
-                    Text(errorMessage(errorCode))
-                        .font(.subheadline)
-                        .foregroundColor(.sweetNSour)
-                        .frame(maxWidth: 272)
-                }
-            }
-            
-            HStack(spacing: 12) {
-                Button {
-                    isShowing = false
-                    code = ""
-                    joinErrorMessage = nil
-                } label: {
-                    Text("Cancel")
-                        .frame(maxWidth: 128, minHeight: 48)
-                        .background(
-                            RoundedRectangle(cornerRadius: 28)
-                                .fill(.fillsSecondary)
-                        )
-                        .foregroundColor(.labelPrimary)
-                }
-                
-                Button {
-                    join(code)
-                } label: {
-                    Text("Join")
-                        .frame(maxWidth: 128, minHeight: 48)
-                        .background(
-                            RoundedRectangle(cornerRadius: 28)
-                                .fill(code.count < numberOfCells ? .fillsSecondary : Color.accentColor)
-                        )
-                        .foregroundColor(.labelPrimary)
-                }
-                .disabled(code.count < numberOfCells)
-            }
-        }
-            .padding(.vertical, 22)
-            .padding(.horizontal, 14)
-        return Group {
-            if #available(iOS 18.0, *) {
-                content
-                    .glassEffect(in: .rect(cornerRadius: 32))
-            } else {
-                content
-                    .background(
-                        RoundedRectangle(cornerRadius: 32)
-                            .fill(.ultraThinMaterial)
-                    )
             }
         }
     }

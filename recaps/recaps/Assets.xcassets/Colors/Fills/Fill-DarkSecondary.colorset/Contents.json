@@ -4,7 +4,11 @@
       "color" : {
         "color-space" : "display-p3",
         "components" : {
+<<<<<<< HEAD
           "alpha" : "1.000",
+=======
+          "alpha" : "0.600",
+>>>>>>> dev
           "blue" : "0x43",
           "green" : "0x3C",
           "red" : "0x3C"

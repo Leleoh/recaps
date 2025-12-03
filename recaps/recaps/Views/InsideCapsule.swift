@@ -57,6 +57,7 @@ struct InsideCapsule: View {
                         .foregroundStyle(Color.blue)
                 }
                 .padding(.bottom, 40)
+
             }
             
             
