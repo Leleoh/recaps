@@ -134,13 +134,11 @@ struct InputSubmissionView: View {
                             if isSubmitting {
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                                    .frame(width: 20, height: 20)
                             } else {
                                 Image(systemName: "checkmark")
                                     .foregroundStyle(.white)
                             }
                         }
-                        .frame(width: 44, height: 28)
                     }
                     .disabled(isSubmitting)
                     .buttonStyle(.borderedProminent)
