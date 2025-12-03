@@ -6,60 +6,70 @@
 //
 
 import Foundation
-import CloudKit
 @testable import recaps
 
 class MockUserService: UserServiceProtocol {
-    // MARK: - Flags para verificação
-    var didCreate = false
-    var didGetCurrentUser = false
-    var didLoadUserId = false
-    var didSaveUserId = false
-    var didLogout = false
 
-    // MARK: - Valores capturados
+    // MARK: - Mocked state
+    var userId: String = ""
+    var shouldThrowOnGetCurrent = false
+    var shouldThrowOnUpdate = false
+
+    // flags
+    var getCurrentUserCalled = false
+    var createUserCalled = false
+    var updateUserCalled = false
+
+    // captured values
     var createdUser: User?
-    var fetchedUserId: String?
-    var savedUserId: String?
+    var updatedUserInput: (user: User, name: String?, email: String?, capsules: [UUID]?)?
 
-    // MARK: - Valores configuráveis para retorno
-    var mockCurrentUser: User?
-    var mockUserId: String = "mock-user-id"
+    // MARK: - User ID handling
+    func saveUserId(_ id: String) {
+        userId = id
+    }
 
-    // MARK: - Métodos do protocolo
+    func loadUserId() -> String { userId }
+    func getUserId() -> String { userId }
+    func logout() {}
 
+    // MARK: - User ops
     func getCurrentUser() async throws -> User {
-        didGetCurrentUser = true
+        getCurrentUserCalled = true
 
-        if let mockCurrentUser = mockCurrentUser {
-            return mockCurrentUser
+        if shouldThrowOnGetCurrent {
+            throw NSError(domain: "mock", code: 1)
         }
 
-        throw NSError(domain: "MockUserService", code: 1, userInfo: [NSLocalizedDescriptionKey: "User not found"])
-    }
-
-    func loadUserId() -> String {
-        didLoadUserId = true
-        return mockUserId
-    }
-
-    func saveUserId(_ id: String) {
-        didSaveUserId = true
-        savedUserId = id
-    }
-
-    func getUserId() -> String {
-        didLoadUserId = true
-        return mockUserId
-    }
-
-    func logout() {
-        didLogout = true
+        return User(id: userId, name: "Mock name", email: "mock@mock.com", capsules: [])
     }
 
     func createUser(user: User) async throws {
-        didCreate = true
+        createUserCalled = true
         createdUser = user
     }
-}
 
+    // MARK: - UPDATE
+    func updateUser(
+        _ user: User,
+        name: String?,
+        email: String?,
+        capsules: [UUID]?
+    ) async throws -> User {
+
+        updateUserCalled = true
+        updatedUserInput = (user, name, email, capsules)
+
+        if shouldThrowOnUpdate {
+            throw NSError(domain: "mockUpdate", code: 2)
+        }
+
+        // Simula o retorno de um user atualizado
+        return User(
+            id: user.id,
+            name: name ?? user.name,
+            email: email ?? user.email,
+            capsules: capsules ?? user.capsules
+        )
+    }
+}

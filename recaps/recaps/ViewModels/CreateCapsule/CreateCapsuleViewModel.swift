@@ -14,7 +14,9 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     
     // MARK: - Properties
     var capsuleName: String = ""
-    var offensiveTarget: Int = 50
+    var offensiveTarget: Int = 30
+    var showPopup = false
+    var code: String = ""
     
     // Controle do PhotosUI
     var selectedPickerItems: [PhotosPickerItem] = [] {
@@ -44,9 +46,9 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     }
     
     // MARK: Helpers
-    private func generateCode() -> String {
-        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        return String((0..<6).map { _ in chars.randomElement()! })
+    func generateCode() -> String {
+        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz"
+        return String((0..<5).map { _ in chars.randomElement()! })
     }
     
     // MARK: - Image Loading
@@ -66,7 +68,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     }
     
     // MARK: - Main Actor
-    func createCapsule() async -> Bool {
+    func createCapsule(code: String) async -> Bool {
         guard isValidToSave else { return false }
         
         isLoading = true
@@ -87,7 +89,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
         // Criar o Objeto Cápsula
         let newCapsule = Capsule(
             id: newCapsuleID,
-            code: generateCode(),
+            code: code,
             submissions: [],
             name: capsuleName,
             createdAt: Date(),
