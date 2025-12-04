@@ -9,16 +9,16 @@ import Foundation
 @testable import recaps
 
 class MockUserService: UserServiceProtocol {
-
+    
     // MARK: - Mocked state / configurable returns
     var userId: String = "mock-user-id"
     var mockCurrentUser: User?
     var mockFetchedUser: User?
-
+    
     var shouldThrowOnGetCurrent = false
     var shouldThrowOnUpdate = false
 
-    // MARK: - Flags
+    // MARK: - Flags (Spy Pattern)
     var didCreate = false
     var didGetCurrentUser = false
     var didGetUser = false
@@ -30,17 +30,19 @@ class MockUserService: UserServiceProtocol {
 
     // MARK: - Captured values (para asserts nos testes)
     var createdUser: User?
+    // Unificação: mantendo o nome 'updatedUser' para consistência, substitui 'updatedUserInput' da dev
     var updatedUser: (user: User, name: String?, email: String?, capsules: [UUID]?)?
     var deletedUserId: String?
     var fetchedUserId: String?
     var savedUserId: String?
 
     // MARK: - User ops
-
+    
     func getCurrentUser() async throws -> User {
         didGetCurrentUser = true
 
         if shouldThrowOnGetCurrent {
+            // Unificação de erro: Usando userInfo detalhado da TK25
             throw NSError(domain: "MockUserService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Forced error on getCurrentUser"])
         }
 
@@ -75,6 +77,7 @@ class MockUserService: UserServiceProtocol {
             throw NSError(domain: "MockUserService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Forced error on updateUser"])
         }
 
+        // Retorna o objeto atualizado simulado
         return User(
             id: user.id,
             name: name ?? user.name,
@@ -90,6 +93,7 @@ class MockUserService: UserServiceProtocol {
 
     // MARK: - User ID handling
 
+    // Mantendo assinaturas da TK25 que parecem refletir uma atualização no protocolo
     func loadUserId() -> String? {
         didLoadUserId = true
         return userId
@@ -102,7 +106,7 @@ class MockUserService: UserServiceProtocol {
     }
 
     func getUserId() -> String {
-        didLoadUserId = true
+        didLoadUserId = true // Nota: getUserId e loadUserId as vezes se confundem, mas mantive ambos para compatibilidade
         return userId
     }
 
