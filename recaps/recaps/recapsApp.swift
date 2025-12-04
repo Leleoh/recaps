@@ -17,6 +17,7 @@ struct recapsApp: App {
     
     var body: some Scene {
         WindowGroup {
+//            SlidingPuzzleView(inputImage: UIImage(imageLiteralResourceName: "monkey"))
             AuthenthicationView()
         }
     }
