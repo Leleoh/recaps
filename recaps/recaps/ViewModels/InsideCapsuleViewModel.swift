@@ -15,12 +15,15 @@
 
 import SwiftUI
 import Foundation
-import Observation
+//import Observation
 import PhotosUI
 
 
-@Observable
+//@Observable
 class InsideCapsuleViewModel {
+    
+    @State private var capsuleService = CapsuleService()
+    @State private var userService = UserService()
     
     var selectedImages: [UIImage] = []
     var selectedPickerItems: [PhotosPickerItem] = [] {
@@ -44,6 +47,20 @@ class InsideCapsuleViewModel {
         await MainActor.run {
             self.selectedImages = loadedImages
         }
+    }
+    
+    func getUsers(IDs: [String]) async throws -> [User] {
+        var users: [User] = []
+        
+        do{
+            users = try await userService.getUsers(IDs: IDs)
+            print("Success")
+            
+        } catch {
+            print("Error: \(error)")
+        }
+        
+        return users
     }
 }
 
