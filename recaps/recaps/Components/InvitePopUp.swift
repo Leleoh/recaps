@@ -18,6 +18,7 @@ struct InvitePopUp: View {
                 .ignoresSafeArea()
                 .onTapGesture { isShowing = false }
             
+
             VStack(spacing: 29) {
                 
                 VStack(alignment: .leading, spacing: 34) {

@@ -9,6 +9,12 @@ import SwiftUI
 
 @main
 struct recapsApp: App {
+    init() {
+        UINavigationBar.appearance().titleTextAttributes = [
+            .font: UIFont.systemFont(ofSize: 28, weight: .light)
+        ]
+    }
+    
     var body: some Scene {
         WindowGroup {
             AuthenthicationView()
