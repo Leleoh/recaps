@@ -63,6 +63,12 @@ class MockCapsuleService: CapsuleServiceProtocol {
             storedCapsules[capsuleID] = capsule
         }
     }
+    
+    func deleteCapsule(capsuleID: UUID) async throws {
+        didDelete = true
+        deletedCapsuleID = capsuleID
+        storedCapsules.removeValue(forKey: capsuleID)
+    }
 
     // MARK: - Fetching
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule] {
@@ -141,4 +147,18 @@ class MockCapsuleService: CapsuleServiceProtocol {
         fetchedCapsuleIDs = []
         createdSubmission = nil
     }
+    
+    func resetTrackers() {
+        didCreate = false
+        didDelete = false
+        didUpdate = false
+        didFetchCapsules = false
+        didCreateSubmission = false
+        createdCapsule = nil
+        updatedCapsule = nil
+        deletedCapsuleID = nil
+        fetchedCapsuleIDs = []
+        createdSubmission = nil
+    }
 }
+
