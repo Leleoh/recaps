@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9BA8170C2EE0A59D008297E7 /* PinterestLikeGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		75E9FEFE2ECE471600D47F7F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -59,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BA8170C2EE0A59D008297E7 /* PinterestLikeGrid in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -126,6 +131,7 @@
 			);
 			name = recaps;
 			packageProductDependencies = (
+				9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */,
 			);
 			productName = recaps;
 			productReference = D72F9B812ECCE53A00B1C949 /* recaps.app */;
@@ -159,6 +165,9 @@
 			);
 			mainGroup = D72F9B782ECCE53A00B1C949;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D72F9B822ECCE53A00B1C949 /* Products */;
 			projectDirPath = "";
@@ -493,6 +502,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/thaisrfernandes/PinterestLikeGrid";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */;
+			productName = PinterestLikeGrid;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D72F9B792ECCE53A00B1C949 /* Project object */;
 }
