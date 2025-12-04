@@ -14,5 +14,6 @@ struct User {
     var name: String
     var email: String
     var capsules: [UUID]
+    var openCapsules: [UUID]
 }
 

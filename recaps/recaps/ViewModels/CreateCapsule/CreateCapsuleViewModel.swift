@@ -150,7 +150,8 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
                 currentUser,
                 name: currentUser.name,
                 email: currentUser.email,
-                capsules: currentUser.capsules
+                capsules: currentUser.capsules,
+                openCapsules: currentUser.openCapsules
             )
             print("✅ Usuário atualizado com a nova cápsula.")
             

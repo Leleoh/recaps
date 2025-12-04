@@ -50,7 +50,8 @@ class AuthenthicationViewModel {
                     id: newUserId,
                     name: newName,
                     email: newEmail,
-                    capsules: []
+                    capsules: [],
+                    openCapsules: []
                 )
 
                 _ = try? await userService.createUser(user: newUser)

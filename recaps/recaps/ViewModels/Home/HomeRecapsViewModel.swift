@@ -120,7 +120,8 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 user,
                 name: user.name,
                 email: user.email,
-                capsules: user.capsules
+                capsules: user.capsules,
+                openCapsules: user.openCapsules
             )
             
             print("✅ Sucesso! Entrou na cápsula: \(capsule.name)")
@@ -152,7 +153,8 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 user,
                 name: user.name,
                 email: user.email,
-                capsules: user.capsules
+                capsules: user.capsules,
+                openCapsules: user.openCapsules
             )
 
             print("DEPOIS de Apagar:")
@@ -165,6 +167,18 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         } catch {
             print("Erro ao apagar cápsula: \(error.localizedDescription)")
         }
+    }
+    
+    func updateUserTest() async throws {
+        let user = User(id: userService.getUserId(), name: "Leonel Maluco", email: "leonel@maluco.verme", capsules: [], openCapsules: [UUID()])
+        
+        do {
+            let _ = try await userService.updateUser(user, name: nil, email: nil, capsules: nil, openCapsules: [UUID()])
+            print("deu  bom")
+        } catch {
+            print("deu merda aqui")
+        }
+            
     }
 }
 
