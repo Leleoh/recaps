@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - Submission
-struct Submission: Codable, Identifiable {
+struct Submission: Codable, Identifiable, Hashable {
     let id: UUID
     let imageURL: URL?
     let description: String?
