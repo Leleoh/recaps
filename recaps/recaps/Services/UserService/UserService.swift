@@ -72,12 +72,14 @@ class UserService: UserServiceProtocol {
         let openCapsulesStrings = record["openCapsules"] as? [String] ?? []
         let openCapsules = openCapsulesStrings.compactMap { UUID(uuidString: $0) }
 
+
         return User(
             id: id,
             name: name,
             email: email,
             capsules: capsules,
             openCapsules: openCapsules
+
         )
 
     }
@@ -154,6 +156,7 @@ class UserService: UserServiceProtocol {
             email: saved["email"] as? String ?? "",
             capsules: savedCaps,
             openCapsules: savedOpenCapsules
+
         )
     }
     
@@ -198,6 +201,7 @@ class UserService: UserServiceProtocol {
             throw error
         }
     }
+
     
     // MARK: Local Persistence (Current User)
     func loadUserId() -> String? {
