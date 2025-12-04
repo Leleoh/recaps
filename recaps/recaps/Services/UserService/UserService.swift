@@ -51,11 +51,37 @@ class UserService: UserServiceProtocol {
                 capsules: capsules,
                 openCapsules: openCapsules
             )
+            
         } catch {
             print("Erro ao buscar o usuário:", error)
             throw error
         }
     }
+    
+    // MARK: Get User
+    func getUser(with id: String) async throws -> User {
+        let recordID = CKRecord.ID(recordName: id)
+        let record = try await database.record(for: recordID)
+        
+        let id = record.recordID.recordName
+        let name = record["name"] as? String ?? ""
+        let email = record["email"] as? String ?? ""
+        let capsulesStrings = record["capsules"] as? [String] ?? []
+        let capsules = capsulesStrings.compactMap { UUID(uuidString: $0) }
+        
+        let openCapsulesStrings = record["openCapsules"] as? [String] ?? []
+        let openCapsules = openCapsulesStrings.compactMap { UUID(uuidString: $0) }
+
+        return User(
+            id: id,
+            name: name,
+            email: email,
+            capsules: capsules,
+            openCapsules: openCapsules
+        )
+
+    }
+
     
     // MARK: Create User
     func createUser(user: User) async throws {
@@ -116,8 +142,8 @@ class UserService: UserServiceProtocol {
         
         let saved = try await database.save(record)
         
-        let savedRefs = saved["capsules"] as? [CKRecord.Reference] ?? []
-        let savedCapsules = savedRefs.map { UUID(uuidString: $0.recordID.recordName)! }
+        let savedCaps = (saved["capsules"] as? [CKRecord.Reference] ?? [])
+                    .compactMap { UUID(uuidString: $0.recordID.recordName) }
         
         let savedOpenCapsulesRefs = saved["openCapsules"] as? [CKRecord.Reference] ?? []
         let savedOpenCapsules = savedOpenCapsulesRefs.map { UUID(uuidString: $0.recordID.recordName)! }
@@ -126,14 +152,56 @@ class UserService: UserServiceProtocol {
             id: saved.recordID.recordName,
             name: saved["name"] as? String ?? "",
             email: saved["email"] as? String ?? "",
-            capsules: savedCapsules,
+            capsules: savedCaps,
             openCapsules: savedOpenCapsules
         )
     }
     
+    func deleteUser() async throws {
+            let id = getUserId()
+            
+            guard !id.isEmpty else { return }
+            
+            let recordID = CKRecord.ID(recordName: id)
+            
+            try await database.deleteRecord(withID: recordID)
+            
+            print("Usuário deletado:", id)
+            logout()
+        }
+
+    // MARK: Switch Capsule from Completed to Open in User Model
+    func changeCompletedCapsuleToOpenCapsule(user: User, capsuleId: UUID) async throws {
+        let recordID = CKRecord.ID(recordName: user.id)
+        let record = try await database.record(for: recordID)
+        
+        var capsuleRefs = record["capsules"] as? [CKRecord.Reference] ?? []
+        var openCapsuleRefs = record["openCapsules"] as? [CKRecord.Reference] ?? []
+        
+        capsuleRefs.removeAll { $0.recordID.recordName == capsuleId.uuidString }
+        
+        if !openCapsuleRefs.contains(where: { $0.recordID.recordName == capsuleId.uuidString }) {
+            let newRef = CKRecord.Reference(
+                recordID: CKRecord.ID(recordName: capsuleId.uuidString),
+                action: .none
+            )
+            openCapsuleRefs.append(newRef)
+        }
+        
+        record["capsules"] = capsuleRefs as CKRecordValue
+        record["openCapsules"] = openCapsuleRefs as CKRecordValue
+        
+        do {
+            try await database.save(record)
+            print("Usuário atualizada:", capsuleId)
+        } catch {
+            throw error
+        }
+    }
+    
     // MARK: Local Persistence (Current User)
-    func loadUserId() -> String {
-        return UserDefaults.standard.string(forKey: "userId") ?? ""
+    func loadUserId() -> String? {
+        UserDefaults.standard.string(forKey: "userId")
     }
     func saveUserId(_ id: String) {
         defaults.set(id, forKey: "userId")
