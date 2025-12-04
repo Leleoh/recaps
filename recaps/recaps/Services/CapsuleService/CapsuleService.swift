@@ -9,6 +9,7 @@ import CloudKit
 import SwiftUI
 
 class CapsuleService: CapsuleServiceProtocol {
+    
     private let database: CKDatabase
     init(database: CKDatabase = Database.shared.database) {
         self.database = database

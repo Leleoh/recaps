@@ -27,5 +27,6 @@ protocol CapsuleServiceProtocol {
     func checkIfCapsuleIsCompleted(capsuleID: UUID) async throws -> Bool
     func checkIfIncreasesStreak(capsuleID: UUID) async throws
 
+
 }
 

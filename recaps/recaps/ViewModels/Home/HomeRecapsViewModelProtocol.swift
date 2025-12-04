@@ -16,4 +16,5 @@ protocol HomeRecapsViewModelProtocol {
     func joinCapsule(code: String) async
     func fetchCapsules() async
     func leaveCapsule(capsule: Capsule) async
+    func checkIfCapsuleIsValidOffensive() async
 }
