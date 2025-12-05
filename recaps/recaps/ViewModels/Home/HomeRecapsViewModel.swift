@@ -41,16 +41,17 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 return
             }
             
+            await checkIfCapsuleIsValidOffensive(user: currentUser)
+            
             // Busca os objetos Capsule no CloudKit usando os IDs
             let allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
             
+        
             // Filtra as cápsulas por status
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
             
             // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
-            
-            await checkIfCapsuleIsValidOffensive()
             
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
@@ -58,30 +59,30 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     }
     
     //MARK: Valid Streak
-    func checkIfCapsuleIsValidOffensive() async {
+    func checkIfCapsuleIsValidOffensive(user: User) async {
         print("Verificando a validades das vidas")
         
-        var updatesMade: Bool = false
+        //var updatesMade: Bool = false
         
-        for capsule in inProgressCapsules {
+        for capsule in user.capsules {
             do{
-                let isValid = try await capsuleService.checkIfCapsuleIsValidOffensive(capsuleID: capsule.id)
+                let isValid = try await capsuleService.checkIfCapsuleIsValidOffensive(capsuleID: capsule)
                 
                 if !isValid{
-                    updatesMade = true
-                    print("AVISO: Cápsula \(capsule.name) sofreu penalidade (vida ou reset).")
+                   // updatesMade = true
+                    print("AVISO: Cápsula \(capsule) sofreu penalidade (vida ou reset).")
                 }
             }
             catch{
-                print("Erro ao verificar ofensiva da cápsula \(capsule.name): \(error)")
+                print("Erro ao verificar ofensiva da cápsula \(capsule): \(error)")
             }
         }
-        if updatesMade {
-            print("🔄 Recarregando cápsulas para atualizar UI...")
-            await fetchCapsules()
-        } else {
-            print("✅ Nenhuma alteração necessária nas ofensivas.")
-        }
+//        if updatesMade {
+//            print("🔄 Recarregando cápsulas para atualizar UI...")
+//            await fetchCapsules()
+//        } else {
+//            print("✅ Nenhuma alteração necessária nas ofensivas.")
+//        }
         
         
         
