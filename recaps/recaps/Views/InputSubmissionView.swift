@@ -15,9 +15,6 @@ struct InputSubmissionView: View {
     private let cardHeight: CGFloat = 244
     
     init(viewModel: InputSubmissionViewModel) {
-        UINavigationBar.appearance().titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 28, weight: .light)
-        ]
         self.viewModel = viewModel
     }
     

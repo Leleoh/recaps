@@ -15,11 +15,8 @@
 
 import SwiftUI
 import Foundation
-//import Observation
 import PhotosUI
 
-
-//@Observable
 class InsideCapsuleViewModel {
     
     @State private var capsuleService = CapsuleService()
