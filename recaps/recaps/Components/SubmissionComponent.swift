@@ -14,7 +14,7 @@ struct SubmissionComponent: View {
     var onButtonGallery: () -> Void
     
     var body: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             
             Button(action: onButtonPhotograph) {
                 Text("Photograph the moment")
@@ -38,10 +38,13 @@ struct SubmissionComponent: View {
                     )
             }
         }
-        .padding(20)
+        .padding(14)
         .frame(width: 300)
         .background(
             RoundedRectangle(cornerRadius: 34)
+                .fill(.quaternary)
+                .opacity(0.8)
+            
         )
     }
 }

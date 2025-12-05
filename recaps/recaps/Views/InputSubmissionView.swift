@@ -14,6 +14,10 @@ struct InputSubmissionView: View {
     private let cardWidth: CGFloat = 300
     private let cardHeight: CGFloat = 244
     
+    init(viewModel: InputSubmissionViewModel) {
+        self.viewModel = viewModel
+    }
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -103,10 +107,15 @@ struct InputSubmissionView: View {
                     .resizable()
                     .ignoresSafeArea()
             )
-            .navigationTitle("Memory")
-            .navigationBarTitleDisplayMode(.inline)
+          //  .navigationTitle("Memory")
+          //  .navigationBarTitleDisplayMode(.inline)
             
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                        Text("Memory")
+                        .font(.system(size: 28, weight: .light))
+                    }
+                
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
                         dismiss()
