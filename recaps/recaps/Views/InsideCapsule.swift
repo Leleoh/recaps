@@ -35,7 +35,8 @@ struct InsideCapsule: View {
                     
                     Text("Click on Recapsule to take a look")
                         .font(.footnote)
-                        .foregroundStyle(Color("SweetnSour"))
+                        //.foregroundStyle(Color("SweetnSour"))
+                        .foregroundStyle(.secondary)
                     
                     VStack(spacing: 32) {
                         
