@@ -837,7 +837,7 @@ class CapsuleService: CapsuleServiceProtocol {
         return capsules
     }
 
-    private func fetchBrazilianTime() async throws -> Date {
+    func fetchBrazilianTime() async throws -> Date {
         let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
 
         let (data, response) = try await URLSession.shared.data(from: url)

@@ -17,12 +17,14 @@ import SwiftUI
 import Foundation
 import PhotosUI
 
-class InsideCapsuleViewModel {
+@Observable
+class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
     
-    @State private var capsuleService = CapsuleService()
-    @State private var userService = UserService()
+    private var capsuleService = CapsuleService()
+    private var userService = UserService()
     
     var selectedImages: [UIImage] = []
+    
     var selectedPickerItems: [PhotosPickerItem] = [] {
         didSet {
             Task {
@@ -30,6 +32,12 @@ class InsideCapsuleViewModel {
             }
         }
     }
+    
+    var users: [User] = []
+    
+    var capsuleOwner: String = ""
+    
+    var currentTime: Date = Date()
 
     func loadSelectedImages() async {
         var loadedImages: [UIImage] = []
@@ -46,18 +54,28 @@ class InsideCapsuleViewModel {
         }
     }
     
-    func getUsers(IDs: [String]) async throws -> [User] {
-        var users: [User] = []
+    func reloadCapsule(id: UUID) async throws -> Capsule? {
+        try await capsuleService.fetchCapsules(IDs: [id]).first
+    }
+    
+    func getUsers(IDs: [String], ownerID: String) async throws {
         
         do{
             users = try await userService.getUsers(IDs: IDs)
+            capsuleOwner = users.first(where: { $0.id == ownerID })?.name ?? ""
             print("Success")
             
         } catch {
             print("Error: \(error)")
         }
-        
-        return users
+    }
+    
+    func setTime() async throws {
+        do {
+            currentTime = try await capsuleService.fetchBrazilianTime()
+        } catch {
+            currentTime = Date()
+        }
     }
 }
 
