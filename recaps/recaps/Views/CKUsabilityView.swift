@@ -31,7 +31,8 @@ struct CKUsabilityView: View {
             id: "mock-user-id",
             name: "Leonel Hernandez",
             email: "leonel@example.com",
-            capsules: [mockId]
+            capsules: [mockId],
+            openCapsules: []
         )
         let mockCapsule = Capsule(
             id: createdID,

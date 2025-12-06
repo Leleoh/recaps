@@ -50,9 +50,42 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
             
+            await checkIfCapsuleIsValidOffensive()
+            
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
         }
+    }
+    
+    //MARK: Valid Streak
+    func checkIfCapsuleIsValidOffensive() async {
+        print("Verificando a validades das vidas")
+        
+        var updatesMade: Bool = false
+        
+        for capsule in inProgressCapsules {
+            do{
+                let isValid = try await capsuleService.checkIfCapsuleIsValidOffensive(capsuleID: capsule.id)
+                
+                if !isValid{
+                    updatesMade = true
+                    print("AVISO: Cápsula \(capsule.name) sofreu penalidade (vida ou reset).")
+                }
+            }
+            catch{
+                print("Erro ao verificar ofensiva da cápsula \(capsule.name): \(error)")
+            }
+        }
+        if updatesMade {
+            print("🔄 Recarregando cápsulas para atualizar UI...")
+            await fetchCapsules()
+        } else {
+            print("✅ Nenhuma alteração necessária nas ofensivas.")
+        }
+        
+        
+        
+        
     }
     
     func didTapNewRecap() {
@@ -87,7 +120,8 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 user,
                 name: user.name,
                 email: user.email,
-                capsules: user.capsules
+                capsules: user.capsules,
+                openCapsules: user.openCapsules
             )
             
             print("✅ Sucesso! Entrou na cápsula: \(capsule.name)")
@@ -119,7 +153,8 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 user,
                 name: user.name,
                 email: user.email,
-                capsules: user.capsules
+                capsules: user.capsules,
+                openCapsules: user.openCapsules
             )
 
             print("DEPOIS de Apagar:")
@@ -133,4 +168,17 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             print("Erro ao apagar cápsula: \(error.localizedDescription)")
         }
     }
+    
+    func updateUserTest() async throws {
+        let user = User(id: userService.getUserId(), name: "Leonel Maluco", email: "leonel@maluco.verme", capsules: [], openCapsules: [UUID()])
+        
+        do {
+            let _ = try await userService.updateUser(user, name: nil, email: nil, capsules: nil, openCapsules: [UUID()])
+            print("deu  bom")
+        } catch {
+            print("deu merda aqui")
+        }
+            
+    }
 }
+

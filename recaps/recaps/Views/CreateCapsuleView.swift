@@ -43,6 +43,7 @@ struct CreateCapsuleView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     
                     NameComponent(text: $viewModel.capsuleName)
+
                         .padding(.top, -32)
                     
                 }
@@ -69,6 +70,7 @@ struct CreateCapsuleView: View {
                                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
                         )
                     }
+
                     .padding(.top, 8)
                     
                     Text("Streak days is the number of consecutive days saving memories that will be required for the Recapsule to open.")
@@ -110,6 +112,7 @@ struct CreateCapsuleView: View {
                 
                 // Botão Salvar (Direita)
                 ToolbarItem(placement: .topBarTrailing) {
+
                     if viewModel.isValidToSave {
                         Button {
                             Task {
