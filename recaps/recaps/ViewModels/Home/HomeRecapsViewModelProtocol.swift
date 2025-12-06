@@ -9,6 +9,8 @@ import Foundation
 
 protocol HomeRecapsViewModelProtocol {
     var showCreateCapsule: Bool { get set }
+    var showJoinPopup: Bool { get set }
+    var showProfile: Bool { get set }
     var inProgressCapsules: [Capsule] { get }
     var completedCapsules: [Capsule] { get }
     

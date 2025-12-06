@@ -15,7 +15,11 @@ struct AuthenthicationView: View {
     var body: some View {
         Group {
             if viewModel.isSignedIn || viewModel.hasUser {
-                HomeRecapsView()
+                HomeRecapsView(
+                    onLogout: {
+                        viewModel.signOut()
+                    }
+                )
             } else {
                 NavigationView {
                     VStack {

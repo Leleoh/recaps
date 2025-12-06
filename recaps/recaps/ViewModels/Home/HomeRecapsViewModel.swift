@@ -14,6 +14,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     var showCreateCapsule: Bool = false
     var showPopup = false
     var showJoinPopup = false
+    var showProfile = false
     var inviteCode: String = ""
     var joinErrorMessage: String? = nil
     
@@ -180,5 +181,6 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         }
             
     }
+     
 }
 
