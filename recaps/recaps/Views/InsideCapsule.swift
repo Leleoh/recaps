@@ -13,7 +13,11 @@ import PhotosUI
 struct InsideCapsule: View {
     
     var capsule: Capsule
+    
+    @State var capsuleMembers: [User] = []
+    
     @State private var showInputComponent = false
+    @State private var showMemberList = false
     
     @State private var goToInputView = false
     
@@ -28,62 +32,76 @@ struct InsideCapsule: View {
     
     var body: some View {
         
-        ZStack {
-            
-            VStack{
-                Text(capsule.name)
-                    .padding(.top, 24)
+        NavigationStack {
+            ZStack {
                 
-                Spacer()
-                
-                ZStack{
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.blue)
-                        .frame(width: 350, height: 600)
+                VStack{
+                    Text(capsule.name)
+                        .padding(.top, 24)
                     
-                    Text("Informações da capsula")
-                        .foregroundStyle(.white)
-                }
-                
-                Spacer()
-                
-                Button{
-                    withAnimation {
-                        showInputComponent = true
-                    }
-                }label:{
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(Color.blue)
-                }
-                .padding(.bottom, 40)
-
-            }
-            
-            
-            // ------------------
-            // POP UP
-            // ------------------
-            if showInputComponent {
-                
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                    .onTapGesture {
+                    Spacer()
+                    
+                    Button{
                         withAnimation {
-                            showInputComponent = false
+                            showMemberList = true
+                            print(capsuleMembers)
                         }
+                    }label:{
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundStyle(Color.blue)
                     }
+                    .padding(.bottom, 40)
+                    
+                    ZStack{
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.blue)
+                            .frame(width: 350, height: 600)
+                        
+                        Text("Informações da capsula")
+                            .foregroundStyle(.white)
+                    }
+                    
+                    Spacer()
+                    
+                    Button{
+                        withAnimation {
+                            showInputComponent = true
+                        }
+                    }label:{
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 40, weight: .bold))
+                            .foregroundStyle(Color.blue)
+                    }
+                    .padding(.bottom, 40)
+
+                }
                 
-                SubmissionComponent(
-                    onButtonPhotograph: {
-                        showCamera = true
-                    },
-                    onButtonGallery: {
-                        showGallery = true
-                    }
-                )
-                .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
-                .padding(.horizontal, 24)
+                
+                // ------------------
+                // POP UP
+                // ------------------
+                if showInputComponent {
+                    
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation {
+                                showInputComponent = false
+                            }
+                        }
+                    
+                    SubmissionComponent(
+                        onButtonPhotograph: {
+                            showCamera = true
+                        },
+                        onButtonGallery: {
+                            showGallery = true
+                        }
+                    )
+                    .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
+                    .padding(.horizontal, 24)
+                }
             }
         }
         
@@ -91,6 +109,13 @@ struct InsideCapsule: View {
         .fullScreenCover(isPresented: $showCamera) {
             CameraView(image: $capturedImage, selectedItem: $capturedPickerItem)
         }
+        
+        .sheet(isPresented: $showMemberList) {
+            NavigationStack {
+                    MembersListView(members: $capsuleMembers)
+                }
+        }
+        
         .onChange(of: capturedImage) { _, newImage in
             if let img = newImage {
                 vm.selectedImages = [img]
@@ -126,22 +151,20 @@ struct InsideCapsule: View {
                 capturedImage = nil
                 capturedPickerItem = nil
             }
-//        .confirmationDialog(
-//            "Add a Memory",
-//            isPresented: $showInputComponent,
-//            titleVisibility: .visible
-//        ) {
-//            
-//            Button("Photograph the moment") {
-//                showCamera = true
-//            }
-//            
-//            Button("Choose from gallery") {
-//                showGallery = true
-//            }
-//
-//            Button("Cancel", role: .cancel) {}
-//        }
+        
+        .onAppear {
+            
+            Task {
+                do {
+                    let members = try await vm.getUsers(IDs: capsule.members)
+                    print(members)
+                    capsuleMembers = members
+                } catch {
+                    print("Failed to fetch capsule: \(error)")
+                }
+            }
+            
+        }
     }
 }
 
