@@ -160,6 +160,7 @@ struct InsideCapsule: View {
         lives: 3,
         members: [],
         ownerId: "",
-        status: .inProgress
+        status: .inProgress,
+        blacklisted: []
     ))
 }

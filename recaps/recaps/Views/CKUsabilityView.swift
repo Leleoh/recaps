@@ -47,7 +47,8 @@ struct CKUsabilityView: View {
             lives: 3,
             members: [mockUser.id],
             ownerId: mockUser.id,
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
         let mockCapsuleUpdate = Capsule(
             id: createdID,
@@ -62,7 +63,8 @@ struct CKUsabilityView: View {
             lives: 3,
             members: [mockUser.id],
             ownerId: mockUser.id,
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
         let mockSubmission = Submission(
             id: UUID(),

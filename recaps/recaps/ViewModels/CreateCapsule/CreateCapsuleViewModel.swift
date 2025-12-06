@@ -100,7 +100,8 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
             lives: 3,
             members: [currentUserID],
             ownerId: currentUserID,
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
         
         do {

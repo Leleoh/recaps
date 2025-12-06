@@ -51,7 +51,7 @@ struct CloseCapsule: View {
         Submission(id: UUID(), imageURL: url, description: "Terceira", authorId: "3", date: Date(), capsuleID: UUID())
     ]
     
-    return CloseCapsule(
+    CloseCapsule(
         capsule: Capsule(
             id: UUID(),
             code: "F5GX3",
@@ -65,7 +65,8 @@ struct CloseCapsule: View {
             lives: 3,
             members: [],
             ownerId: " ",
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
     )
 }

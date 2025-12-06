@@ -44,7 +44,7 @@ struct OpenCapsule: View {
         Submission(id: UUID(), imageURL: url, description: "Terceira", authorId: "3", date: Date(), capsuleID: UUID())
     ]
 
-    return OpenCapsule(
+    OpenCapsule(
         isPink: false,
         capsule: Capsule(
             id: UUID(),
@@ -59,7 +59,8 @@ struct OpenCapsule: View {
             lives: 3,
             members: [],
             ownerId: " ",
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
     )
 }

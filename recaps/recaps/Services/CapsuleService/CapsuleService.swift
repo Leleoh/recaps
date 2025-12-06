@@ -189,6 +189,7 @@ class CapsuleService: CapsuleServiceProtocol {
             record["ownerId"] = capsule.ownerId as CKRecordValue
             record["status"] = capsule.status.rawValue as CKRecordValue
             record["members"] = capsule.members as CKRecordValue
+            record["blacklisted"] = capsule.blacklisted.map { $0.uuidString } as CKRecordValue
             
             do {
                 let savedRecord = try await database.save(record)
@@ -642,6 +643,10 @@ class CapsuleService: CapsuleServiceProtocol {
                 
                 let submissions = try await fetchSubmissions(capsuleID: id)
                 
+                let blacklistedStrings = record["blacklisted"] as? [String] ?? []
+                let blacklisted = blacklistedStrings.compactMap { UUID(uuidString: $0) }
+
+                
                 let capsule = Capsule(
                     id: id,
                     code: code,
@@ -655,7 +660,8 @@ class CapsuleService: CapsuleServiceProtocol {
                     lives: lives,
                     members: members,
                     ownerId: ownerId,
-                    status: status
+                    status: status,
+                    blacklisted: blacklisted
                 )
                 
                 capsules.append(capsule)
@@ -693,7 +699,11 @@ class CapsuleService: CapsuleServiceProtocol {
                     let statusRaw = record["status"] as? String,
                     let status = CapsuleStatus(rawValue: statusRaw),
                     let members = record["members"] as? [String]
+
                 else { continue }
+                let blacklistedStrings = record["blacklisted"] as? [String] ?? []
+                let blacklisted = blacklistedStrings.compactMap { UUID(uuidString: $0) }
+                            
                 
                 let submissions = try await fetchSubmissions(capsuleID: id)
                 
@@ -710,7 +720,8 @@ class CapsuleService: CapsuleServiceProtocol {
                     lives: lives,
                     members: members,
                     ownerId: ownerId,
-                    status: status
+                    status: status,
+                    blacklisted: blacklisted
                 )
                 
                 capsules.append(capsule)
@@ -749,8 +760,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     let status = CapsuleStatus(rawValue: statusRaw),
                     let members = record["members"] as? [String]
                 else { continue }
-                
-                
+
                 let capsule = Capsule(
                     id: id,
                     code: code,
@@ -764,7 +774,9 @@ class CapsuleService: CapsuleServiceProtocol {
                     lives: lives,
                     members: members,
                     ownerId: ownerId,
-                    status: status
+                    status: status,
+                    blacklisted: []
+                    
                 )
                 
                 capsules.append(capsule)
@@ -776,6 +788,28 @@ class CapsuleService: CapsuleServiceProtocol {
         
         return capsules
     }
+    
+    func addSubmissionToBlacklist(capsule: Capsule, submissionId: UUID) async throws {
+        var updatedCapsule = capsule
+        print ("Adding \(submissionId) to blacklist")
+        if !updatedCapsule.blacklisted.contains(submissionId) {
+            updatedCapsule.blacklisted.append(submissionId)
+        }
+
+        try await updateCapsule(capsule: updatedCapsule)
+        print(updatedCapsule)
+    }
+    
+    func fetchPossibleSubmissions(capsule: Capsule) async throws -> [Submission] {
+        let blacklisted = Set(capsule.blacklisted)
+        print("blacklisted: \(blacklisted)")
+        let allSubmissions = try await fetchSubmissions(capsuleID: capsule.id)
+        
+        return allSubmissions.filter { submission in
+            !blacklisted.contains(submission.id)
+        }
+    }
+
 
     private func fetchBrazilianTime() async throws -> Date {
         let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
