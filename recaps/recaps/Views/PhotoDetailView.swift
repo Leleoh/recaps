@@ -31,7 +31,7 @@ struct PhotoDetailView: View {
                     }
                     
                     VStack(alignment: .trailing, spacing: 4) {
-                        Text(submission.description ?? "")
+                        Text(viewModel.userName)
                             .font(.coveredByYourGraceSignature)
                         
                         Text(viewModel.formatDate(submission.date))
@@ -40,7 +40,7 @@ struct PhotoDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .trailing)
                 }
                 
-                Text(viewModel.userName)
+                Text(submission.description ?? "")
                     .font(.coveredByYourGraceTitle)
             }
             .padding(.horizontal, 44)
@@ -72,6 +72,10 @@ struct PhotoDetailView: View {
                     }
                 }
             }
+            
+            Pins()
+                .scaleEffect(1.6)
+                .offset(x: -120, y: -160)
         }
         .task {
             if let name = await viewModel.getUser(id: submission.authorId) {
