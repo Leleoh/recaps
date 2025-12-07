@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PhotoDetailView: View {
     let submission: Submission
+    let num = Int.random(in: 1...5)
     @State private var viewModel = PhotoDetailsViewModel()
     @Environment(\.dismiss) private var dismiss
     
@@ -18,20 +19,26 @@ struct PhotoDetailView: View {
                 .ignoresSafeArea()
                 .onTapGesture { dismiss() }
             
-            VStack(alignment: .leading, spacing: 30) {
+            VStack(alignment: .leading, spacing: 20) {
                 VStack {
-                    AsyncImage(url: submission.imageURL) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .rotationEffect(.degrees(-2))
-                            .shadow(radius: 20)
-                    } placeholder: {
-                        ProgressView()
+                    ZStack(alignment: .topLeading){
+                        AsyncImage(url: submission.imageURL) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .rotationEffect(.degrees(-2))
+                                .shadow(radius: 20)
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        Pins(pin: num)
+                            .scaleEffect(2)
+                            .padding(.top, -10)
+                            .padding(.leading, 30)
                     }
                     
                     VStack(alignment: .trailing, spacing: 4) {
-                        Text(viewModel.userName)
+                        Text("by " + "\(viewModel.userName)")
                             .font(.coveredByYourGraceSignature)
                         
                         Text(viewModel.formatDate(submission.date))
@@ -72,10 +79,6 @@ struct PhotoDetailView: View {
                     }
                 }
             }
-            
-            Pins(pin: Int.random(in: 1...5))
-                .scaleEffect(1.6)
-                .offset(x: -120, y: -160)
         }
         .task {
             if let name = await viewModel.getUser(id: submission.authorId) {
