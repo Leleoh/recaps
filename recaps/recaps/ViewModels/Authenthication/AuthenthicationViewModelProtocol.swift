@@ -8,7 +8,6 @@
 import AuthenticationServices
 
 protocol AuthenticationViewModelProtocol: AnyObject {
-    var hasUser: Bool { get set }
     var isSignedIn: Bool { get }
     
     @MainActor

@@ -9,12 +9,12 @@ import AuthenticationServices
 import SwiftUI
 
 struct AuthenthicationView: View {
-    var viewModel = AuthenthicationViewModel()
+    @State var viewModel = AuthenthicationViewModel()
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Group {
-            if viewModel.isSignedIn || viewModel.hasUser {
+            if viewModel.isSignedIn {
                 HomeRecapsView()
             } else {
                 NavigationView {
