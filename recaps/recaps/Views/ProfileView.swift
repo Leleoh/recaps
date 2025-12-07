@@ -10,7 +10,7 @@ import SwiftUI
 struct ProfileView: View {
     @State private var viewModel = ProfileViewModel()
     @Environment(\.dismiss) private var dismiss
-
+    
     var body: some View {
         NavigationStack {
             ScrollView{
@@ -49,52 +49,54 @@ struct ProfileView: View {
                                     await viewModel.deleteAccount()
                                 }
                                 dismiss()
-                        } label: {
-                            Text("Delete account")
-                                .foregroundStyle(.red)
+                            } label: {
+                                Text("Delete account")
+                                    .foregroundStyle(.red)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            
+                            Divider()
+                                .padding(.horizontal, 8)
+                            
+                            Button {
+                                viewModel.logout()
+                                dismiss()
+                            } label: {
+                                Text("Sign out")
+                                    .foregroundStyle(.red)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
                         }
-                        
-                        Divider()
-                            .padding(.horizontal, 8)
-                        
-                        Button {
-                            viewModel.logout()
-                            dismiss()
-                        } label: {
-                            Text("Sign out")
-                                .foregroundStyle(.red)
-                        }
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 26)
+                                .fill(.sheetBackground)
+                        )
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 26)
-                            .fill(.sheetBackground)
-                    )
+                }
+                .padding(.horizontal)
+                .padding(.top, 32)
+            }
+            .navigationTitle("Account")
+            .toolbarBackground(.visible, for: .navigationBar)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                    }
+                    
                 }
             }
-            .padding(.horizontal)
-            .padding(.top, 32)
         }
-        .navigationTitle("Account")
-        .toolbarBackground(.visible, for: .navigationBar)
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-                }
-                
-            }
-        }
-    }
         .task {
             await viewModel.loadUser()
         }
-}
+    }
 }
 
 

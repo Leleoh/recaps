@@ -31,10 +31,10 @@ class ProfileViewModel: ProfileViewModelProtocol {
     }
     
     var userName: String {
-        user?.name ?? "Null"
+        user?.name ?? " "
     }
     var userEmail: String {
-        user?.email ?? "Null"
+        user?.email ?? " "
     }
     
     func logout() {
