@@ -17,10 +17,7 @@ struct recapsApp: App {
     
     var body: some Scene {
         WindowGroup {
-            let url = URL(string: "https://picsum.photos/300/200")!
-            
-            let testSubmissions = Submission(id: UUID(), imageURL: url, description: "Primeira", authorId: "1", date: Date(), capsuleID: UUID())
-            PhotoDetailView(submission: testSubmissions)
+            AuthenthicationView()
         }
     }
 }
