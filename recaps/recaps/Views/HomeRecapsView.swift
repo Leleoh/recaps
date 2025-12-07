@@ -83,7 +83,7 @@ struct HomeRecapsView: View {
                                 TabView {
                                     ForEach(viewModel.inProgressCapsules) { recap in
                                         NavigationLink {
-                                            InsideCapsule(capsule: recap)
+                                            PostOpenedCapsuleView(capsule: recap)
                                         } label: {
                                             VStack (spacing: 24){
                                                 CloseCapsule(capsule: recap)

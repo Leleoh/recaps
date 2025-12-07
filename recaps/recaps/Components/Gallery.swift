@@ -12,28 +12,23 @@ struct Gallery: View {
     @State var submissions: [Submission] = []
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                PinterestLikeGrid($submissions, spacing: 8) { submission, index in
-                    
-                    if let url = submission.imageURL {
-                        NavigationLink {
-                            PhotoDetailView(submission: submission)
-                        } label: {
-                            AsyncImage(url: url) { image in
-                                image
-                                    .resizable()
-                                    .scaledToFit()
-                            } placeholder: {
-                                ProgressView()
-                            }
-                        }
+        PinterestLikeGrid($submissions, spacing: 16) { submission, index in
+            
+            if let url = submission.imageURL {
+                NavigationLink {
+                    PhotoDetailView(submission: submission)
+                } label: {
+                    AsyncImage(url: url) { image in
+                        image
+                            .resizable()
+                            .scaledToFit()
+                    } placeholder: {
+                        ProgressView()
                     }
                 }
-                .padding()
             }
+            
         }
-        .navigationTitle("Gallery")
     }
 }
 
