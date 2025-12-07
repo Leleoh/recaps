@@ -13,13 +13,6 @@ import CloudKit
 class AuthenthicationViewModel {
     // MARK: Properties
     private let userService = UserService()
-
-    var isSignedIn: Bool = false
-
-    init() {
-        let _ = userService.loadUserId()
-        self.isSignedIn = !userService.userId.isEmpty
-    }
     
     // MARK: Auth Handling (Sign in With Apple)
     @MainActor
@@ -37,7 +30,6 @@ class AuthenthicationViewModel {
             do {
                 _ = try await userService.getUser(with: newUserId)
                 userService.saveUserId(newUserId)
-                self.isSignedIn = true
 
             } catch {
                 let newUser = User(
@@ -50,7 +42,6 @@ class AuthenthicationViewModel {
 
                 _ = try? await userService.createUser(user: newUser)
                 userService.saveUserId(newUserId)
-                self.isSignedIn = true
             }
 
         case .failure(let error):

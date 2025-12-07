@@ -13,30 +13,26 @@ struct AuthenthicationView: View {
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        Group {
-            if viewModel.isSignedIn {
-                HomeRecapsView()
-            } else {
-                NavigationView {
-                    VStack {
-                        SignInWithAppleButton(.continue) { request in
-                            request.requestedScopes = [.email, .fullName]
-                        } onCompletion: { result in
-                            Task { @MainActor in
-                                await viewModel.handleAuthResult(result)
-                            }
-                        }
-                        .signInWithAppleButtonStyle(
-                            colorScheme == .dark ? .white : .black
-                        )
-                        .frame(height: 50)
-                        .padding()
+        NavigationView {
+            VStack {
+                SignInWithAppleButton(.continue) { request in
+                    request.requestedScopes = [.email, .fullName]
+                } onCompletion: { result in
+                    Task { @MainActor in
+                        await viewModel.handleAuthResult(result)
                     }
-                    .navigationTitle("Sign In With Apple")
                 }
+                .signInWithAppleButtonStyle(
+                    colorScheme == .dark ? .white : .black
+                )
+                .frame(height: 50)
+                .padding()
             }
+            .navigationTitle("Sign In With Apple")
         }
     }
+    
+    
 }
 
 #Preview {

@@ -17,7 +17,7 @@ struct recapsApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AuthenthicationView()
+            RootView()
         }
     }
 }

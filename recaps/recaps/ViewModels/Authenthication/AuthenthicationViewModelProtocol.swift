@@ -8,8 +8,6 @@
 import AuthenticationServices
 
 protocol AuthenticationViewModelProtocol: AnyObject {
-    var isSignedIn: Bool { get }
-    
     @MainActor
     func handleAuthResult(_ result: Result<ASAuthorization, Error>) async
 }
