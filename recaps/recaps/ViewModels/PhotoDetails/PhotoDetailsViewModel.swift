@@ -10,7 +10,7 @@ import SwiftUI
 import UIKit
 
 @Observable
-class PhotoDetailsViewModel {
+class PhotoDetailsViewModel: PhotoDetailsViewModelProtocol {
     private let userService: UserServiceProtocol
     
     init(userService: UserServiceProtocol = UserService()) {
@@ -20,8 +20,6 @@ class PhotoDetailsViewModel {
     var user: User? = nil
     var saveMessage: String?
     var userName: String = ""
-    
-    // 👇 imagem que vamos compartilhar
     var shareableImage: UIImage?
     
     func getUser(id: String) async -> String? {

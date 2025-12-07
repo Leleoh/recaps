@@ -82,9 +82,6 @@ struct CloudKitServiceTests {
             capsuleID: capsuleID
         )
 
-        mock.addSubmission(submission1)
-        mock.addSubmission(submission2)
-
         let result = try await mock.fetchSubmissions(capsuleID: capsuleID)
 
         #expect(result.count == 2)

@@ -9,7 +9,6 @@ import Foundation
 @testable import recaps
 
 class MockUserService: UserServiceProtocol {
-    
     // MARK: - Mocked state / configurable returns
     var userId: String = "mock-user-id"
     var mockCurrentUser: User?
@@ -50,7 +49,7 @@ class MockUserService: UserServiceProtocol {
             return user
         }
 
-        return User(id: userId, name: "Mock name", email: "mock@mock.com", capsules: [])
+        return User(id: userId, name: "Mock name", email: "mock@mock.com", capsules: [], openCapsules: [])
     }
 
     func getUser(with id: String) async throws -> User {
@@ -61,7 +60,9 @@ class MockUserService: UserServiceProtocol {
             return user
         }
 
-        throw NSError(domain: "MockUserService", code: 2, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+        throw NSError(domain: "MockUserService", code: 4, userInfo: [
+            NSLocalizedDescriptionKey: "Mock user not found"
+        ])
     }
 
     func createUser(user: User) async throws {
@@ -82,7 +83,8 @@ class MockUserService: UserServiceProtocol {
             id: user.id,
             name: name ?? user.name,
             email: email ?? user.email,
-            capsules: capsules ?? user.capsules
+            capsules: capsules ?? user.capsules,
+            openCapsules: []
         )
     }
 
@@ -91,6 +93,21 @@ class MockUserService: UserServiceProtocol {
         deletedUserId = userId
     }
 
+    func updateUser(_ user: recaps.User, name: String?, email: String?, capsules: [UUID]?, openCapsules: [UUID]?) async throws -> recaps.User {
+       
+        return User(
+            id: user.id,
+            name: name ?? user.name,
+            email: email ?? user.email,
+            capsules: capsules ?? user.capsules,
+            openCapsules: []
+        )
+    }
+    
+    func changeCompletedCapsuleToOpenCapsule(user: recaps.User, capsuleId: UUID) async throws {
+        
+    }
+    
     // MARK: - User ID handling
 
     // Mantendo assinaturas da TK25 que parecem refletir uma atualização no protocolo

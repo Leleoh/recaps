@@ -8,13 +8,16 @@
 import SwiftUI
 
 struct Pins: View {
-    private let pin: String = "pin\(Int.random(in: 1...5))"
-    
+    var pin: Int?
     var body: some View {
-        Image(pin)
+        let finalPin = pin ?? Int.random(in: 1...5)
+        Image("pin\(finalPin)")
     }
 }
 
 #Preview {
-    Pins()
+    VStack {
+        Pins(pin: 1)
+        Pins()
+    }
 }

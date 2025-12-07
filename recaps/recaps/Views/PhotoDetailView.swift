@@ -73,7 +73,7 @@ struct PhotoDetailView: View {
                 }
             }
             
-            Pins()
+            Pins(pin: Int.random(in: 1...5))
                 .scaleEffect(1.6)
                 .offset(x: -120, y: -160)
         }
