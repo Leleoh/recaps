@@ -81,7 +81,9 @@ struct CloudKitServiceTests {
             date: .now,
             capsuleID: capsuleID
         )
-
+        
+        try await mock.createSubmission(submission: submission1, capsuleID: submission1.capsuleID, image: .backgroundPNG)
+        try await mock.createSubmission(submission: submission2, capsuleID: submission2.capsuleID, image: ._2Life)
         let result = try await mock.fetchSubmissions(capsuleID: capsuleID)
 
         #expect(result.count == 2)
