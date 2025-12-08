@@ -117,6 +117,7 @@ class UserService: UserServiceProtocol {
                 
             case .failure(let error):
                 print("Erro ao obter User: \(error)")
+                throw error
             }
         }
         

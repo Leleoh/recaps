@@ -151,7 +151,7 @@ struct InsideCapsule: View {
                 capturedImage = nil
                 capturedPickerItem = nil
             }
-        
+
         .onAppear {
             
             Task {
