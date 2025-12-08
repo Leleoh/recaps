@@ -17,6 +17,8 @@ struct InsideCapsule: View {
     
     @State private var vm = InsideCapsuleViewModel()
     
+    @State private var isShaking = false
+
     
     var body: some View {
         
@@ -29,6 +31,21 @@ struct InsideCapsule: View {
                             .disabled(true)
                         
                         CloseCapsule(capsule: capsule)
+                            .rotationEffect(.degrees(isShaking ? 5 : 0))
+                            .animation(
+                                isShaking ? .easeInOut(duration: 0.1).repeatCount(3, autoreverses: true) : .default,
+                                value: isShaking
+                            )
+                            .onTapGesture {
+                                
+                                let impact = UIImpactFeedbackGenerator(style: .heavy)
+                                impact.impactOccurred()
+                                
+                                isShaking = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    isShaking = false
+                                }
+                            }
                     }
                     
                     Text("Click on Recapsule to take a look")
