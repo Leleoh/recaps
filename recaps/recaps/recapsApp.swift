@@ -17,8 +17,7 @@ struct recapsApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SlidingPuzzleComponent(image: UIImage(named: "imagem3") ?? UIImage())
-//            AuthenthicationView()
+            AuthenthicationView()
         }
     }
 }
