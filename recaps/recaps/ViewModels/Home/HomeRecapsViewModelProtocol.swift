@@ -15,7 +15,7 @@ protocol HomeRecapsViewModelProtocol {
     var completedCapsules: [Capsule] { get }
     
     func didTapNewRecap()
-    func joinCapsule(code: String) async
+    func joinCapsule(code: String) async -> Capsule?
     func fetchCapsules() async
     func fetchCapsule(id: UUID) async -> Capsule?
 

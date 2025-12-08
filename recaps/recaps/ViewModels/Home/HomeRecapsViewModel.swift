@@ -130,7 +130,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         showCreateCapsule = true
     }
     
-    func joinCapsule(code: String) async {
+    func joinCapsule(code: String) async -> Capsule? {
         do {
             joinErrorMessage = nil
             print("Buscando cápsula com código: \(code)")
@@ -140,12 +140,12 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             guard var capsule = allCapsules.first(where: { $0.code == code }) else {
                 joinErrorMessage = "NotFound"
-                return
+                return nil
             }
             
             if capsule.members.contains(user.id) {
                 joinErrorMessage = "AlreadyMember"
-                return
+                return nil
             }
             
             // Adiciona usuário à cápsula e atualiza
@@ -164,12 +164,13 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             print("✅ Sucesso! Entrou na cápsula: \(capsule.name)")
             
-            await fetchCapsules()
+            return capsule
             
         } catch {
             joinErrorMessage = "Unknown"
             print("❌ Erro ao entrar na cápsula: \(error)")
         }
+        return nil
     }
     
     func leaveCapsule(capsule: Capsule) async {
