@@ -256,6 +256,12 @@ class CapsuleService: CapsuleServiceProtocol {
                 return true
             }
             
+            let isStreakCompleted = try await isStreakCompleted(record: record)
+            
+            if isStreakCompleted {
+                return true
+            }
+            
             guard
                 let lastSubmissionDate = record["lastSubmissionDate"] as? Date
             else {
