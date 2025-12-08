@@ -668,6 +668,66 @@ class CapsuleService: CapsuleServiceProtocol {
         return capsules
     }
     
+    func fetchCapsulesWithoutSubmissions(IDs: [UUID]) async throws -> [Capsule] {
+        let recordNames = IDs.map { $0.uuidString }
+        
+        let referenceIDs = recordNames.map { CKRecord.ID(recordName: $0) }
+        
+        var capsules: [Capsule] = []
+        
+        let result = try await database.records(for: referenceIDs)
+        
+        for (_, recordResult) in result {
+            switch recordResult {
+            case .success(let record):
+                
+                guard
+                    let idString = record["id"] as? String,
+                    let id = UUID(uuidString: idString)
+                else { continue }
+                
+                let code = record["code"] as? String ?? ""
+                let name = record["name"] as? String ?? ""
+                let createdAt = record["createdAt"] as? Date ?? Date()
+                let offensive = record["offensive"] as? Int ?? 0
+                let offensiveTarget = record["offensiveTarget"] as? Int ?? 0
+                let lastSubmissionDate = record["lastSubmissionDate"] as? Date ?? Date()
+                let validOffensive = record["validOffensive"] as? Bool ?? false
+                let lives = record["lives"] as? Int ?? 0
+                
+                let ownerId = record["ownerId"] as? String ?? ""
+                
+                let statusRaw = record["status"] as? String ?? ""
+                let status = CapsuleStatus(rawValue: statusRaw) ?? .inProgress
+                
+                let members = record["members"] as? [String] ?? []
+                
+                let capsule = Capsule(
+                    id: id,
+                    code: code,
+                    submissions: [],
+                    name: name,
+                    createdAt: createdAt,
+                    offensive: offensive,
+                    offensiveTarget: offensiveTarget,
+                    lastSubmissionDate: lastSubmissionDate,
+                    validOffensive: validOffensive,
+                    lives: lives,
+                    members: members,
+                    ownerId: ownerId,
+                    status: status
+                )
+                
+                capsules.append(capsule)
+                
+            case .failure(let error):
+                print("Erro ao obter Capsule: \(error)")
+            }
+        }
+        
+        return capsules
+    }
+    
     func fetchAllCapsules() async throws -> [Capsule] {
         let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: "Capsule", predicate: predicate)

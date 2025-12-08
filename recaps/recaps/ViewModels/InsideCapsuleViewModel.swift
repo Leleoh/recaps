@@ -1,13 +1,5 @@
 //
-//  InputViewModel 2.swift
-//  recaps
-//
-//  Created by Fernando Sulzbach on 02/12/25.
-//
-
-
-//
-//  InputViewModel.swift
+//  InsideCapsuleViewModel.swift
 //  recaps
 //
 //  Created by Leonel Ferraz Hernandez on 24/11/25.
@@ -15,12 +7,13 @@
 
 import SwiftUI
 import Foundation
-import Observation
 import PhotosUI
-
 
 @Observable
 class InsideCapsuleViewModel {
+    
+    private let capsuleService = CapsuleService()
+    private let userService = UserService()
     
     var selectedImages: [UIImage] = []
     var selectedPickerItems: [PhotosPickerItem] = [] {
@@ -44,6 +37,23 @@ class InsideCapsuleViewModel {
         await MainActor.run {
             self.selectedImages = loadedImages
         }
+    }
+    
+    func getUsers(IDs: [String]) async throws -> [User] {
+//        var users: [User] = []
+//        
+//        do{
+//            users = try await userService.getUsers(IDs: IDs)
+//            print("Success")
+//            
+//        } catch {
+//            print("Error: \(error)")
+//            throw error
+//        }
+//        
+//        return users
+        
+        return try await userService.getUsers(IDs: IDs)
     }
 }
 

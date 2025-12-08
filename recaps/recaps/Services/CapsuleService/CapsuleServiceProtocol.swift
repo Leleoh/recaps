@@ -13,6 +13,7 @@ protocol CapsuleServiceProtocol {
     // MARK: - Reading
     func fetchSubmissions(capsuleID: UUID) async throws -> [Submission]
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule]
+    func fetchCapsulesWithoutSubmissions(IDs: [UUID]) async throws -> [Capsule]
     func fetchAllCapsules() async throws -> [Capsule]
     func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule]
 
