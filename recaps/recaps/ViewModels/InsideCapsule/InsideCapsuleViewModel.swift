@@ -1,13 +1,5 @@
 //
-//  InputViewModel 2.swift
-//  recaps
-//
-//  Created by Fernando Sulzbach on 02/12/25.
-//
-
-
-//
-//  InputViewModel.swift
+//  InsideCapsuleViewModel.swift
 //  recaps
 //
 //  Created by Leonel Ferraz Hernandez on 24/11/25.
@@ -22,6 +14,7 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
     
     private var capsuleService = CapsuleService()
     private var userService = UserService()
+
     
     var selectedImages: [UIImage] = []
     var selectedPickerItems: [PhotosPickerItem] = [] {

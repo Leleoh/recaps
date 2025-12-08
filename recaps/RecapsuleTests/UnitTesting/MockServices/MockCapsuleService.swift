@@ -6,12 +6,11 @@
 //
 
 import Foundation
-import CloudKit
-@testable import recaps
 import UIKit
+@testable import recaps
 
 class MockCapsuleService: CapsuleServiceProtocol {
-    
+
     // MARK: - Trackers
     var didCreate = false
     var didDelete = false
@@ -19,44 +18,45 @@ class MockCapsuleService: CapsuleServiceProtocol {
     var didFetchCapsules = false
     var didCreateSubmission = false
     var didCheckValidOffensive = false
-    
+
     var createdCapsule: Capsule?
     var updatedCapsule: Capsule?
     var deletedCapsuleID: UUID?
     var fetchedCapsuleIDs: [UUID] = []
     var createdSubmission: Submission?
 
-    // MARK: - State interno
+    // MARK: - Internal storage
     var storedCapsules: [UUID: Capsule] = [:]
     var storedSubmissions: [UUID: [Submission]] = [:]
 
-    // MARK: - Criação, atualização, deleção
+    // MARK: - Capsules
     func createCapsule(capsule: Capsule) async throws -> UUID {
         didCreate = true
         createdCapsule = capsule
         storedCapsules[capsule.id] = capsule
         return capsule.id
     }
-    
+
     func updateCapsule(capsule: Capsule) async throws {
         didUpdate = true
         updatedCapsule = capsule
         storedCapsules[capsule.id] = capsule
     }
-    
+
     func deleteCapsule(capsuleID: UUID) async throws {
         didDelete = true
         deletedCapsuleID = capsuleID
         storedCapsules.removeValue(forKey: capsuleID)
+        storedSubmissions.removeValue(forKey: capsuleID)
     }
 
     // MARK: - Submissions
     func createSubmission(submission: Submission, capsuleID: UUID, image: UIImage) async throws {
         didCreateSubmission = true
         createdSubmission = submission
+
         storedSubmissions[capsuleID, default: []].append(submission)
-        
-        // Também atualizar a capsule com a submission se existir
+
         if var capsule = storedCapsules[capsuleID] {
             capsule.submissions.append(submission)
             capsule.lastSubmissionDate = submission.date
@@ -64,13 +64,17 @@ class MockCapsuleService: CapsuleServiceProtocol {
         }
     }
 
-    // MARK: - Fetching
+    func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
+        return storedSubmissions[capsuleID] ?? []
+    }
+
+    // MARK: - Fetching Capsules
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule] {
         didFetchCapsules = true
         fetchedCapsuleIDs = IDs
         return IDs.compactMap { storedCapsules[$0] }
     }
-    
+
     func fetchAllCapsules() async throws -> [Capsule] {
         didFetchCapsules = true
         return Array(storedCapsules.values)
@@ -79,55 +83,53 @@ class MockCapsuleService: CapsuleServiceProtocol {
     func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule] {
         didFetchCapsules = true
         return storedCapsules.values.map { capsule in
-            Capsule(
-                id: capsule.id,
-                code: capsule.code,
-                submissions: [],
-                name: capsule.name,
-                createdAt: capsule.createdAt,
-                offensive: capsule.offensive,
-                offensiveTarget: capsule.offensiveTarget,
-                lastSubmissionDate: capsule.lastSubmissionDate,
-                validOffensive: capsule.validOffensive,
-                lives: capsule.lives,
-                members: capsule.members,
-                ownerId: capsule.ownerId,
-                status: capsule.status
-            )
+            var copy = capsule
+            copy.submissions = []
+            return copy
         }
     }
-    
-    func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
-        return storedSubmissions[capsuleID] ?? []
-    }
-    
-    // MARK: - Implementação do método exigido pelo protocolo
-    // Retorna `true` se a cápsula existir e tiver `lastSubmissionDate` dentro das últimas 48 horas.
-    // Esse comportamento é simples e suficiente para testes unitários; ajuste conforme necessário.
+
+    // MARK: - Capsule Logic (Mocked)
     func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool {
         didCheckValidOffensive = true
-        
+
         guard let capsule = storedCapsules[capsuleID] else {
             return false
         }
-        
+
         let last = capsule.lastSubmissionDate
-        
-        let difference = Date().timeIntervalSince(last)
-        let fortyEightHours: TimeInterval = 48 * 60 * 60
-        return difference < fortyEightHours
+        let diff = Date().timeIntervalSince(last)
+        let limit: TimeInterval = 48 * 60 * 60
+
+        return diff < limit
     }
-    
-    // MARK: - Helpers de teste
-    func addSubmission(_ submission: Submission) {
-        storedSubmissions[submission.capsuleID, default: []].append(submission)
-        if var capsule = storedCapsules[submission.capsuleID] {
-            capsule.submissions.append(submission)
-            capsule.lastSubmissionDate = submission.date
-            storedCapsules[submission.capsuleID] = capsule
-        }
+
+    func checkIfCapsuleIsCompleted(capsuleID: UUID) async throws -> Bool {
+        guard let capsule = storedCapsules[capsuleID] else { return false }
+        return capsule.status == .completed
     }
-    
+
+    func checkIfIncreasesStreak(capsuleID: UUID) async throws {
+        // Mock vazio - não faz nada
+    }
+
+    // MARK: - Extra helper for tests
+    func createCapsuleWithSubmissions(
+        capsule: Capsule,
+        submissions: [Submission],
+        images: [UIImage]
+    ) async throws -> UUID {
+
+        storedCapsules[capsule.id] = capsule
+        storedSubmissions[capsule.id] = submissions
+
+        var updated = capsule
+        updated.submissions = submissions
+        storedCapsules[capsule.id] = updated
+
+        return capsule.id
+    }
+
     func resetTrackers() {
         didCreate = false
         didDelete = false
@@ -135,6 +137,7 @@ class MockCapsuleService: CapsuleServiceProtocol {
         didFetchCapsules = false
         didCreateSubmission = false
         didCheckValidOffensive = false
+
         createdCapsule = nil
         updatedCapsule = nil
         deletedCapsuleID = nil

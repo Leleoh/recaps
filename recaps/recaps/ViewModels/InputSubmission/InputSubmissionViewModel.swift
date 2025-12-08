@@ -1,5 +1,5 @@
 //
-//  InputViewModel.swift
+//  InputSubmissionViewModel.swift
 //  recaps
 //
 //  Created by Leonel Ferraz Hernandez on 24/11/25.
@@ -10,7 +10,7 @@ import Foundation
 import Observation
 
 @Observable
-class InputSubmissionViewModel{
+class InputSubmissionViewModel: InputSubmissionViewModelProtocol{
     
     private let ckCapsuleService = CapsuleService()
     private let ckUserService = UserService()
