@@ -30,6 +30,7 @@ struct CapsuleLifes: View {
                         lives: 0,
                         members: [],
                         ownerId: " ",
-                        status: .inProgress))
+                        status: .inProgress,
+                        blacklisted: []))
 }
 

@@ -34,15 +34,18 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         do {
             // Pega o usuário logado para acessar a lista de IDs de cápsulas
             let currentUser = try await userService.getCurrentUser()
-            let capsuleIDs = currentUser.capsules
+            let progressCapsuleIDs = currentUser.capsules
+            let openCapsuleIDs = currentUser.openCapsules
             
+            let capsuleIDs = progressCapsuleIDs + openCapsuleIDs
+
             guard !capsuleIDs.isEmpty else {
                 print("Usuário não possui cápsulas.")
                 return
             }
             
             // Busca os objetos Capsule no CloudKit usando os IDs
-            let allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
+            var allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs).sorted(by: { $0.createdAt < $1.createdAt })
             
             // Filtra as cápsulas por status
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
@@ -50,7 +53,17 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
             
-            await checkIfCapsuleIsValidOffensive()
+            // Verifica se foram feitos updates
+            await checkIfCapsuleIsValidOffensive(user: currentUser)
+            
+            // faz fetch novamente
+            allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs).sorted(by: { $0.createdAt < $1.createdAt })
+            
+            // Filtra as cápsulas atualizadas por status
+            self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
+            
+            // Consideramos completed ou opened como "Concluídas" na Home
+            self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
             
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
@@ -58,34 +71,40 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     }
     
     //MARK: Valid Streak
-    func checkIfCapsuleIsValidOffensive() async {
+    func checkIfCapsuleIsValidOffensive(user: User) async {
         print("Verificando a validades das vidas")
         
-        var updatesMade: Bool = false
+       // var updatesMade: Bool = false
         
-        for capsule in inProgressCapsules {
+        for capsule in user.capsules {
             do{
-                let isValid = try await capsuleService.checkIfCapsuleIsValidOffensive(capsuleID: capsule.id)
+                let isValid = try await capsuleService.checkIfCapsuleIsValidOffensive(capsuleID: capsule)
                 
                 if !isValid{
-                    updatesMade = true
-                    print("AVISO: Cápsula \(capsule.name) sofreu penalidade (vida ou reset).")
+                    //updatesMade = true
+                    print("AVISO: Cápsula \(capsule) sofreu penalidade (vida ou reset).")
                 }
             }
             catch{
-                print("Erro ao verificar ofensiva da cápsula \(capsule.name): \(error)")
+                print("Erro ao verificar ofensiva da cápsula \(capsule): \(error)")
             }
         }
-        if updatesMade {
-            print("🔄 Recarregando cápsulas para atualizar UI...")
-            await fetchCapsules()
-        } else {
-            print("✅ Nenhuma alteração necessária nas ofensivas.")
+    }
+        
+//        if updatesMade {
+//            print("🔄 Recarregando cápsulas para atualizar UI...")
+//            await fetchCapsules()
+//        } else {
+//            print("✅ Nenhuma alteração necessária nas ofensivas.")
+//        }
+        
+    func fetchCapsule(id: UUID) async -> Capsule? {
+        do {
+            return try await capsuleService.fetchCapsule(id: id)
+        } catch {
+            print("Erro ao buscar cápsula: \(error)")
+            return nil
         }
-        
-        
-        
-        
     }
     
     func didTapNewRecap() {

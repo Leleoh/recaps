@@ -1,19 +1,14 @@
-//
-//  InsideCapsule.swift
-//  recaps
-//
-
-//  Created by Leonel Ferraz Hernandez on 24/11/25.
-
-
-
 import SwiftUI
 import PhotosUI
 
 struct InsideCapsule: View {
     
-    var capsule: Capsule
+    @State var capsule: Capsule
+    
+    @State var capsuleMembers: [User] = []
+    
     @State private var showInputComponent = false
+    @State private var showMemberList = false
     
     @State private var goToInputView = false
     
@@ -22,84 +17,202 @@ struct InsideCapsule: View {
     
     @State private var vm = InsideCapsuleViewModel()
     
-    // States required by CameraView
-    @State private var capturedImage: UIImage?
-    @State private var capturedPickerItem: PhotosPickerItem?
+    @State private var isShaking = false
+
     
     var body: some View {
         
         ZStack {
-            
-            VStack{
-                Text(capsule.name)
-                    .padding(.top, 24)
-                
-                Spacer()
-                
-                ZStack{
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.blue)
-                        .frame(width: 350, height: 600)
+            ScrollView {
+                VStack(spacing: 34) {
                     
-                    Text("Informações da capsula")
-                        .foregroundStyle(.white)
-                }
-                
-                Spacer()
-                
-                Button{
-                    withAnimation {
-                        showInputComponent = true
+                    VStack(spacing: 62) {
+                        NameComponent(text: .constant(capsule.name))
+                            .disabled(true)
+                        
+                        CloseCapsule(capsule: capsule)
+                            .rotationEffect(.degrees(isShaking ? 5 : 0))
+                            .animation(
+                                isShaking ? .easeInOut(duration: 0.1).repeatCount(3, autoreverses: true) : .default,
+                                value: isShaking
+                            )
+                            .onTapGesture {
+                                
+                                let impact = UIImpactFeedbackGenerator(style: .heavy)
+                                impact.impactOccurred()
+                                
+                                isShaking = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    isShaking = false
+                                }
+                            }
                     }
-                }label:{
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(Color.blue)
+                    
+                    Text("Click on Recapsule to take a look")
+                        .font(.footnote)
+                        //.foregroundStyle(Color("SweetnSour"))
+                        .foregroundStyle(.secondary)
+                    
+                    VStack(spacing: 32) {
+                        
+                        VStack(spacing: 4) {
+                            HStack(spacing: 38) {
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text("Streak days")
+                                        .font(.title2)
+                                    
+                                    Text("\(capsule.offensive) / \(capsule.offensiveTarget)")
+                                        .font(.body)
+                                        .foregroundStyle(.secondary)
+                                    
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Daily submission")
+                                            .font(.body)
+                                            .foregroundStyle(.secondary)
+                                        
+                                        if capsule.lastSubmissionDate.ddMMyyyy == vm.currentTime.ddMMyyyy {
+                                            HStack {
+                                                Image(systemName: "checkmark.circle.fill")
+                                                    .foregroundStyle(.secondary)
+                                                
+                                                Text("Done")
+                                                    .font(.body)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        } else {
+                                            HStack {
+                                                Image(systemName: "clock.fill")
+                                                    .foregroundStyle(.secondary)
+                                                
+                                                Text("Pending")
+                                                    .font(.body)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                    }
+                                }
+                                .frame(width: 141, alignment: .leading)
+                                
+                                ActivityRing(capsule: capsule)
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 16)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(.quaternary)
+                                    .opacity(0.8)
+                            )
+                            
+                            HStack {
+                                CapsuleLifes(capsule: capsule)
+                            }
+                            .padding(.horizontal, 24)
+                            .padding(.vertical, 16)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 24)
+                                    .fill(.quaternary)
+                                    .opacity(0.8)
+                            )
+                        }
+                        
+                        VStack(spacing: 4) {
+                            Text("Created by")
+                            Text(vm.capsuleOwner)
+                                .font(.coveredByYourGraceSignature)
+                        }
+                    }
+                    
                 }
-                .padding(.bottom, 40)
-
+                .padding(.horizontal, 40)
+                .padding(.top, 62)
+                
+            }
+            .scrollIndicators(.hidden)
+            .refreshable {
+                do {
+                    if let reloaded = try await vm.reloadCapsule(id: capsule.id) {
+                        capsule = reloaded
+                    }
+                } catch {
+                    print("Failed refresh:", error)
+                }
             }
             
-            
-            // ------------------
-            // POP UP
-            // ------------------
             if showInputComponent {
-                
                 Color.black.opacity(0.4)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        withAnimation {
+                        withAnimation(.easeInOut(duration: 0.2)) {
                             showInputComponent = false
                         }
                     }
-                
-                SubmissionComponent(
-                    onButtonPhotograph: {
-                        showCamera = true
-                    },
-                    onButtonGallery: {
-                        showGallery = true
+            }
+            
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 16) {
+                        
+                        if showInputComponent {
+                            SubmissionComponent(
+                                onButtonPhotograph: { showCamera = true },
+                                onButtonGallery: { showGallery = true }
+                            )
+                            .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
+                            .padding(.horizontal, 24)
+                        }
+                        
+                        InputSubmissionButton {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showInputComponent.toggle()
+                            }
+                        }
+                        .frame(width: 48, height: 48)
+                        .padding(.trailing, 26)
+                        .padding(.bottom, 48)
                     }
-                )
-                .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
-                .padding(.horizontal, 24)
+                }
             }
         }
         
-    
-        .fullScreenCover(isPresented: $showCamera) {
-            CameraView(image: $capturedImage, selectedItem: $capturedPickerItem)
+        .background {
+            Image("backgroundImage")
+                .resizable()
+                .ignoresSafeArea()
         }
-        .onChange(of: capturedImage) { _, newImage in
-            if let img = newImage {
-                vm.selectedImages = [img]
-                goToInputView = true
+        
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {} label: {
+                    Image(systemName: "link")
+                        .resizable()
+                        .scaledToFit()
+                }
             }
-            // Close overlays after capture
-            if newImage != nil {
-                showCamera = false
-                showInputComponent = false
+            
+            if #available(iOS 26.0, *) {
+                ToolbarSpacer(.fixed, placement: .primaryAction)
+            }
+            
+            ToolbarItem(placement: .primaryAction) {
+                Button { showMemberList = true } label: {
+                    Image(systemName: "person.2.fill")
+                        .resizable()
+                        .scaledToFit()
+                }
+            }
+        }
+        
+        .fullScreenCover(isPresented: $showCamera) {
+            CameraView(image: $vm.capturedImage, selectedItem: $vm.capturedPickerItem)
+        }
+        
+        .sheet(isPresented: $showMemberList) {
+            NavigationStack {
+                MembersListView(members: $vm.users)
             }
         }
         
@@ -110,56 +223,31 @@ struct InsideCapsule: View {
             matching: .images
         )
         
-        .onChange(of: vm.selectedImages) { _, newImages in
-                        if !newImages.isEmpty {
-                            goToInputView = true
-                            showInputComponent = false
-                        }
-                    }
-        .navigationDestination(isPresented: $goToInputView) {
-            InputSubmissionView(viewModel: InputSubmissionViewModel(images: vm.selectedImages, capsuleID: capsule.id))
-                    }
-        .onDisappear {
-                vm.selectedImages.removeAll()
-                vm.selectedPickerItems.removeAll()
-                
-                capturedImage = nil
-                capturedPickerItem = nil
+        .onChange(of: vm.selectedImages) { _, imgs in
+            if !imgs.isEmpty {
+                withAnimation { showInputComponent = false }
+                goToInputView = true
             }
-//        .confirmationDialog(
-//            "Add a Memory",
-//            isPresented: $showInputComponent,
-//            titleVisibility: .visible
-//        ) {
-//            
-//            Button("Photograph the moment") {
-//                showCamera = true
-//            }
-//            
-//            Button("Choose from gallery") {
-//                showGallery = true
-//            }
-//
-//            Button("Cancel", role: .cancel) {}
-//        }
+        }
+        
+        .onChange(of: vm.capturedImage) { _, newImage in
+            if let image = newImage {
+                vm.selectedImages = [image]
+                vm.capturedImage = nil
+            }
+        }
+        
+        .navigationDestination(isPresented: $goToInputView) {
+            InputSubmissionView(
+                viewModel: InputSubmissionViewModel(images: vm.selectedImages, capsuleID: capsule.id)
+            )
+        }
+        
+        .onAppear {
+            Task {
+                try await vm.getUsers(IDs: capsule.members, ownerID: capsule.ownerId)
+                try await vm.setTime()
+            }
+        }
     }
-}
-
-#Preview {
-
-    InsideCapsule(capsule: Capsule(
-        id: UUID(),
-        code: "PREVIEW",
-        submissions: [],
-        name: "Cápsula de Teste",
-        createdAt: Date(),
-        offensive: 0,
-        offensiveTarget: 50,
-        lastSubmissionDate: Date(),
-        validOffensive: true,
-        lives: 3,
-        members: [],
-        ownerId: "",
-        status: .inProgress
-    ))
 }
