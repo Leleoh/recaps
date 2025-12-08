@@ -17,6 +17,9 @@ import SwiftUI
 struct SlidingPuzzleView: View {
     @State var isSolved = false
     
+    
+    var image: UIImage?
+    
     var body: some View {
         
         VStack{
@@ -39,7 +42,7 @@ struct SlidingPuzzleView: View {
                         .padding(.top, 8)
                     
                     ZStack {
-                        if let image = UIImage(named: "monkey") {
+                        if let image = image {
                             SlidingPuzzleComponent(isSolved: $isSolved, image: image)
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         } else {

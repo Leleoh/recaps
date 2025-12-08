@@ -45,6 +45,11 @@ struct InsideCapsule: View {
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                     isShaking = false
                                 }
+                                
+                                Task{
+                                    try await vm.generateDailySubmission(capsule: capsule)
+                                }
+                                
                             }
                     }
                     
@@ -216,6 +221,14 @@ struct InsideCapsule: View {
             }
         }
         
+        .navigationDestination(item: $vm.gameSubmission){ gameSubmission in
+            
+            if let url = gameSubmission.imageURL, let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
+                SlidingPuzzleView(image: image)
+            }
+
+        }
+        
         .photosPicker(
             isPresented: $showGallery,
             selection: $vm.selectedPickerItems,
@@ -251,3 +264,4 @@ struct InsideCapsule: View {
         }
     }
 }
+

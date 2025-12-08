@@ -33,6 +33,8 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
     var capsuleOwner: String = ""
     
     var currentTime: Date = Date()
+    
+    var gameSubmission: Submission?
 
     func loadSelectedImages() async {
         var loadedImages: [UIImage] = []
@@ -63,6 +65,25 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
         } catch {
             print("Error: \(error)")
         }
+    }
+    
+    func generateDailySubmission(capsule: Capsule) async throws {
+        let possibleSubmissions = try await capsuleService.fetchPossibleSubmissions(capsule: capsule)
+        
+        guard let dailySubmission = possibleSubmissions.first else {
+            throw CapsuleError.noAvailableSubmissions
+        }
+        
+        try await capsuleService.addSubmissionToBlacklist(
+            capsule: capsule,
+            submissionId: dailySubmission.id
+        )
+        
+        gameSubmission = dailySubmission
+    }
+
+    enum CapsuleError: Error {
+        case noAvailableSubmissions
     }
     
     func setTime() async throws {
