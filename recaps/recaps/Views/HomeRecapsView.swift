@@ -220,6 +220,7 @@ struct HomeRecapsView: View {
         }
         .task {
             await viewModel.fetchCapsules()
+            await viewModel.fetchUser()
         }
         .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
             Task { await viewModel.fetchCapsules() }
@@ -232,7 +233,7 @@ struct HomeRecapsView: View {
         
         .sheet(isPresented: $viewModel.showProfile, onDismiss: {
         }) {
-            ProfileView()
+            ProfileView(user: $viewModel.user)
         }
     }
 }
