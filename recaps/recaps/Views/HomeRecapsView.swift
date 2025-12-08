@@ -83,7 +83,7 @@ struct HomeRecapsView: View {
                                 TabView {
                                     ForEach(viewModel.inProgressCapsules) { recap in
                                         NavigationLink {
-                                            PostOpenedCapsuleView(capsule: recap)
+                                            InsideCapsule(capsule: recap)
                                         } label: {
                                             VStack (spacing: 24){
                                                 CloseCapsule(capsule: recap)
@@ -134,7 +134,7 @@ struct HomeRecapsView: View {
                                 LazyVGrid(columns: columns, spacing: 24) {
                                     ForEach(viewModel.completedCapsules) { recap in
                                         NavigationLink {
-                                            // TODO: Adicionar view de capsula aberta.
+                                            PostOpenedCapsuleView(capsule: recap)
                                             Text("Openend Capsule View Placeholder.")
                                         } label: {
                                             OpenCapsule(capsule: recap)

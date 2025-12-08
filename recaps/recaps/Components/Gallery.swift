@@ -13,7 +13,6 @@ struct Gallery: View {
     
     var body: some View {
         PinterestLikeGrid($submissions, spacing: 16) { submission, index in
-            
             if let url = submission.imageURL {
                 NavigationLink {
                     PhotoDetailView(submission: submission)
