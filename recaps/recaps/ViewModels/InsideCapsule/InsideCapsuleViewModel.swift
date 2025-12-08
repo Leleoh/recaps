@@ -24,7 +24,6 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
     private var userService = UserService()
     
     var selectedImages: [UIImage] = []
-    
     var selectedPickerItems: [PhotosPickerItem] = [] {
         didSet {
             Task {
@@ -32,6 +31,9 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
             }
         }
     }
+    
+    var capturedImage: UIImage?
+    var capturedPickerItem: PhotosPickerItem?
     
     var users: [User] = []
     

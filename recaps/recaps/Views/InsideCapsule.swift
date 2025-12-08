@@ -17,8 +17,6 @@ struct InsideCapsule: View {
     
     @State private var vm = InsideCapsuleViewModel()
     
-    @State private var capturedImage: UIImage?
-    @State private var capturedPickerItem: PhotosPickerItem?
     
     var body: some View {
         
@@ -192,7 +190,7 @@ struct InsideCapsule: View {
         }
         
         .fullScreenCover(isPresented: $showCamera) {
-            CameraView(image: $capturedImage, selectedItem: $capturedPickerItem)
+            CameraView(image: $vm.capturedImage, selectedItem: $vm.capturedPickerItem)
         }
         
         .sheet(isPresented: $showMemberList) {
@@ -212,6 +210,13 @@ struct InsideCapsule: View {
             if !imgs.isEmpty {
                 withAnimation { showInputComponent = false }
                 goToInputView = true
+            }
+        }
+        
+        .onChange(of: vm.capturedImage) { _, newImage in
+            if let image = newImage {
+                vm.selectedImages = [image]
+                vm.capturedImage = nil
             }
         }
         
