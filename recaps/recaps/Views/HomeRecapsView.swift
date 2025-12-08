@@ -190,7 +190,11 @@ struct HomeRecapsView: View {
                             join: { code in
                                 Task {
                                     await viewModel.joinCapsule(code: code)
-                                    withAnimation { viewModel.showJoinPopup = false }
+                                    if viewModel.joinErrorMessage == nil {
+                                        withAnimation {
+                                            viewModel.showJoinPopup = false
+                                        }
+                                    }
                                 }
                             },
                             joinErrorMessage: $viewModel.joinErrorMessage
