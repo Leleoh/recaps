@@ -45,7 +45,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             }
             
             // Busca os objetos Capsule no CloudKit usando os IDs
-            var allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
+            var allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs).sorted(by: { $0.createdAt < $1.createdAt })
             
             // Filtra as cápsulas por status
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
@@ -57,7 +57,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             await checkIfCapsuleIsValidOffensive(user: currentUser)
             
             // faz fetch novamente
-            allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
+            allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs).sorted(by: { $0.createdAt < $1.createdAt })
             
             // Filtra as cápsulas atualizadas por status
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }

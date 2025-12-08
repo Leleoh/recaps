@@ -714,7 +714,10 @@ class CapsuleService: CapsuleServiceProtocol {
         
         let members = result["members"] as? [String] ?? []
         
+        let blacklisted = result["blacklisted"] as? [UUID] ?? []
+        
         let submissions = try await fetchSubmissions(capsuleID: id)
+        
         
         let capsule = Capsule(
             id: id,
@@ -729,7 +732,8 @@ class CapsuleService: CapsuleServiceProtocol {
             lives: lives,
             members: members,
             ownerId: ownerId,
-            status: status
+            status: status,
+            blacklisted: blacklisted
         )
         
         return capsule
@@ -767,6 +771,8 @@ class CapsuleService: CapsuleServiceProtocol {
                 let statusRaw = record["status"] as? String ?? ""
                 let status = CapsuleStatus(rawValue: statusRaw) ?? .inProgress
                 
+                let blacklisted = record["blacklisted"] as? [UUID] ?? []
+                
                 let members = record["members"] as? [String] ?? []
                 
                 let capsule = Capsule(
@@ -782,7 +788,8 @@ class CapsuleService: CapsuleServiceProtocol {
                     lives: lives,
                     members: members,
                     ownerId: ownerId,
-                    status: status
+                    status: status,
+                    blacklisted: blacklisted
                 )
                 
                 capsules.append(capsule)
@@ -932,7 +939,7 @@ class CapsuleService: CapsuleServiceProtocol {
     }
 
 
-    private func fetchBrazilianTime() async throws -> Date {
+    func fetchBrazilianTime() async throws -> Date {
         let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
 
         let (data, response) = try await URLSession.shared.data(from: url)
