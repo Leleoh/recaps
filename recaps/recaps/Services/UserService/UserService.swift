@@ -83,6 +83,46 @@ class UserService: UserServiceProtocol {
         )
 
     }
+    
+    func getUsers(IDs: [String]) async throws -> [User] {
+        let referenceIDs = IDs.map { CKRecord.ID(recordName: $0) }
+        
+        var users: [User] = []
+        
+        let result = try await database.records(for: referenceIDs)
+        
+        for (_, recordResult) in result {
+            switch recordResult {
+            case .success(let record):
+                
+                let id = record.recordID.recordName
+                let name = record["name"] as? String ?? ""
+                let email = record["email"] as? String ?? ""
+                
+                let capsulesStrings = record["capsules"] as? [String] ?? []
+                let capsules = capsulesStrings.compactMap { UUID(uuidString: $0) }
+                
+                let openCapsulesStrings = record["openCapsules"] as? [String] ?? []
+                let openCapsules = openCapsulesStrings.compactMap { UUID(uuidString: $0) }
+                
+                let user = User(
+                    id: id,
+                    name: name,
+                    email: email,
+                    capsules: capsules,
+                    openCapsules: openCapsules
+                )
+                
+                users.append(user)
+                
+            case .failure(let error):
+                print("Erro ao obter User: \(error)")
+                throw error
+            }
+        }
+        
+        return users
+    }
 
     
     // MARK: Create User

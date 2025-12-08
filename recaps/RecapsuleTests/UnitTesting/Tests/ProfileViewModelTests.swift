@@ -12,7 +12,7 @@ import Foundation
 struct ProfileViewModelTests {
     
     @Test func testLoadUser() async throws {
-        let mockUser = User(id: "1", name: "teste", email: "ana@test.com", capsules: [])
+        let mockUser = User(id: "1", name: "teste", email: "ana@test.com", capsules: [], openCapsules: [])
         let userService = MockUserService()
         userService.mockCurrentUser = mockUser
         
@@ -28,7 +28,7 @@ struct ProfileViewModelTests {
     }
     
     @Test func testLogout() async throws {
-        let mockUser = User(id: "1", name: "Ana", email: "ana@test.com", capsules: [])
+        let mockUser = User(id: "1", name: "Ana", email: "ana@test.com", capsules: [], openCapsules: [])
         let userService = MockUserService()
         userService.mockCurrentUser = mockUser
         
@@ -43,7 +43,7 @@ struct ProfileViewModelTests {
     
     @Test func testRemoveUserFromAllCapsules() async throws {
         let capsuleID = UUID()
-        let user = User(id: "user1", name: "Ana", email: "ana@test.com", capsules: [capsuleID])
+        let user = User(id: "user1", name: "Ana", email: "ana@test.com", capsules: [capsuleID], openCapsules: [])
         let capsule = Capsule(
             id: capsuleID,
             code: "teste",
@@ -80,7 +80,7 @@ struct ProfileViewModelTests {
     
     @Test func testDeleteAccount() async throws {
         let capsuleID = UUID()
-        let user = User(id: "user1", name: "Ana", email: "ana@test.com", capsules: [capsuleID])
+        let user = User(id: "user1", name: "Ana", email: "ana@test.com", capsules: [capsuleID], openCapsules: [])
         let capsule = Capsule(
             id: capsuleID,
             code: "teste",

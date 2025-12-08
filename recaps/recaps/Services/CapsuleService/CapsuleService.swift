@@ -9,7 +9,7 @@ import CloudKit
 import SwiftUI
 
 class CapsuleService: CapsuleServiceProtocol {
-    
+
     private let database: CKDatabase
     init(database: CKDatabase = Database.shared.database) {
         self.database = database
@@ -253,6 +253,12 @@ class CapsuleService: CapsuleServiceProtocol {
             let isCapsuleCompleted = try await isCapsuleCompleted(record: record)
             
             if isCapsuleCompleted {
+                return true
+            }
+            
+            let isStreakCompleted = try await isStreakCompleted(record: record)
+            
+            if isStreakCompleted {
                 return true
             }
             
@@ -548,14 +554,22 @@ class CapsuleService: CapsuleServiceProtocol {
         }
     }
     
-    func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
+    func fetchSubmissions(capsuleID: UUID, limit: Int? = nil) async throws -> [Submission] {
         let predicate = NSPredicate(format: "capsuleID == %@", capsuleID.uuidString)
-        // let predicate = NSPredicate(value: true)
         let query = CKQuery(recordType: "Submission", predicate: predicate)
+        
+        // Add sorting to get the oldest submissions
+        query.sortDescriptors = [NSSortDescriptor(key: "date", ascending: true)]
         
         var submissions: [Submission] = []
         
-        let result = try await database.records(matching: query)
+        let result: (matchResults: [(CKRecord.ID, Result<CKRecord, Error>)], queryCursor: CKQueryOperation.Cursor?)
+        
+        if let limit = limit {
+            result = try await database.records(matching: query, resultsLimit: limit)
+        } else {
+            result = try await database.records(matching: query)
+        }
         
         for (_, recordResult) in result.matchResults {
             switch recordResult {
@@ -614,6 +628,120 @@ class CapsuleService: CapsuleServiceProtocol {
         
         var capsules: [Capsule] = []
         
+        let result = try await database.records(for: referenceIDs,)
+        
+        for (_, recordResult) in result {
+            switch recordResult {
+            case .success(let record):
+                
+                guard
+                    let idString = record["id"] as? String,
+                    let id = UUID(uuidString: idString)
+                else { continue }
+                
+                let code = record["code"] as? String ?? ""
+                let name = record["name"] as? String ?? ""
+                let createdAt = record["createdAt"] as? Date ?? Date()
+                let offensive = record["offensive"] as? Int ?? 0
+                let offensiveTarget = record["offensiveTarget"] as? Int ?? 0
+                let lastSubmissionDate = record["lastSubmissionDate"] as? Date ?? Date()
+                let validOffensive = record["validOffensive"] as? Bool ?? false
+                let lives = record["lives"] as? Int ?? 0
+                
+                let ownerId = record["ownerId"] as? String ?? ""
+                
+                let statusRaw = record["status"] as? String ?? ""
+                let status = CapsuleStatus(rawValue: statusRaw) ?? .inProgress
+                
+                let members = record["members"] as? [String] ?? []
+                
+                let submissions = try await fetchSubmissions(capsuleID: id, limit: 3)
+                
+                let blacklistedStrings = record["blacklisted"] as? [String] ?? []
+                let blacklisted = blacklistedStrings.compactMap { UUID(uuidString: $0) }
+
+                
+                let capsule = Capsule(
+                    id: id,
+                    code: code,
+                    submissions: submissions,
+                    name: name,
+                    createdAt: createdAt,
+                    offensive: offensive,
+                    offensiveTarget: offensiveTarget,
+                    lastSubmissionDate: lastSubmissionDate,
+                    validOffensive: validOffensive,
+                    lives: lives,
+                    members: members,
+                    ownerId: ownerId,
+                    status: status,
+                    blacklisted: blacklisted
+                )
+                
+                capsules.append(capsule)
+                
+            case .failure(let error):
+                print("Erro ao obter Capsule: \(error)")
+            }
+        }
+        
+        return capsules
+    }
+    
+    func fetchCapsule(id: UUID) async throws -> Capsule? {
+        let recordID = CKRecord.ID(recordName: id.uuidString)
+        
+        let result = try await database.record(for: recordID)
+        
+        guard
+            let idString = result["id"] as? String,
+            let id = UUID(uuidString: idString)
+        else { return nil }
+        
+        let code = result["code"] as? String ?? ""
+        let name = result["name"] as? String ?? ""
+        let createdAt = result["createdAt"] as? Date ?? Date()
+        let offensive = result["offensive"] as? Int ?? 0
+        let offensiveTarget = result["offensiveTarget"] as? Int ?? 0
+        let lastSubmissionDate = result["lastSubmissionDate"] as? Date ?? Date()
+        let validOffensive = result["validOffensive"] as? Bool ?? false
+        let lives = result["lives"] as? Int ?? 0
+        
+        let ownerId = result["ownerId"] as? String ?? ""
+        
+        let statusRaw = result["status"] as? String ?? ""
+        let status = CapsuleStatus(rawValue: statusRaw) ?? .inProgress
+        
+        let members = result["members"] as? [String] ?? []
+        
+        let submissions = try await fetchSubmissions(capsuleID: id)
+        
+        let capsule = Capsule(
+            id: id,
+            code: code,
+            submissions: submissions,
+            name: name,
+            createdAt: createdAt,
+            offensive: offensive,
+            offensiveTarget: offensiveTarget,
+            lastSubmissionDate: lastSubmissionDate,
+            validOffensive: validOffensive,
+            lives: lives,
+            members: members,
+            ownerId: ownerId,
+            status: status
+        )
+        
+        return capsule
+    }
+    
+    func fetchCapsulesWithoutSubmissions(IDs: [UUID]) async throws -> [Capsule] {
+        let recordNames = IDs.map { $0.uuidString }
+        
+        let referenceIDs = recordNames.map { CKRecord.ID(recordName: $0) }
+        
+        var capsules: [Capsule] = []
+        
         let result = try await database.records(for: referenceIDs)
         
         for (_, recordResult) in result {
@@ -641,16 +769,10 @@ class CapsuleService: CapsuleServiceProtocol {
                 
                 let members = record["members"] as? [String] ?? []
                 
-                let submissions = try await fetchSubmissions(capsuleID: id)
-                
-                let blacklistedStrings = record["blacklisted"] as? [String] ?? []
-                let blacklisted = blacklistedStrings.compactMap { UUID(uuidString: $0) }
-
-                
                 let capsule = Capsule(
                     id: id,
                     code: code,
-                    submissions: submissions,
+                    submissions: [],
                     name: name,
                     createdAt: createdAt,
                     offensive: offensive,
@@ -660,8 +782,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     lives: lives,
                     members: members,
                     ownerId: ownerId,
-                    status: status,
-                    blacklisted: blacklisted
+                    status: status
                 )
                 
                 capsules.append(capsule)
