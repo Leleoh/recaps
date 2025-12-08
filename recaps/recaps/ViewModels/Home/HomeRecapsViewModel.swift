@@ -34,8 +34,11 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         do {
             // Pega o usuário logado para acessar a lista de IDs de cápsulas
             let currentUser = try await userService.getCurrentUser()
-            let capsuleIDs = currentUser.capsules
+            let progressCapsuleIDs = currentUser.capsules
+            let openCapsuleIDs = currentUser.openCapsules
             
+            let capsuleIDs = progressCapsuleIDs + openCapsuleIDs
+
             guard !capsuleIDs.isEmpty else {
                 print("Usuário não possui cápsulas.")
                 return
@@ -95,6 +98,14 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
 //            print("✅ Nenhuma alteração necessária nas ofensivas.")
 //        }
         
+    func fetchCapsule(id: UUID) async -> Capsule? {
+        do {
+            return try await capsuleService.fetchCapsule(id: id)
+        } catch {
+            print("Erro ao buscar cápsula: \(error)")
+            return nil
+        }
+    }
     
     func didTapNewRecap() {
         showCreateCapsule = true
