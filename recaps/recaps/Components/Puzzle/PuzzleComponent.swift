@@ -41,9 +41,12 @@ struct PuzzleTileView: View {
 
 struct SlidingPuzzleComponent: View {
     @State private var viewModel = SlidingPuzzleViewModel()
+    
+    @Binding var isSolved: Bool
+    
     let image: UIImage
     
-    let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 3)
+    let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 3)
     
     var body: some View {
         VStack {
@@ -79,35 +82,24 @@ struct SlidingPuzzleComponent: View {
                     .fill(Color.gray.opacity(0.2))
                     .aspectRatio(1, contentMode: .fit)
                 
-                LazyVGrid(columns: columns, spacing: 2) {
+                LazyVGrid(columns: columns, spacing: 4) {
 
                     ForEach(Array(viewModel.tiles.enumerated()), id: \.element.id) { index, tile in
                         PuzzleTileView(tile: tile)
                             .onTapGesture {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
                                     viewModel.moveTile(index: index)
+                                    isSolved = viewModel.isSolved
                                 }
                             }
                     }
                 }
-                .padding(4)
+                .padding(12)
+                .background(.fillDarkSecondary)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
                 
                 if viewModel.isSolved {
-                    VStack(spacing: 16) {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 60))
-                            .foregroundStyle(.green)
-                            .shadow(radius: 5)
-                        
-                        Text("Memória concluída!")
-                            .font(.title)
-                            .bold()
-                            .foregroundStyle(.white)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(.black.opacity(0.75))
-                    .cornerRadius(12)
-                    .transition(.opacity)
+                    
                 }
             }
             .aspectRatio(1, contentMode: .fit)
@@ -117,14 +109,14 @@ struct SlidingPuzzleComponent: View {
         }
         .onAppear {
             viewModel.setupGame(originalImage: image)
+            viewModel.isSolved = true
+            isSolved = true
         }
     }
 }
 
 #Preview {
+    @Previewable @State var isSolved = false
     let mockImage = UIImage(named: "imagem3") ?? UIImage()
-    return SlidingPuzzleComponent(image: mockImage)
+    return SlidingPuzzleComponent(isSolved: .constant(isSolved), image: mockImage)
 }
-
-
-
