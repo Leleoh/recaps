@@ -10,6 +10,7 @@ import PinterestLikeGrid
 
 struct Gallery: View {
     @State var submissions: [Submission] = []
+    @State private var pinOffsets: [UUID: CGFloat] = [:]
     
     var body: some View {
         PinterestLikeGrid($submissions, spacing: 16) { submission, index in
@@ -17,18 +18,32 @@ struct Gallery: View {
                 NavigationLink {
                     PhotoDetailView(submission: submission)
                 } label: {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                    } placeholder: {
-                        ProgressView()
+                    ZStack(alignment: .topLeading){
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .scaledToFit()
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        
+                        Pins()
+                            .scaleEffect(1.4)
+                            .offset(
+                                x: pinOffsets[submission.id] ?? 0,
+                                y: -10
+                            )
+                            .onAppear {
+                                if pinOffsets[submission.id] == nil {
+                                    pinOffsets[submission.id] = CGFloat.random(in: -15...130)
+                                }
+                            }
                     }
                 }
             }
-            
         }
     }
 }
+
 
 

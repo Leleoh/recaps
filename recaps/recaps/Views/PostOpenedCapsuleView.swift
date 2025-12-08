@@ -43,14 +43,15 @@ struct PostOpenedCapsuleView: View {
                         NameComponent(text: .constant(capsule.name))
                     }
 
-                    Timeline(
-                        sortedMonths: viewModel.sortedMonths(submissions: submissions),
-                        groupedByMonth: viewModel.groupedByMonth(submissions: submissions),
-                        scrollOffset: scrollOffset
-                    )
+                    Gallery(submissions: submissions)
+//                    Timeline(
+//                        sortedMonths: viewModel.sortedMonths(submissions: submissions),
+//                        groupedByMonth: viewModel.groupedByMonth(submissions: submissions),
+//                        scrollOffset: scrollOffset
+//                    )
                 }
                 .padding(.bottom, -40)
-                .padding(.leading, 24)
+                .padding(.horizontal, 24)
             }
             .coordinateSpace(name: "scroll")
             .onPreferenceChange(ScrollOffsetKey.self) { value in
@@ -110,7 +111,8 @@ struct PostOpenedCapsuleView: View {
         lives: 0,
         members: [],
         ownerId: " ",
-        status: .inProgress
+        status: .inProgress,
+        blacklisted: []
     )
 
     PostOpenedCapsuleView(capsule: capsule)
