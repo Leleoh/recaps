@@ -162,9 +162,8 @@ struct HomeRecapsView: View {
             // Configuração da Navigation Bar
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        // TODO: Navegar para View do Perfil.
-                        Text("Profile View Placeholder")
+                    Button {
+                        viewModel.showProfile = true
                     } label: {
                         Image(systemName: "person.fill")
                             .resizable()
@@ -224,6 +223,7 @@ struct HomeRecapsView: View {
         }
         .task {
             await viewModel.fetchCapsules()
+            await viewModel.fetchUser()
         }
         .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
             Task { await viewModel.fetchCapsules() }
@@ -232,6 +232,11 @@ struct HomeRecapsView: View {
                 viewModel.inviteCode = code
                 viewModel.showPopup = true
             }
+        }
+        
+        .sheet(isPresented: $viewModel.showProfile, onDismiss: {
+        }) {
+            ProfileView(user: $viewModel.user)
         }
     }
 }

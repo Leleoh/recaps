@@ -14,11 +14,20 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     var showCreateCapsule: Bool = false
     var showPopup = false
     var showJoinPopup = false
+    var showProfile = false
     var inviteCode: String = ""
     var joinErrorMessage: String? = nil
     
     var inProgressCapsules: [Capsule] = []
     var completedCapsules: [Capsule] = []
+    var user: User = User(
+        id: "",
+        name: "",
+        email: "",
+        capsules: [],
+        openCapsules: []
+    )
+
     
     private let capsuleService: CapsuleServiceProtocol
     private let userService: UserServiceProtocol
@@ -67,6 +76,16 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
+        }
+    }
+    
+    @MainActor
+    func fetchUser() async {
+        do {
+            let user = try await userService.getCurrentUser()
+            self.user = user
+        } catch {
+            print("Erro ao buscar usuário: \(error)")
         }
     }
     
@@ -199,5 +218,6 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         }
             
     }
+     
 }
 
