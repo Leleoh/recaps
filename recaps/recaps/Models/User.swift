@@ -9,10 +9,11 @@ import Foundation
 import CloudKit
 // MARK: - User
 
-struct User {
+struct User: Identifiable {
     let id: String
     var name: String
     var email: String
     var capsules: [UUID]
+    var openCapsules: [UUID]
 }
 
