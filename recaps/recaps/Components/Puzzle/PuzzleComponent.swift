@@ -109,8 +109,8 @@ struct SlidingPuzzleComponent: View {
         }
         .onAppear {
             viewModel.setupGame(originalImage: image)
-            viewModel.isSolved = true
-            isSolved = true
+//            viewModel.isSolved = true
+//            isSolved = true
         }
     }
 }
