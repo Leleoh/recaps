@@ -69,7 +69,9 @@ class MockUserService: UserServiceProtocol {
             return current
         }
 
-        throw NSError(domain: "MockUserService", code: 2, userInfo: [NSLocalizedDescriptionKey: "User not found"])
+        throw NSError(domain: "MockUserService", code: 4, userInfo: [
+            NSLocalizedDescriptionKey: "Mock user not found"
+        ])
     }
 
     func createUser(user: User) async throws {
@@ -131,7 +133,6 @@ class MockUserService: UserServiceProtocol {
     }
 
     // MARK: - User ID Handling
-
     func loadUserId() -> String? {
         didLoadUserId = true
         return userId.isEmpty ? nil : userId
