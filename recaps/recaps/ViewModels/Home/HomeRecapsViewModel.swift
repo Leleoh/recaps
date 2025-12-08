@@ -41,13 +41,22 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 return
             }
             
+            // Busca os objetos Capsule no CloudKit usando os IDs
+            var allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
+            
+            // Filtra as cápsulas por status
+            self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
+            
+            // Consideramos completed ou opened como "Concluídas" na Home
+            self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
+            
+            // Verifica se foram feitos updates
             await checkIfCapsuleIsValidOffensive(user: currentUser)
             
-            // Busca os objetos Capsule no CloudKit usando os IDs
-            let allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
+            // faz fetch novamente
+            allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
             
-        
-            // Filtra as cápsulas por status
+            // Filtra as cápsulas atualizadas por status
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
             
             // Consideramos completed ou opened como "Concluídas" na Home
@@ -62,14 +71,14 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     func checkIfCapsuleIsValidOffensive(user: User) async {
         print("Verificando a validades das vidas")
         
-        //var updatesMade: Bool = false
+       // var updatesMade: Bool = false
         
         for capsule in user.capsules {
             do{
                 let isValid = try await capsuleService.checkIfCapsuleIsValidOffensive(capsuleID: capsule)
                 
                 if !isValid{
-                   // updatesMade = true
+                    //updatesMade = true
                     print("AVISO: Cápsula \(capsule) sofreu penalidade (vida ou reset).")
                 }
             }
@@ -77,6 +86,8 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 print("Erro ao verificar ofensiva da cápsula \(capsule): \(error)")
             }
         }
+    }
+        
 //        if updatesMade {
 //            print("🔄 Recarregando cápsulas para atualizar UI...")
 //            await fetchCapsules()
@@ -84,10 +95,6 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
 //            print("✅ Nenhuma alteração necessária nas ofensivas.")
 //        }
         
-        
-        
-        
-    }
     
     func didTapNewRecap() {
         showCreateCapsule = true
