@@ -256,5 +256,4 @@ class UserService: UserServiceProtocol {
     func logout() {
         defaults.removeObject(forKey: "userId")
     }
-    
 }

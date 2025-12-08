@@ -9,34 +9,30 @@ import AuthenticationServices
 import SwiftUI
 
 struct AuthenthicationView: View {
-    var viewModel = AuthenthicationViewModel()
+    @State var viewModel = AuthenthicationViewModel()
     @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        Group {
-            if viewModel.isSignedIn || viewModel.hasUser {
-                HomeRecapsView()
-            } else {
-                NavigationView {
-                    VStack {
-                        SignInWithAppleButton(.continue) { request in
-                            request.requestedScopes = [.email, .fullName]
-                        } onCompletion: { result in
-                            Task { @MainActor in
-                                await viewModel.handleAuthResult(result)
-                            }
-                        }
-                        .signInWithAppleButtonStyle(
-                            colorScheme == .dark ? .white : .black
-                        )
-                        .frame(height: 50)
-                        .padding()
+        NavigationView {
+            VStack {
+                SignInWithAppleButton(.continue) { request in
+                    request.requestedScopes = [.email, .fullName]
+                } onCompletion: { result in
+                    Task { @MainActor in
+                        await viewModel.handleAuthResult(result)
                     }
-                    .navigationTitle("Sign In With Apple")
                 }
+                .signInWithAppleButtonStyle(
+                    colorScheme == .dark ? .white : .black
+                )
+                .frame(height: 50)
+                .padding()
             }
+            .navigationTitle("Sign In With Apple")
         }
     }
+    
+    
 }
 
 #Preview {
