@@ -1,9 +1,15 @@
+//
+//  InputSubmissionView.swift
+//  recaps
+//
+//  Created by Leonel Ferraz Hernandez on 24/11/25.
+//
+
 import SwiftUI
 
 struct InputSubmissionView: View {
     
-    
-    @State var viewModel: InputSubmissionViewModel
+    @State var viewModel: InputSubmissionViewModelProtocol
     
     @State private var selectedIndex = 0
     @GestureState private var dragOffset: CGFloat = 0
@@ -13,6 +19,10 @@ struct InputSubmissionView: View {
     
     private let cardWidth: CGFloat = 300
     private let cardHeight: CGFloat = 244
+    
+    init(viewModel: InputSubmissionViewModelProtocol) {
+        self.viewModel = viewModel
+    }
     
     var body: some View {
         NavigationStack {
@@ -103,10 +113,13 @@ struct InputSubmissionView: View {
                     .resizable()
                     .ignoresSafeArea()
             )
-            .navigationTitle("Memory")
-            .navigationBarTitleDisplayMode(.inline)
             
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                        Text("Memory")
+                        .font(.system(size: 28, weight: .light))
+                    }
+                
                 ToolbarItem(placement: .cancellationAction) {
                     Button {
                         dismiss()
