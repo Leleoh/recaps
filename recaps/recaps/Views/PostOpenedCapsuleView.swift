@@ -7,10 +7,14 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct PostOpenedCapsuleView: View {
     var capsule: Capsule
     let viewModel = PostOpenedCapsuleViewModel()
-    
+
+    @State private var scrollOffset: CGFloat = 0
+
     var submissions: [Submission] {
         viewModel.orderSubmission(submissions: capsule.submissions)
     }
@@ -20,24 +24,42 @@ struct PostOpenedCapsuleView: View {
             Image(.backgroundPNG)
                 .resizable()
                 .ignoresSafeArea()
-            
+
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 16){
+                GeometryReader { geo in
+                    Color.clear
+                        .preference(
+                            key: ScrollOffsetKey.self,
+                            value: geo.frame(in: .named("scroll")).minY
+                        )
+                }
+                .frame(height: 0)
+
+                VStack(spacing: 16) {
                     VStack(spacing: 5) {
                         Text(viewModel.dates(submissions: submissions))
                             .font(.coveredByYourGraceSignature)
-                        
+
                         NameComponent(text: .constant(capsule.name))
                     }
-                    Gallery(submissions: submissions)
-//                    Timeline(sortedMonths: viewModel.sortedMonths(submissions: submissions), groupedByMonth: viewModel.groupedByMonth(submissions: submissions))
+
+                    Timeline(
+                        sortedMonths: viewModel.sortedMonths(submissions: submissions),
+                        groupedByMonth: viewModel.groupedByMonth(submissions: submissions),
+                        scrollOffset: scrollOffset
+                    )
                 }
                 .padding(.bottom, -40)
-                .padding(.horizontal, 24)
+                .padding(.leading, 24)
+            }
+            .coordinateSpace(name: "scroll")
+            .onPreferenceChange(ScrollOffsetKey.self) { value in
+                scrollOffset = value
             }
         }
     }
 }
+
 
 #Preview {
     let calendar = Calendar.current
@@ -65,6 +87,15 @@ struct PostOpenedCapsuleView: View {
     let s11 = Submission(id: UUID(), imageURL: url8, description: "7 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -7, to: now)!, capsuleID: UUID())
     let s12 = Submission(id: UUID(), imageURL: url9, description: "8 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -20, to: now)!, capsuleID: UUID())
     let s13 = Submission(id: UUID(), imageURL: url1, description: "9 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -23, to: now)!, capsuleID: UUID())
+    let s14 = Submission(id: UUID(), imageURL: url1, description: "9 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -9, to: now)!, capsuleID: UUID())
+    let s15 = Submission(id: UUID(), imageURL: url8, description: "7 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -7, to: now)!, capsuleID: UUID())
+    let s16 = Submission(id: UUID(), imageURL: url9, description: "8 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -20, to: now)!, capsuleID: UUID())
+    let s17 = Submission(id: UUID(), imageURL: url1, description: "9 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -23, to: now)!, capsuleID: UUID())
+    let s18 = Submission(id: UUID(), imageURL: url1, description: "9 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -9, to: now)!, capsuleID: UUID())
+    let s19 = Submission(id: UUID(), imageURL: url8, description: "7 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -7, to: now)!, capsuleID: UUID())
+    let s20 = Submission(id: UUID(), imageURL: url9, description: "8 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -20, to: now)!, capsuleID: UUID())
+    let s21 = Submission(id: UUID(), imageURL: url1, description: "9 dias atrás", authorId: "1", date: calendar.date(byAdding: .day, value: -23, to: now)!, capsuleID: UUID())
+    
     
     let capsule = Capsule(
         id: UUID(),
