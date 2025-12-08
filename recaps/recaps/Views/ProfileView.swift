@@ -47,16 +47,13 @@ struct ProfileView: View {
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Button {
-                                Task {
-                                    await viewModel.deleteAccount()
-                                }
-                                dismiss()
+                                viewModel.showDeleteAlert = true
                             } label: {
                                 Text("Delete account")
                                     .foregroundStyle(.red)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            
+
                             Divider()
                                 .padding(.horizontal, 8)
                             
@@ -93,6 +90,19 @@ struct ProfileView: View {
                     }
                 }
             }
+            .alert("Delete account?", isPresented: $viewModel.showDeleteAlert) {
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await viewModel.deleteAccount()
+                    }
+                    dismiss()
+                }
+
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This action cannot be undone.")
+            }
+
         }
     }
 }
