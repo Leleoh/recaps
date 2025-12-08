@@ -9,16 +9,18 @@ import SwiftUI
 
 struct ProfileView: View {
     @State private var viewModel = ProfileViewModel()
+    @Binding var user: User
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationStack {
-            ScrollView{
+            ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(viewModel.userName)
+                        Text(user.name)
                             .font(.coveredByYourGraceTitle)
-                        Text(viewModel.userEmail)
+                        
+                        Text(user.email)
                             .font(.footnote)
                     }
                     .padding(16)
@@ -89,17 +91,8 @@ struct ProfileView: View {
                             .font(.headline)
                             .foregroundStyle(.primary)
                     }
-                    
                 }
             }
         }
-        .task {
-            await viewModel.loadUser()
-        }
     }
-}
-
-
-#Preview {
-    ProfileView()
 }
