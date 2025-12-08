@@ -58,8 +58,7 @@ struct ProfileView: View {
                                 .padding(.horizontal, 8)
                             
                             Button {
-                                viewModel.logout()
-                                dismiss()
+                                viewModel.showSignOutAlert = true
                             } label: {
                                 Text("Sign out")
                                     .foregroundStyle(.red)
@@ -100,9 +99,20 @@ struct ProfileView: View {
 
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("This action cannot be undone.")
+                Text("Your account and all associated data will be permanently deleted.")
             }
+            
+            .alert("Sign Out?", isPresented: $viewModel.showSignOutAlert) {
+                Button("Sign Out", role: .destructive) {
+                    viewModel.logout()
+                    dismiss()
+                }
 
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("You'll need to sign in again to access your account.")
+
+            }
         }
     }
 }

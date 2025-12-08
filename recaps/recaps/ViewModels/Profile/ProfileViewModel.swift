@@ -21,6 +21,7 @@ class ProfileViewModel: ProfileViewModelProtocol {
     var user: User? = nil
     var allowNotifications = false
     var showDeleteAlert: Bool = false
+    var showSignOutAlert: Bool = false
     
     func loadUser() async {
         do {
