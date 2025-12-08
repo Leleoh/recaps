@@ -11,12 +11,14 @@ import SwiftUI
 protocol CapsuleServiceProtocol {
 
     // MARK: - Reading
-    func fetchSubmissions(capsuleID: UUID) async throws -> [Submission]
+    func fetchSubmissions(capsuleID: UUID, limit: Int?) async throws -> [Submission]
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule]
+    func fetchCapsule(id: UUID) async throws -> Capsule?
     func fetchCapsulesWithoutSubmissions(IDs: [UUID]) async throws -> [Capsule]
     func fetchAllCapsules() async throws -> [Capsule]
     func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule]
-
+    func fetchBrazilianTime() async throws -> Date
+    
     // MARK: - Writing
     func createCapsule(capsule: Capsule) async throws -> UUID
     func deleteCapsule(capsuleID: UUID) async throws
