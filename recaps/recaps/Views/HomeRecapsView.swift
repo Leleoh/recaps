@@ -181,11 +181,6 @@ struct HomeRecapsView: View {
                     ZStack {
                         Color.black.opacity(0.4)
                             .ignoresSafeArea()
-                            .onTapGesture {
-                                withAnimation {
-                                    viewModel.showJoinPopup = false
-                                }
-                            }
                         
                         JoinPopUp(
                             isShowing: $viewModel.showJoinPopup,
