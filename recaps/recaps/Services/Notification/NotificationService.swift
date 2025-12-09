@@ -7,10 +7,13 @@
 
 import Foundation
 import UserNotifications
+import Combine
 
 class NotificationService: NSObject, NotificationServiceProtocol {
     
     static let shared = NotificationService()
+    
+    @Published var selectedCapsuleID: String?
     
     override private init() {
         super.init()
@@ -42,14 +45,55 @@ class NotificationService: NSObject, NotificationServiceProtocol {
             }
         }
     }
+    
+    func scheduleStreakReminder(for capsule: Capsule, at hour: Int, minute: Int) {
+        let content = UNMutableNotificationContent()
+        content.title = "🗝️ Offensive in risk for capsule: \(capsule.name)"
+        content.body = "No photos submitted to capsule '\(capsule.name)'! Don't lose the streak!"
+        content.sound = .default
+        content.userInfo = ["capsuleId": capsule.id.uuidString]
+        
+        var dateComponents = DateComponents()
+        dateComponents.hour = hour
+        dateComponents.minute = minute
+        
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        let requestID = "streak-\(capsule.id.uuidString)"
+        
+        let request = UNNotificationRequest(identifier: requestID, content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Erro ao agendar para \(capsule.name): \(error)")
+            } else {
+                print("⏰ Agendado para cápsula \(capsule.name) às \(hour):\(minute)")
+            }
+        }
+    }
+    
+    func cancelReminder(for capsuleID: UUID) {
+        let requestID = "streak-\(capsuleID.uuidString)"
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [requestID])
+        print("🔕 Lembrete cancelado para cápsula ID: \(capsuleID)")
+    }
 }
 
 extension NotificationService: UNUserNotificationCenterDelegate {
+    
+    // Mostrar notificação mesmo com app aberto
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
         return [.banner, .sound]
     }
     
+    // Tratamento de clique na notifiação
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
+        let userInfo = response.notification.request.content.userInfo
         
+        if let capsuleID = userInfo["capsuleId"] as? String {
+            await MainActor.run {
+                self.selectedCapsuleID = capsuleID
+            }
+        }
     }
 }
