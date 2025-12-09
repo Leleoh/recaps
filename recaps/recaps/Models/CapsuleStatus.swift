@@ -10,8 +10,9 @@ import Foundation
 
 // MARK: - CapsuleStatus
 
-enum CapsuleStatus: String, Codable {
+enum CapsuleStatus: String, Codable, Hashable {
     case inProgress
     case completed
     case opened
 }
+

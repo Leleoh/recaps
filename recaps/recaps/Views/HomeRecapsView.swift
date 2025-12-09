@@ -11,6 +11,8 @@ struct HomeRecapsView: View {
     
     @State private var viewModel = HomeRecapsViewModel()
     
+    @State private var capsuleToNavigate: Capsule?
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -162,9 +164,8 @@ struct HomeRecapsView: View {
             // Configuração da Navigation Bar
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        // TODO: Navegar para View do Perfil.
-                        Text("Profile View Placeholder")
+                    Button {
+                        viewModel.showProfile = true
                     } label: {
                         Image(systemName: "person.fill")
                             .resizable()
@@ -180,17 +181,16 @@ struct HomeRecapsView: View {
                     ZStack {
                         Color.black.opacity(0.4)
                             .ignoresSafeArea()
-                            .onTapGesture {
-                                withAnimation {
-                                    viewModel.showJoinPopup = false
-                                }
-                            }
                         
                         JoinPopUp(
                             isShowing: $viewModel.showJoinPopup,
                             join: { code in
                                 Task {
-                                    await viewModel.joinCapsule(code: code)
+                                    if let capsule = await viewModel.joinCapsule(code: code) {
+                                        capsuleToNavigate = capsule
+                                        viewModel.showJoinPopup = false
+                                        await viewModel.fetchCapsules()
+                                    }
 
                                     if viewModel.joinErrorMessage == nil {
                                         withAnimation { viewModel.showJoinPopup = false }
@@ -221,9 +221,17 @@ struct HomeRecapsView: View {
                     .zIndex(2)
                 }
             }
+            // Navigation to InsideCapsule when capsuleToNavigate is set
+            .navigationDestination(item: $capsuleToNavigate) { capsule in
+                InsideCapsule(capsule: capsule)
+            }
+            
         }
+        
+        
         .task {
             await viewModel.fetchCapsules()
+            await viewModel.fetchUser()
         }
         .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
             Task { await viewModel.fetchCapsules() }
@@ -233,10 +241,14 @@ struct HomeRecapsView: View {
                 viewModel.showPopup = true
             }
         }
+        
+        .sheet(isPresented: $viewModel.showProfile, onDismiss: {
+        }) {
+            ProfileView(user: $viewModel.user)
+        }
     }
 }
 
 #Preview {
     HomeRecapsView()
 }
-

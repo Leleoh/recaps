@@ -18,18 +18,21 @@ class MockCapsuleService: CapsuleServiceProtocol {
     var didFetchCapsules = false
     var didCreateSubmission = false
     var didCheckValidOffensive = false
-
+    var didCreateCapsuleWithSubmissions = false
+    var didCheckIfCapsuleIsCompleted = false
+    var didCheckIfIncreasesStreak = false
+    
     var createdCapsule: Capsule?
     var updatedCapsule: Capsule?
     var deletedCapsuleID: UUID?
     var fetchedCapsuleIDs: [UUID] = []
     var createdSubmission: Submission?
-
-    // MARK: - Internal storage
+    
+    // MARK: - State interno
     var storedCapsules: [UUID: Capsule] = [:]
     var storedSubmissions: [UUID: [Submission]] = [:]
-
-    // MARK: - Capsules
+    
+    // MARK: - Criação, atualização, deleção
     func createCapsule(capsule: Capsule) async throws -> UUID {
         didCreate = true
         createdCapsule = capsule
@@ -49,7 +52,7 @@ class MockCapsuleService: CapsuleServiceProtocol {
         storedCapsules.removeValue(forKey: capsuleID)
         storedSubmissions.removeValue(forKey: capsuleID)
     }
-
+    
     // MARK: - Submissions
     func createSubmission(submission: Submission, capsuleID: UUID, image: UIImage) async throws {
         didCreateSubmission = true
@@ -63,12 +66,8 @@ class MockCapsuleService: CapsuleServiceProtocol {
             storedCapsules[capsuleID] = capsule
         }
     }
-
-    func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
-        return storedSubmissions[capsuleID] ?? []
-    }
-
-    // MARK: - Fetching Capsules
+    
+    // MARK: - Fetching
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule] {
         didFetchCapsules = true
         fetchedCapsuleIDs = IDs
@@ -79,7 +78,7 @@ class MockCapsuleService: CapsuleServiceProtocol {
         didFetchCapsules = true
         return Array(storedCapsules.values)
     }
-
+    
     func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule] {
         didFetchCapsules = true
         return storedCapsules.values.map { capsule in
@@ -88,8 +87,11 @@ class MockCapsuleService: CapsuleServiceProtocol {
             return copy
         }
     }
-
-    // MARK: - Capsule Logic (Mocked)
+    
+    func fetchSubmissions(capsuleID: UUID) async throws -> [Submission] {
+        return storedSubmissions[capsuleID] ?? []
+    }
+    
     func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool {
         didCheckValidOffensive = true
 
@@ -103,33 +105,48 @@ class MockCapsuleService: CapsuleServiceProtocol {
 
         return diff < limit
     }
-
-    func checkIfCapsuleIsCompleted(capsuleID: UUID) async throws -> Bool {
-        guard let capsule = storedCapsules[capsuleID] else { return false }
-        return capsule.status == .completed
-    }
-
-    func checkIfIncreasesStreak(capsuleID: UUID) async throws {
-        // Mock vazio - não faz nada
-    }
-
-    // MARK: - Extra helper for tests
-    func createCapsuleWithSubmissions(
-        capsule: Capsule,
-        submissions: [Submission],
-        images: [UIImage]
-    ) async throws -> UUID {
-
-        storedCapsules[capsule.id] = capsule
+    
+    func createCapsuleWithSubmissions(capsule: Capsule, submissions: [Submission], images: [UIImage]) async throws -> UUID {
+        didCreateCapsuleWithSubmissions = true
+        
+        var newCapsule = capsule
+        newCapsule.submissions = submissions
+        storedCapsules[capsule.id] = newCapsule
+        
         storedSubmissions[capsule.id] = submissions
-
-        var updated = capsule
-        updated.submissions = submissions
-        storedCapsules[capsule.id] = updated
-
+        
         return capsule.id
     }
-
+    
+    func checkIfCapsuleIsCompleted(capsuleID: UUID) async throws -> Bool {
+        didCheckIfCapsuleIsCompleted = true
+        
+        guard let capsule = storedCapsules[capsuleID] else {
+            return false
+        }
+        
+        return capsule.status == .completed
+    }
+    
+    func checkIfIncreasesStreak(capsuleID: UUID) async throws {
+        didCheckIfIncreasesStreak = true
+        
+        guard var capsule = storedCapsules[capsuleID] else { return }
+        
+        capsule.offensive += 1
+        storedCapsules[capsuleID] = capsule
+    }
+    
+    // MARK: - Helpers de teste
+    func addSubmission(_ submission: Submission) {
+        storedSubmissions[submission.capsuleID, default: []].append(submission)
+        if var capsule = storedCapsules[submission.capsuleID] {
+            capsule.submissions.append(submission)
+            capsule.lastSubmissionDate = submission.date
+            storedCapsules[submission.capsuleID] = capsule
+        }
+    }
+    
     func resetTrackers() {
         didCreate = false
         didDelete = false
@@ -138,6 +155,10 @@ class MockCapsuleService: CapsuleServiceProtocol {
         didCreateSubmission = false
         didCheckValidOffensive = false
 
+        didCreateCapsuleWithSubmissions = false
+        didCheckIfCapsuleIsCompleted = false
+        didCheckIfIncreasesStreak = false
+        
         createdCapsule = nil
         updatedCapsule = nil
         deletedCapsuleID = nil

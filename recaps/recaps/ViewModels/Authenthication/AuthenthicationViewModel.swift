@@ -13,12 +13,6 @@ import CloudKit
 class AuthenthicationViewModel {
     // MARK: Properties
     private let userService = UserService()
-    var hasUser = false
-    
-    // MARK: Computed Properties
-    var isSignedIn: Bool {
-        !userService.userId.isEmpty
-    }
     
     // MARK: Auth Handling (Sign in With Apple)
     @MainActor
@@ -34,18 +28,10 @@ class AuthenthicationViewModel {
             let newName = "\(givenName) \(familyName)".trimmingCharacters(in: .whitespaces)
 
             do {
-                // 1. Tenta buscar usuário no CloudKit
-                let existingUser = try await userService.getUser(with: newUserId)
-
-                print("Usuário encontrado no CloudKit:", existingUser.name)
-
-                // 2. Só agora salva localmente
+                _ = try await userService.getUser(with: newUserId)
                 userService.saveUserId(newUserId)
-                self.hasUser = true
 
             } catch {
-                print("Usuário não existe. Criando no CloudKit...")
-
                 let newUser = User(
                     id: newUserId,
                     name: newName,
@@ -55,17 +41,11 @@ class AuthenthicationViewModel {
                 )
 
                 _ = try? await userService.createUser(user: newUser)
-
-                // Agora sim salva o userId localmente
                 userService.saveUserId(newUserId)
-                self.hasUser = true
-
-                print("Novo usuário criado no CloudKit")
             }
 
         case .failure(let error):
-            print("Erro no Sign In With Apple:", error)
+            print("Erro:", error)
         }
     }
-
 }

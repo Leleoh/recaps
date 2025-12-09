@@ -8,7 +8,7 @@ import Foundation
 
 // MARK: - Capsule
 
-struct Capsule: Codable, Identifiable {
+struct Capsule: Codable, Identifiable, Hashable {
     let id: UUID
     var code: String
     var submissions: [Submission]
@@ -26,3 +26,4 @@ struct Capsule: Codable, Identifiable {
     var dailyGameSubmission: UUID?
     var blacklisted: [UUID]
 }
+

@@ -19,6 +19,9 @@ class ProfileViewModel: ProfileViewModelProtocol {
     }
     
     var user: User? = nil
+    var allowNotifications = false
+    var showDeleteAlert: Bool = false
+    var showSignOutAlert: Bool = false
     
     func loadUser() async {
         do {
@@ -30,10 +33,10 @@ class ProfileViewModel: ProfileViewModelProtocol {
     }
     
     var userName: String {
-        user?.name ?? "dsukudhfis"
+        user?.name ?? " "
     }
     var userEmail: String {
-        user?.email ?? "skjdn"
+        user?.email ?? " "
     }
     
     func logout() {

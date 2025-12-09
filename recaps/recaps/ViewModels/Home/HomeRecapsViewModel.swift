@@ -14,11 +14,20 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     var showCreateCapsule: Bool = false
     var showPopup = false
     var showJoinPopup = false
+    var showProfile = false
     var inviteCode: String = ""
     var joinErrorMessage: String? = nil
     
     var inProgressCapsules: [Capsule] = []
     var completedCapsules: [Capsule] = []
+    var user: User = User(
+        id: "",
+        name: "",
+        email: "",
+        capsules: [],
+        openCapsules: []
+    )
+
     
     private let capsuleService: CapsuleServiceProtocol
     private let userService: UserServiceProtocol
@@ -70,6 +79,16 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         }
     }
     
+    @MainActor
+    func fetchUser() async {
+        do {
+            let user = try await userService.getCurrentUser()
+            self.user = user
+        } catch {
+            print("Erro ao buscar usuário: \(error)")
+        }
+    }
+    
     //MARK: Valid Streak
     func checkIfCapsuleIsValidOffensive(user: User) async {
         print("Verificando a validades das vidas")
@@ -111,7 +130,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         showCreateCapsule = true
     }
     
-    func joinCapsule(code: String) async {
+    func joinCapsule(code: String) async -> Capsule? {
         do {
             joinErrorMessage = nil
             print("Buscando cápsula com código: \(code)")
@@ -121,12 +140,12 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             guard var capsule = allCapsules.first(where: { $0.code == code }) else {
                 joinErrorMessage = "NotFound"
-                return
+                return nil
             }
             
             if capsule.members.contains(user.id) {
                 joinErrorMessage = "AlreadyMember"
-                return
+                return nil
             }
             
             // Adiciona usuário à cápsula e atualiza
@@ -145,12 +164,13 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             print("✅ Sucesso! Entrou na cápsula: \(capsule.name)")
             
-            await fetchCapsules()
+            return capsule
             
         } catch {
             joinErrorMessage = "Unknown"
             print("❌ Erro ao entrar na cápsula: \(error)")
         }
+        return nil
     }
     
     func leaveCapsule(capsule: Capsule) async {
@@ -199,5 +219,6 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         }
             
     }
+     
 }
 

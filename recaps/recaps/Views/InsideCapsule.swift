@@ -18,6 +18,8 @@ struct InsideCapsule: View {
     @State private var vm = InsideCapsuleViewModel()
     
     @State private var isShaking = false
+    
+    @State private var showPopup: Bool = false
 
     
     var body: some View {
@@ -183,6 +185,22 @@ struct InsideCapsule: View {
             }
         }
         
+        .overlay {
+            if showPopup {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                    
+                    InvitePopUp(
+                        isShowing: $showPopup,
+                        code: capsule.code
+                    )
+                    .transition(.scale.combined(with: .opacity))
+                }
+                .zIndex(2)
+            }
+        }
+        
         .background {
             Image("backgroundImage")
                 .resizable()
@@ -191,7 +209,7 @@ struct InsideCapsule: View {
         
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {} label: {
+                Button { showPopup = true } label: {
                     Image(systemName: "link")
                         .resizable()
                         .scaledToFit()
