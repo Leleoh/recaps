@@ -11,6 +11,7 @@ protocol ProfileViewModelProtocol {
     var user: User? { get }
     var userName: String { get }
     var userEmail: String { get }
+    var allowNotifications: Bool { get }
     
     func logout()
     func loadUser() async

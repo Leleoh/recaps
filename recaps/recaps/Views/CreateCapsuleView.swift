@@ -106,7 +106,7 @@ struct CreateCapsuleView: View {
                 
                 // Título Central
                 ToolbarItem(placement: .principal) {
-                    Text("Nova Capsula")
+                    Text("New Capsule")
                         .font(.headline)
                 }
                 
