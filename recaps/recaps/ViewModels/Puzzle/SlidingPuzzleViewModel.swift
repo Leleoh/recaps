@@ -23,6 +23,8 @@ class SlidingPuzzleViewModel {
         self.moveCount = 0
         self.isSolved = false
         
+//        let squaredImage = cropToSquare(image: originalImage)
+//        let squaredImage = fitImageIntoSquare(image: originalImage)
         let squaredImage = cropToSquare(image: originalImage)
         let pieceSize = squaredImage.size.width / CGFloat(gridSize)
         var newTiles: [PuzzleTile] = []
@@ -123,20 +125,50 @@ class SlidingPuzzleViewModel {
         return abs(row1 - row2) + abs(col1 - col2) == 1
     }
     
-    private func cropToSquare(image: UIImage) -> UIImage {
-        let originalWidth = image.size.width
-        let originalHeight = image.size.height
-        
-        let edge = min(originalWidth, originalHeight) //define o lado como o menor da imagem
-        let posX = (originalWidth - edge) / 2.0
-        let posY = (originalHeight - edge) / 2.0
-        
-        let cropSquare = CGRect(x: posX, y: posY, width: edge, height: edge) //Cria o quadradoo
-        
-        if let imageRef = image.cgImage?.cropping(to: cropSquare) {
-            return UIImage(cgImage: imageRef, scale: image.scale, orientation: image.imageOrientation)
-        }
-        return image
-    }
+//    private func cropToSquare(image: UIImage) -> UIImage {
+//        let originalWidth = image.size.width
+//        let originalHeight = image.size.height
+//        
+//        let edge = min(originalWidth, originalHeight) //define o lado como o menor da imagem
+//        let posX = (originalWidth - edge) / 2.0
+//        let posY = (originalHeight - edge) / 2.0
+//        
+//        let cropSquare = CGRect(x: posX, y: posY, width: edge, height: edge) //Cria o quadradoo
+//        
+//        if let imageRef = image.cgImage?.cropping(to: cropSquare) {
+//            return UIImage(cgImage: imageRef, scale: image.scale, orientation: image.imageOrientation)
+//        }
+//        return image
+//    }
+//
     
+    private func cropToSquare(image: UIImage) -> UIImage {
+            // First, redraw the image in the correct orientation
+            let normalizedImage: UIImage
+            if image.imageOrientation != .up {
+                UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+                image.draw(in: CGRect(origin: .zero, size: image.size))
+                normalizedImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
+                UIGraphicsEndImageContext()
+            } else {
+                normalizedImage = image
+            }
+            
+            guard let cgImage = normalizedImage.cgImage else { return image }
+            
+            let originalWidth = CGFloat(cgImage.width)
+            let originalHeight = CGFloat(cgImage.height)
+            
+            let edge = min(originalWidth, originalHeight)
+            let posX = (originalWidth - edge) / 2.0
+            let posY = (originalHeight - edge) / 2.0
+            
+            let cropSquare = CGRect(x: posX, y: posY, width: edge, height: edge)
+            
+            if let croppedCGImage = cgImage.cropping(to: cropSquare) {
+                return UIImage(cgImage: croppedCGImage, scale: image.scale, orientation: .up)
+            }
+            
+            return image
+        }
 }

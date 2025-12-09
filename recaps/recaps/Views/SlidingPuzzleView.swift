@@ -16,6 +16,7 @@ import SwiftUI
 
 struct SlidingPuzzleView: View {
     @State var isSolved = false
+    @State private var hidePuzzle = false
     
     
     var image: UIImage?
@@ -42,9 +43,12 @@ struct SlidingPuzzleView: View {
                         .padding(.top, 8)
                     
                     ZStack {
+                        
                         if let image = image {
-                            SlidingPuzzleComponent(isSolved: $isSolved, image: image)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                            ScreenshotPrivacy {
+                                SlidingPuzzleComponent(isSolved: $isSolved, image: image)
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                         } else {
                             Image(systemName: "photo")
                                 .resizable()
@@ -82,6 +86,12 @@ struct SlidingPuzzleView: View {
             }
             
             Spacer()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.userDidTakeScreenshotNotification)) { _ in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                hidePuzzle = true
+            }
+            
         }
     }
 }
