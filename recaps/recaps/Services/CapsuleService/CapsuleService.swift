@@ -716,6 +716,9 @@ class CapsuleService: CapsuleServiceProtocol {
         
         let submissions = try await fetchSubmissions(capsuleID: id)
         
+        let blacklistedStrings = result["blacklisted"] as? [String] ?? []
+        let blacklisted = blacklistedStrings.compactMap { UUID(uuidString: $0) }
+        
         let capsule = Capsule(
             id: id,
             code: code,
@@ -729,7 +732,8 @@ class CapsuleService: CapsuleServiceProtocol {
             lives: lives,
             members: members,
             ownerId: ownerId,
-            status: status
+            status: status,
+            blacklisted: blacklisted
         )
         
         return capsule
@@ -769,6 +773,9 @@ class CapsuleService: CapsuleServiceProtocol {
                 
                 let members = record["members"] as? [String] ?? []
                 
+                let blacklistedStrings = record["blacklisted"] as? [String] ?? []
+                let blacklisted = blacklistedStrings.compactMap { UUID(uuidString: $0) }
+                
                 let capsule = Capsule(
                     id: id,
                     code: code,
@@ -782,7 +789,8 @@ class CapsuleService: CapsuleServiceProtocol {
                     lives: lives,
                     members: members,
                     ownerId: ownerId,
-                    status: status
+                    status: status,
+                    blacklisted: blacklisted
                 )
                 
                 capsules.append(capsule)
