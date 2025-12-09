@@ -16,12 +16,10 @@ struct HomeRecapsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                
                 // Fundo da tela
                 Image(.backgroundPNG)
                     .resizable()
                     .ignoresSafeArea()
-                
                 ScrollView {
                     VStack(spacing: 32) {
                         
@@ -67,99 +65,110 @@ struct HomeRecapsView: View {
                         .padding(.horizontal, 24)
                         .padding(.top, 16)
                         
-                        // MARK: Cápsulas em andamento
-                        VStack() {
-                            if viewModel.inProgressCapsules.isEmpty {
-                                VStack {
-                                    Text("No capsules currently in progress.\nCreate the first one!")
-                                        .font(.appBody)
-                                        .multilineTextAlignment(.center)
-                                        .foregroundStyle(.labelTertiary)
-                                        .padding(.horizontal, 40)
-                                }
-                                .frame(height: 420)
-                                .frame(maxWidth: .infinity)
-                                .padding(.horizontal, 24)
-                                .cornerRadius(24)
-                            } else {
-                                TabView {
-                                    ForEach(viewModel.inProgressCapsules) { recap in
-                                        NavigationLink {
-                                            InsideCapsule(capsule: recap)
-                                        } label: {
-                                            VStack (spacing: 24){
-                                                CloseCapsule(capsule: recap)
-                                                NameComponent(text: .constant(recap.name))
-                                                    .disabled(true)
-                                            }
-                                        }
-                                        .buttonStyle(.plain)
-                                        .contextMenu {
-                                            Button {
-                                                UIPasteboard.general.string = recap.code
-                                            } label: {
-                                                Label("Copy invite code", systemImage: "doc.on.doc")
-                                            }
-                                            
-                                            Button(role: .destructive) {
-                                                Task {
-                                                    await viewModel.leaveCapsule(capsule: recap)
-                                                    Task { await viewModel.fetchCapsules() }
-                                                }
-                                            } label: {
-                                                Label("Leave Recapsule", systemImage: "rectangle.portrait.and.arrow.right")
-                                            }
-                                        }
-                                    }
-                                }
-                                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
-                                .frame(height: 420)
-                                .frame(maxWidth: .infinity)
-                            }
-                        }
                         
-                        // MARK: Cápsulas concluídas
-                        VStack(alignment: .leading, spacing: 16) {
-                            if viewModel.completedCapsules.isEmpty {
-                                // Nada deve aparecer aqui.
-                            } else {
-                                Text("Opened")
-                                    .font(.appTitle2)
-                                    .foregroundStyle(.labelSecondary)
+                        if viewModel.isLoading {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                    .scaleEffect(1.4)
+                                Spacer()
+                            }
+                            .padding(.top, 200)
+                        } else {
+                            // MARK: Cápsulas em andamento
+                            VStack() {
+                                if viewModel.inProgressCapsules.isEmpty {
+                                    VStack {
+                                        Text("No capsules currently in progress.\nCreate the first one!")
+                                            .font(.appBody)
+                                            .multilineTextAlignment(.center)
+                                            .foregroundStyle(.labelTertiary)
+                                            .padding(.horizontal, 40)
+                                    }
+                                    .frame(height: 420)
+                                    .frame(maxWidth: .infinity)
                                     .padding(.horizontal, 24)
-                                
-                                let columns = [
-                                    GridItem(.flexible(), spacing: 16),
-                                    GridItem(.flexible(), spacing: 16)
-                                ]
-                                
-                                LazyVGrid(columns: columns, spacing: 24) {
-                                    ForEach(viewModel.completedCapsules) { recap in
-                                        NavigationLink {
-                                            // TODO: Adicionar view de capsula aberta.
-                                            Text("Openend Capsule View Placeholder.")
-                                        } label: {
-                                            OpenCapsule(capsule: recap)
-                                        }
-                                        .contextMenu {
-                                            // Apenas Sair
-                                            Button(role: .destructive) {
-                                                Task {
-                                                    await viewModel.leaveCapsule(capsule: recap)
-                                                }
+                                    .cornerRadius(24)
+                                } else {
+                                    TabView {
+                                        ForEach(viewModel.inProgressCapsules) { recap in
+                                            NavigationLink {
+                                                InsideCapsule(capsule: recap)
                                             } label: {
-                                                Label("Leave Recapsule", systemImage: "rectangle.portrait.and.arrow.right")
+                                                VStack (spacing: 24){
+                                                    CloseCapsule(capsule: recap)
+                                                    NameComponent(text: .constant(recap.name))
+                                                        .disabled(true)
+                                                }
+                                            }
+                                            .buttonStyle(.plain)
+                                            .contextMenu {
+                                                Button {
+                                                    UIPasteboard.general.string = recap.code
+                                                } label: {
+                                                    Label("Copy invite code", systemImage: "doc.on.doc")
+                                                }
+                                                
+                                                Button(role: .destructive) {
+                                                    Task {
+                                                        await viewModel.leaveCapsule(capsule: recap)
+                                                        Task { await viewModel.fetchCapsules() }
+                                                    }
+                                                } label: {
+                                                    Label("Leave Recapsule", systemImage: "rectangle.portrait.and.arrow.right")
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                                    .frame(height: 420)
+                                    .frame(maxWidth: .infinity)
+                                }
+                            }
+                            
+                            // MARK: Cápsulas concluídas
+                            VStack(alignment: .leading, spacing: 16) {
+                                if viewModel.completedCapsules.isEmpty {
+                                    // Nada deve aparecer aqui.
+                                } else {
+                                    Text("Opened")
+                                        .font(.appTitle2)
+                                        .foregroundStyle(.labelSecondary)
+                                        .padding(.horizontal, 24)
+                                    
+                                    let columns = [
+                                        GridItem(.flexible(), spacing: 16),
+                                        GridItem(.flexible(), spacing: 16)
+                                    ]
+                                    
+                                    LazyVGrid(columns: columns, spacing: 24) {
+                                        ForEach(viewModel.completedCapsules) { recap in
+                                            NavigationLink {
+                                                // TODO: Adicionar view de capsula aberta.
+                                                Text("Openend Capsule View Placeholder.")
+                                            } label: {
+                                                OpenCapsule(capsule: recap)
+                                            }
+                                            .contextMenu {
+                                                // Apenas Sair
+                                                Button(role: .destructive) {
+                                                    Task {
+                                                        await viewModel.leaveCapsule(capsule: recap)
+                                                    }
+                                                } label: {
+                                                    Label("Leave Recapsule", systemImage: "rectangle.portrait.and.arrow.right")
+                                                }
                                             }
                                         }
                                     }
                                 }
-                                .padding(.horizontal, 24)
                             }
                         }
                     }
                     .padding(.bottom, 40)
                 }
                 .scrollIndicators(.hidden)
+                
             }
             // Configuração da Navigation Bar
             .toolbar {
@@ -191,7 +200,7 @@ struct HomeRecapsView: View {
                                         viewModel.showJoinPopup = false
                                         await viewModel.fetchCapsules()
                                     }
-
+                                    
                                     if viewModel.joinErrorMessage == nil {
                                         withAnimation { viewModel.showJoinPopup = false }
                                     }
@@ -228,6 +237,9 @@ struct HomeRecapsView: View {
             
         }
         
+        .refreshable {
+            await viewModel.fetchCapsules()
+        }
         
         .task {
             await viewModel.fetchCapsules()
