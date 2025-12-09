@@ -48,8 +48,8 @@ class NotificationService: NSObject, NotificationServiceProtocol {
     
     func scheduleStreakReminder(for capsule: Capsule, at hour: Int, minute: Int) {
         let content = UNMutableNotificationContent()
-        content.title = "🗝️ Offensive in risk for capsule: \(capsule.name)"
-        content.body = "No photos submitted to capsule '\(capsule.name)'! Don't lose the streak!"
+        content.title = "🗝️ Offensive in risk!"
+        content.body = "Your daily submission in the '\(capsule.name)' Recapsule is pending, save a memory to protect your streak days"
         content.sound = .default
         content.userInfo = ["capsuleId": capsule.id.uuidString]
         
