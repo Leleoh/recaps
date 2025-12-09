@@ -10,11 +10,24 @@ import SwiftUI
 
 struct AuthenthicationView: View {
     @State var viewModel = AuthenthicationViewModel()
-    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        NavigationView {
-            VStack {
+        ZStack{
+            Image(.backgroundPNG)
+                .resizable()
+                .ignoresSafeArea()
+            
+            VStack(spacing: 62) {
+                Image(.loginLock)
+                
+                VStack(spacing: 12){
+                    Text("Recapsule")
+                        .font(.custom("CoveredByYourGrace", size: 48))
+                    
+                    Text("Unlock memories")
+                        .font(.title3)
+                }
+                
                 SignInWithAppleButton(.continue) { request in
                     request.requestedScopes = [.email, .fullName]
                 } onCompletion: { result in
@@ -22,18 +35,17 @@ struct AuthenthicationView: View {
                         await viewModel.handleAuthResult(result)
                     }
                 }
-                .signInWithAppleButtonStyle(
-                    colorScheme == .dark ? .white : .black
-                )
-                .frame(height: 50)
+                .signInWithAppleButtonStyle(.white)
+                .cornerRadius(32)
+                .frame(height: 54)
                 .padding()
             }
-            .navigationTitle("Sign In With Apple")
         }
     }
-    
-    
 }
+
+
+
 
 #Preview {
     AuthenthicationView()

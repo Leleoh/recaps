@@ -22,6 +22,8 @@ struct Capsule: Codable, Identifiable, Hashable {
     var members: [String]
     var ownerId: String
     var status: CapsuleStatus
+    var dailyGameDate: Date?
+    var dailyGameSubmission: UUID?
     var blacklisted: [UUID]
 }
 

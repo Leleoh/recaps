@@ -125,27 +125,37 @@ struct HomeRecapsView: View {
                                     .frame(maxWidth: .infinity)
                                 }
                             }
-                            
-                            // MARK: Cápsulas concluídas
-                            VStack(alignment: .leading, spacing: 16) {
-                                if viewModel.completedCapsules.isEmpty {
-                                    // Nada deve aparecer aqui.
-                                } else {
-                                    Text("Opened")
-                                        .font(.appTitle2)
-                                        .foregroundStyle(.labelSecondary)
-                                        .padding(.horizontal, 24)
-                                    
-                                    let columns = [
-                                        GridItem(.flexible(), spacing: 16),
-                                        GridItem(.flexible(), spacing: 16)
-                                    ]
-                                    
-                                    LazyVGrid(columns: columns, spacing: 24) {
-                                        ForEach(viewModel.completedCapsules) { recap in
-                                            NavigationLink {
-                                                // TODO: Adicionar view de capsula aberta.
-                                                Text("Openend Capsule View Placeholder.")
+                        }
+                        
+                        // MARK: Cápsulas concluídas
+                        VStack(alignment: .leading, spacing: 16) {
+                            if viewModel.completedCapsules.isEmpty {
+                                // Nada deve aparecer aqui.
+                            } else {
+                                Text("Opened")
+                                    .font(.appTitle2)
+                                    .foregroundStyle(.labelSecondary)
+                                    .padding(.horizontal, 24)
+                                
+                                let columns = [
+                                    GridItem(.flexible(), spacing: 16),
+                                    GridItem(.flexible(), spacing: 16)
+                                ]
+                                
+                                LazyVGrid(columns: columns, spacing: 24) {
+                                    ForEach(viewModel.completedCapsules) { recap in
+                                        NavigationLink {
+                                            PostOpenedCapsuleView(capsule: recap)
+                                            Text("Openend Capsule View Placeholder.")
+                                        } label: {
+                                            OpenCapsule(capsule: recap)
+                                        }
+                                        .contextMenu {
+                                            // Apenas Sair
+                                            Button(role: .destructive) {
+                                                Task {
+                                                    await viewModel.leaveCapsule(capsule: recap)
+                                                }
                                             } label: {
                                                 OpenCapsule(capsule: recap)
                                             }

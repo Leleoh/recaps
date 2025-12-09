@@ -177,7 +177,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     func leaveCapsule(capsule: Capsule) async {
         do {
             var user = try await userService.getCurrentUser()
-
+            
             user.capsules.removeAll(where: { $0 == capsule.id })
 
             var updatedCapsule = capsule
@@ -192,7 +192,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 capsules: user.capsules,
                 openCapsules: user.openCapsules
             )
-            
+
             await fetchCapsules()
 
         } catch {
