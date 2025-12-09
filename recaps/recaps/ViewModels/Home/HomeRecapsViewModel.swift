@@ -66,6 +66,10 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
             
+            let _ = try? await NotificationService.shared.requestAuthorization()
+
+            self.manageDailyNotifications()
+            
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
         }
@@ -74,8 +78,6 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     //MARK: Valid Streak
     func checkIfCapsuleIsValidOffensive(user: User) async {
         print("Verificando a validades das vidas")
-        
-       // var updatesMade: Bool = false
         
         for capsule in user.capsules {
             do{
@@ -91,19 +93,12 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             }
         }
     }
-        
-//        if updatesMade {
-//            print("🔄 Recarregando cápsulas para atualizar UI...")
-//            await fetchCapsules()
-//        } else {
-//            print("✅ Nenhuma alteração necessária nas ofensivas.")
-//        }
-        
+
     func fetchCapsule(id: UUID) async -> Capsule? {
         do {
             return try await capsuleService.fetchCapsule(id: id)
         } catch {
-            print("Erro ao buscar cápsula: \(error)")
+            print("Erro ao buscar cápsula: \(error.localizedDescription)")
             return nil
         }
     }
@@ -198,8 +193,28 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         } catch {
             print("deu merda aqui")
         }
-            
+        
     }
-     
+    
+    // MARK: - Notifications Logic
+    private func manageDailyNotifications() {
+        let calendar = Calendar.current
+        
+        for capsule in inProgressCapsules {
+            let hasSubmissionToday = calendar.isDateInToday(capsule.lastSubmissionDate)
+            
+            if hasSubmissionToday {
+                // Se já tem foto hoje, cancela o aviso dessa cápsula específica
+                NotificationService.shared.cancelReminder(for: capsule.id)
+            } else {
+                // Se ninguém postou, garante que o aviso está agendado
+                NotificationService.shared.scheduleStreakReminder(
+                    for: capsule,
+                    at: 20,
+                    minute: 00
+                )
+            }
+        }
+    }
 }
 

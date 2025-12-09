@@ -10,6 +10,7 @@ import SwiftUI
 struct HomeRecapsView: View {
     
     @State private var viewModel = HomeRecapsViewModel()
+    @State private var navigationCapsuleID: UUID?
     
     var body: some View {
         NavigationStack {
@@ -137,7 +138,11 @@ struct HomeRecapsView: View {
                                             // TODO: Adicionar view de capsula aberta.
                                             Text("Openend Capsule View Placeholder.")
                                         } label: {
-                                            OpenCapsule(capsule: recap)
+                                            VStack(spacing: 8) {
+                                                OpenCapsule(capsule: recap)
+                                                NameComponent(text: .constant(recap.name))
+                                                    .disabled(true)
+                                            }
                                         }
                                         .contextMenu {
                                             // Apenas Sair
@@ -219,6 +224,19 @@ struct HomeRecapsView: View {
                     }
                     .zIndex(2)
                 }
+            }
+            .navigationDestination(item: $navigationCapsuleID) { uuid in
+                if let capsule = viewModel.inProgressCapsules.first(where: { $0.id == uuid }) {
+                    InsideCapsule(capsule: capsule)
+                }
+            }
+        }
+        .onReceive(NotificationService.shared.$selectedCapsuleID) { uuidString in
+            if let uuidString = uuidString, let uuid = UUID(uuidString: uuidString) {
+                // Aciona a navegação programática
+                self.navigationCapsuleID = uuid
+                // Reseta para permitir novos cliques futuros
+                NotificationService.shared.selectedCapsuleID = nil
             }
         }
         .task {
