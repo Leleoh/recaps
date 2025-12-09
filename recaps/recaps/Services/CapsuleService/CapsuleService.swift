@@ -500,12 +500,13 @@ class CapsuleService: CapsuleServiceProtocol {
                 case .success:
                     Task {
                         try? await self.checkIfIncreasesStreak(capsuleID: capsuleID)
-                    }
+                    
                     
                     // Remover arquivos temporários
                     tempFiles.forEach { try? FileManager.default.removeItem(at: $0) }
                     
                     continuation.resume()
+                }
                     
                 case .failure(let error):
                     print("Erro ao salvar submissions em lote: \(error)")
@@ -543,9 +544,8 @@ class CapsuleService: CapsuleServiceProtocol {
                 if difference >= TwentyFourHours {
                     print("diferenca maior que 24h")
                     try await increaseStreak(record: record)
-                    try await updateLastSubmissionDate(record: record)
                 }
-                
+                try await updateLastSubmissionDate(record: record)
             }
             
         } catch {
