@@ -11,6 +11,7 @@ import SwiftUI
 @Observable
 class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
+    var isLoading: Bool = false
     var showCreateCapsule: Bool = false
     var showPopup = false
     var showJoinPopup = false
@@ -40,42 +41,42 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     // MARK: - Fetch Data Logic
     @MainActor
     func fetchCapsules() async {
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            // Pega o usuário logado para acessar a lista de IDs de cápsulas
             let currentUser = try await userService.getCurrentUser()
             let progressCapsuleIDs = currentUser.capsules
             let openCapsuleIDs = currentUser.openCapsules
-            
             let capsuleIDs = progressCapsuleIDs + openCapsuleIDs
 
             guard !capsuleIDs.isEmpty else {
-                print("Usuário não possui cápsulas.")
+                inProgressCapsules = []
+                completedCapsules = []
                 return
             }
-            
-            // Busca os objetos Capsule no CloudKit usando os IDs
-            var allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs).sorted(by: { $0.createdAt < $1.createdAt })
-            
-            // Filtra as cápsulas por status
+
+            var allCapsules = try await capsuleService
+                .fetchCapsules(IDs: capsuleIDs)
+                .sorted(by: { $0.createdAt < $1.createdAt })
+
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            
-            // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
-            
-            // Verifica se foram feitos updates
+
             await checkIfCapsuleIsValidOffensive(user: currentUser)
-            
-            // faz fetch novamente
-            allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs).sorted(by: { $0.createdAt < $1.createdAt })
-            
-            // Filtra as cápsulas atualizadas por status
+
+            // Recarrega depois das possíveis atualizações
+            allCapsules = try await capsuleService
+                .fetchCapsules(IDs: capsuleIDs)
+                .sorted(by: { $0.createdAt < $1.createdAt })
+
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            
-            // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
-            
+
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
+            inProgressCapsules = []
+            completedCapsules = []
         }
     }
     
