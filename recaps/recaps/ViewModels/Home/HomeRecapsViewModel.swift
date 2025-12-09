@@ -176,10 +176,6 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     func leaveCapsule(capsule: Capsule) async {
         do {
             var user = try await userService.getCurrentUser()
-
-            print("ANTES de Apagar:")
-            print(user)
-            print(capsule)
             
             user.capsules.removeAll(where: { $0 == capsule.id })
 
@@ -196,12 +192,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 openCapsules: user.openCapsules
             )
 
-            print("DEPOIS de Apagar:")
-            let refreshedUser = try await userService.getCurrentUser()
-            let refreshedCapsule = try await capsuleService.fetchCapsules(IDs: [capsule.id])
-
-            print(refreshedUser)
-            print(refreshedCapsule)
+            await fetchCapsules()
 
         } catch {
             print("Erro ao apagar cápsula: \(error.localizedDescription)")
