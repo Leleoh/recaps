@@ -20,6 +20,7 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
     var showFullScreenAnimation = false
     var goToGame = false
     var showAlert = false
+    var gameImage: UIImage?
     
     
     var selectedImages: [UIImage] = []
@@ -40,6 +41,8 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
     
     var currentTime: Date = Date()
     
+    var gameSubmission: Submission?
+
     func loadSelectedImages() async {
         var loadedImages: [UIImage] = []
         
@@ -69,6 +72,47 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
         } catch {
             print("Error: \(error)")
         }
+    }
+    
+    
+    func generateDailySubmission(capsule: Capsule) async throws {
+                
+       let currentDate = try await capsuleService.fetchBrazilianTime().ddMMyyyy
+                
+        if capsule.dailyGameDate?.ddMMyyyy != currentDate {
+            
+            let possibleSubmissions = try await capsuleService
+                .fetchPossibleSubmissions(capsule: capsule)
+                .sorted { (lhs: Submission, rhs: Submission) in
+                    lhs.id < rhs.id
+                }
+            
+            guard let dailySubmission = possibleSubmissions.first else {
+                throw CapsuleError.noAvailableSubmissions
+            }
+            
+            try await capsuleService.addSubmissionToDailyGameAndBlacklist(
+                capsule: capsule,
+                submissionId: dailySubmission.id
+            )
+            
+            gameSubmission = dailySubmission
+            
+        } else {
+            if let dailyGameSubmissionID = capsule.dailyGameSubmission {
+                if let currentDailySubmission = try await capsuleService.fetchSubmission(id: dailyGameSubmissionID) {
+                    gameSubmission = currentDailySubmission
+                } else {
+                    throw CapsuleError.noAvailableSubmissions
+                }
+            } else {
+                throw CapsuleError.noAvailableSubmissions
+            }
+        }
+    }
+
+    enum CapsuleError: Error {
+        case noAvailableSubmissions
     }
     
     func setTime() async throws {
@@ -101,5 +145,17 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
             return true
         }
     }
+    @MainActor
+    func prepareGameImage() async {
+        guard let url = gameSubmission?.imageURL else { return }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            self.gameImage = UIImage(data: data)
+        } catch {
+            print("Erro ao baixar imagem do game:", error)
+        }
+    }
+
 }
 

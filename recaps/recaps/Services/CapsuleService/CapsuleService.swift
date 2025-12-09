@@ -191,6 +191,14 @@ class CapsuleService: CapsuleServiceProtocol {
             record["members"] = capsule.members as CKRecordValue
             record["blacklisted"] = capsule.blacklisted.map { $0.uuidString } as CKRecordValue
             
+            if let dailyGameSubmission = capsule.dailyGameSubmission {
+                record["dailyGameSubmission"] = dailyGameSubmission.uuidString as CKRecordValue
+            }
+            
+            if let dailyGameDate = capsule.dailyGameDate {
+                record["dailyGameDate"] = dailyGameDate as CKRecordValue
+            }
+            
             do {
                 let savedRecord = try await database.save(record)
                 print("Capsula salva: \(savedRecord)")
@@ -621,6 +629,50 @@ class CapsuleService: CapsuleServiceProtocol {
         return submissions
     }
     
+    func fetchSubmission(id: UUID) async throws -> Submission? {
+        let recordID = CKRecord.ID(recordName: id.uuidString)
+        
+        let result = try await database.record(for: recordID)
+        
+        guard
+            let idString = result["id"] as? String,
+            let id = UUID(uuidString: idString)
+        else { return nil }
+        
+        let description = result["description"] as? String
+        let date = result["date"] as? Date ?? Date()
+        let authorId = result["authorId"] as? String ?? ""
+        
+        let capsuleIDString = result["capsuleID"] as? String ?? ""
+        let capsuleID = UUID(uuidString: capsuleIDString) ?? UUID()
+        
+        var imageURL: URL? = nil
+        if let asset = result["image"] as? CKAsset,
+           let fileURL = asset.fileURL {
+            
+            let localURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("\(UUID().uuidString).jpg")
+            
+            do {
+                try FileManager.default.copyItem(at: fileURL, to: localURL)
+                imageURL = localURL
+            } catch {
+                print("Erro ao copiar asset: \(error)")
+            }
+        }
+        
+        let submission = Submission(
+            id: id,
+            imageURL: imageURL,
+            description: description,
+            authorId: authorId,
+            date: date,
+            capsuleID: capsuleID
+        )
+        
+        return submission
+    }
+    
     func fetchCapsules(IDs: [UUID]) async throws -> [Capsule] {
         let recordNames = IDs.map { $0.uuidString }
         
@@ -659,6 +711,15 @@ class CapsuleService: CapsuleServiceProtocol {
                 
                 let blacklistedStrings = record["blacklisted"] as? [String] ?? []
                 let blacklisted = blacklistedStrings.compactMap { UUID(uuidString: $0) }
+                
+                let dailyGameDate = record["dailyGameDate"] as? Date ?? nil
+                let dailyGameSubmissionString = record["dailyGameSubmission"] as? String ?? nil
+                
+                var dailyGameSubmission = nil as UUID?
+                
+                if let dailyGameSubmissionString {
+                    dailyGameSubmission = UUID(uuidString: dailyGameSubmissionString)
+                }
 
                 
                 let capsule = Capsule(
@@ -675,7 +736,10 @@ class CapsuleService: CapsuleServiceProtocol {
                     members: members,
                     ownerId: ownerId,
                     status: status,
-                    blacklisted: blacklisted
+                    dailyGameDate: dailyGameDate,
+                    dailyGameSubmission: dailyGameSubmission,
+                    blacklisted: blacklisted,
+                    
                 )
                 
                 capsules.append(capsule)
@@ -718,6 +782,15 @@ class CapsuleService: CapsuleServiceProtocol {
         
         let submissions = try await fetchSubmissions(capsuleID: id)
         
+        let dailyGameDate = result["dailyGameDate"] as? Date ?? nil
+        let dailyGameSubmissionString = result["dailyGameSubmission"] as? String ?? nil
+        
+        var dailyGameSubmission = nil as UUID?
+        
+        if let dailyGameSubmissionString {
+            dailyGameSubmission = UUID(uuidString: dailyGameSubmissionString)
+        }
+        
         
         let capsule = Capsule(
             id: id,
@@ -733,7 +806,10 @@ class CapsuleService: CapsuleServiceProtocol {
             members: members,
             ownerId: ownerId,
             status: status,
-            blacklisted: blacklisted
+            dailyGameDate: dailyGameDate,
+            dailyGameSubmission: dailyGameSubmission,
+            blacklisted: blacklisted,
+            
         )
         
         return capsule
@@ -775,6 +851,15 @@ class CapsuleService: CapsuleServiceProtocol {
                 
                 let members = record["members"] as? [String] ?? []
                 
+                let dailyGameDate = record["dailyGameDate"] as? Date ?? nil
+                let dailyGameSubmissionString = record["dailyGameSubmission"] as? String ?? nil
+                
+                var dailyGameSubmission = nil as UUID?
+                
+                if let dailyGameSubmissionString {
+                    dailyGameSubmission = UUID(uuidString: dailyGameSubmissionString)
+                }
+                
                 let capsule = Capsule(
                     id: id,
                     code: code,
@@ -789,7 +874,10 @@ class CapsuleService: CapsuleServiceProtocol {
                     members: members,
                     ownerId: ownerId,
                     status: status,
-                    blacklisted: blacklisted
+                    dailyGameDate: dailyGameDate,
+                    dailyGameSubmission: dailyGameSubmission,
+                    blacklisted: blacklisted,
+                    
                 )
                 
                 capsules.append(capsule)
@@ -835,6 +923,15 @@ class CapsuleService: CapsuleServiceProtocol {
                 
                 let submissions = try await fetchSubmissions(capsuleID: id)
                 
+                let dailyGameDate = record["dailyGameDate"] as? Date ?? nil
+                let dailyGameSubmissionString = record["dailyGameSubmission"] as? String ?? nil
+                
+                var dailyGameSubmission = nil as UUID?
+                
+                if let dailyGameSubmissionString {
+                    dailyGameSubmission = UUID(uuidString: dailyGameSubmissionString)
+                }
+                
                 let capsule = Capsule(
                     id: id,
                     code: code,
@@ -849,7 +946,10 @@ class CapsuleService: CapsuleServiceProtocol {
                     members: members,
                     ownerId: ownerId,
                     status: status,
-                    blacklisted: blacklisted
+                    dailyGameDate: dailyGameDate,
+                    dailyGameSubmission: dailyGameSubmission,
+                    blacklisted: blacklisted,
+                    
                 )
                 
                 capsules.append(capsule)
@@ -917,9 +1017,19 @@ class CapsuleService: CapsuleServiceProtocol {
         return capsules
     }
     
-    func addSubmissionToBlacklist(capsule: Capsule, submissionId: UUID) async throws {
+    func addSubmissionToDailyGameAndBlacklist(capsule: Capsule, submissionId: UUID) async throws {
         var updatedCapsule = capsule
         print ("Adding \(submissionId) to blacklist")
+        
+        do {
+            updatedCapsule.dailyGameDate = try await fetchBrazilianTime()
+        } catch {
+            updatedCapsule.dailyGameDate = Date()
+        }
+        
+        updatedCapsule.dailyGameSubmission = submissionId
+        
+        
         if !updatedCapsule.blacklisted.contains(submissionId) {
             updatedCapsule.blacklisted.append(submissionId)
         }
@@ -931,6 +1041,7 @@ class CapsuleService: CapsuleServiceProtocol {
     func fetchPossibleSubmissions(capsule: Capsule) async throws -> [Submission] {
         let blacklisted = Set(capsule.blacklisted)
         print("blacklisted: \(blacklisted)")
+                
         let allSubmissions = try await fetchSubmissions(capsuleID: capsule.id)
         
         return allSubmissions.filter { submission in

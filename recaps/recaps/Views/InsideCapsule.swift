@@ -40,12 +40,16 @@ struct InsideCapsule: View {
                                         impact.impactOccurred()
                                         Task{
                                             if await vm.canPlayGame(capsuleId: capsule.id) {
+                                                try await vm.generateDailySubmission(capsule: capsule)
+                                                await vm.prepareGameImage()
+
                                                 vm.showFullScreenAnimation = true
-                                                
+
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                                                     vm.showFullScreenAnimation = false
                                                     vm.goToGame = true
                                                 }
+
                                             } else {
                                                 vm.isShaking = true
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -291,7 +295,11 @@ struct InsideCapsule: View {
             )
         }
         .fullScreenCover(isPresented: $vm.goToGame) {
-            SlidingPuzzleView()
+            if let image = vm.gameImage {
+                SlidingPuzzleView(image: image)
+            } else {
+                Color.black.ignoresSafeArea()
+            }
         }
         
         .onAppear {

@@ -17,6 +17,7 @@ struct PuzzleTileView: View {
                 Image(uiImage: img)
                     .resizable()
                     .scaledToFill()
+//                    .interpolation(.high)
                     .aspectRatio(contentMode: .fit)
                     .clipped()
                     .cornerRadius(4)
