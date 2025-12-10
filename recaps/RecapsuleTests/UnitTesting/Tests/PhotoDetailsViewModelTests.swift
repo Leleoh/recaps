@@ -11,7 +11,7 @@ import UIKit
 
 struct PhotoDetailsViewModelTests {
     @Test
-        func testGetUserReturnsNameAndCallsService() async throws {
+        func testGetUser() async throws {
             let user = User(
                 id: "1",
                 name: "Ana",
@@ -34,7 +34,7 @@ struct PhotoDetailsViewModelTests {
         }
     
     @Test
-    func testFormatDateReturnsCorrectString() async throws {
+    func testFormatDate() async throws {
         let viewModel = await PhotoDetailsViewModel(
             userService: MockUserService()
         )
