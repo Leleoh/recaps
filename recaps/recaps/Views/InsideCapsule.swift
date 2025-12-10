@@ -38,28 +38,23 @@ struct InsideCapsule: View {
                                     onTap: {
                                         let impact = UIImpactFeedbackGenerator(style: .heavy)
                                         impact.impactOccurred()
-                                        Task{
-                                            if await vm.canPlayGame(capsuleId: capsule.id) {
-                                                try await vm.generateDailySubmission(capsule: capsule)
-                                                await vm.prepareGameImage()
-
-                                                vm.showFullScreenAnimation = true
-
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                                    vm.showFullScreenAnimation = false
-                                                    vm.goToGame = true
-                                                }
-
-                                            } else {
-                                                vm.isShaking = true
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                                    vm.isShaking = false
-                                                    vm.showAlert = true
-                                                }
+                                        if vm.gameImage != nil {
+                                            vm.showFullScreenAnimation = true
+                                            
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                                vm.showFullScreenAnimation = false
+                                                vm.goToGame = true
+                                            }
+                                        } else {
+                                            vm.isShaking = true
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                                vm.isShaking = false
+                                                vm.showAlert = true
                                             }
                                         }
-                                        
                                     }
+                                    
+                                    
                                 )
                                 .rotationEffect(.degrees(vm.isShaking ? 5 : 0))
                                 .animation(
@@ -306,10 +301,15 @@ struct InsideCapsule: View {
             Task {
                 try await vm.getUsers(IDs: capsule.members, ownerID: capsule.ownerId)
                 try await vm.setTime()
+                
+                if await vm.canPlayGame(capsuleId: capsule.id) {
+                    try await vm.generateDailySubmission(capsule: capsule)
+                    await vm.prepareGameImage()
+                }
             }
+            
             vm.showFullScreenAnimation = false
         }
-        
         .alert("Submission Needed", isPresented: $vm.showAlert) {
             Button("OK", role: .cancel) { }
         } message: {
