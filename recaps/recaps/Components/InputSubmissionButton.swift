@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct LiquidGlassButton: View {
+struct InputSubmissionButton: View {
     
     var action: () -> Void = { }
     
@@ -65,5 +65,5 @@ struct LiquidGlassButton: View {
 }
 
 #Preview {
-    LiquidGlassButton()
+    InputSubmissionButton()
 }

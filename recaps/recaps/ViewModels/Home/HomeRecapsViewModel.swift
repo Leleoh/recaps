@@ -11,6 +11,7 @@ import SwiftUI
 @Observable
 class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
+    var isLoading: Bool = false
     var showCreateCapsule: Bool = false
     var showPopup = false
     var showJoinPopup = false
@@ -20,6 +21,14 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
     var inProgressCapsules: [Capsule] = []
     var completedCapsules: [Capsule] = []
+    var user: User = User(
+        id: "",
+        name: "",
+        email: "",
+        capsules: [],
+        openCapsules: []
+    )
+
     
     private let capsuleService: CapsuleServiceProtocol
     private let userService: UserServiceProtocol
@@ -32,38 +41,36 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     // MARK: - Fetch Data Logic
     @MainActor
     func fetchCapsules() async {
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            // Pega o usuário logado para acessar a lista de IDs de cápsulas
             let currentUser = try await userService.getCurrentUser()
             let progressCapsuleIDs = currentUser.capsules
             let openCapsuleIDs = currentUser.openCapsules
-            
             let capsuleIDs = progressCapsuleIDs + openCapsuleIDs
 
             guard !capsuleIDs.isEmpty else {
-                print("Usuário não possui cápsulas.")
+                inProgressCapsules = []
+                completedCapsules = []
                 return
             }
-            
-            // Busca os objetos Capsule no CloudKit usando os IDs
-            var allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
-            
-            // Filtra as cápsulas por status
+
+            var allCapsules = try await capsuleService
+                .fetchCapsules(IDs: capsuleIDs)
+                .sorted(by: { $0.createdAt < $1.createdAt })
+
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            
-            // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
-            
-            // Verifica se foram feitos updates
+
             await checkIfCapsuleIsValidOffensive(user: currentUser)
-            
-            // faz fetch novamente
-            allCapsules = try await capsuleService.fetchCapsules(IDs: capsuleIDs)
-            
-            // Filtra as cápsulas atualizadas por status
+
+            // Recarrega depois das possíveis atualizações
+            allCapsules = try await capsuleService
+                .fetchCapsules(IDs: capsuleIDs)
+                .sorted(by: { $0.createdAt < $1.createdAt })
+
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            
-            // Consideramos completed ou opened como "Concluídas" na Home
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
             
             let _ = try? await NotificationService.shared.requestAuthorization()
@@ -76,6 +83,18 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
+            inProgressCapsules = []
+            completedCapsules = []
+        }
+    }
+    
+    @MainActor
+    func fetchUser() async {
+        do {
+            let user = try await userService.getCurrentUser()
+            self.user = user
+        } catch {
+            print("Erro ao buscar usuário: \(error)")
         }
     }
     
@@ -111,7 +130,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         showCreateCapsule = true
     }
     
-    func joinCapsule(code: String) async {
+    func joinCapsule(code: String) async -> Capsule? {
         do {
             joinErrorMessage = nil
             print("Buscando cápsula com código: \(code)")
@@ -121,12 +140,12 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             guard var capsule = allCapsules.first(where: { $0.code == code }) else {
                 joinErrorMessage = "NotFound"
-                return
+                return nil
             }
             
             if capsule.members.contains(user.id) {
                 joinErrorMessage = "AlreadyMember"
-                return
+                return nil
             }
             
             // Adiciona usuário à cápsula e atualiza
@@ -145,21 +164,18 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             print("✅ Sucesso! Entrou na cápsula: \(capsule.name)")
             
-            await fetchCapsules()
+            return capsule
             
         } catch {
             joinErrorMessage = "Unknown"
             print("❌ Erro ao entrar na cápsula: \(error)")
         }
+        return nil
     }
     
     func leaveCapsule(capsule: Capsule) async {
         do {
             var user = try await userService.getCurrentUser()
-
-            print("ANTES de Apagar:")
-            print(user)
-            print(capsule)
             
             user.capsules.removeAll(where: { $0 == capsule.id })
 
@@ -176,12 +192,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 openCapsules: user.openCapsules
             )
 
-            print("DEPOIS de Apagar:")
-            let refreshedUser = try await userService.getCurrentUser()
-            let refreshedCapsule = try await capsuleService.fetchCapsules(IDs: [capsule.id])
-
-            print(refreshedUser)
-            print(refreshedCapsule)
+            await fetchCapsules()
 
         } catch {
             print("Erro ao apagar cápsula: \(error.localizedDescription)")

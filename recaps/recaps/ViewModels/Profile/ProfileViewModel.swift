@@ -23,6 +23,8 @@ class ProfileViewModel: ProfileViewModelProtocol {
     var user: User? = nil
     var allowNotifications = false
     var showSettingsAlert = false
+    var showDeleteAlert: Bool = false
+    var showSignOutAlert: Bool = false
     
     func checkNotificationStatus() async {
         let status = await notificationService.checkAuthorizationStatus()

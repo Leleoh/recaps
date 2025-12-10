@@ -17,7 +17,8 @@ protocol CapsuleServiceProtocol {
     func fetchCapsulesWithoutSubmissions(IDs: [UUID]) async throws -> [Capsule]
     func fetchAllCapsules() async throws -> [Capsule]
     func fetchAllCapsulesWithoutSubmissions() async throws -> [Capsule]
-
+    func fetchBrazilianTime() async throws -> Date
+    
     // MARK: - Writing
     func createCapsule(capsule: Capsule) async throws -> UUID
     func deleteCapsule(capsuleID: UUID) async throws

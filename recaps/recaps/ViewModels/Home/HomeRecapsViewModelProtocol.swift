@@ -8,6 +8,7 @@
 import Foundation
 
 protocol HomeRecapsViewModelProtocol {
+    var isLoading: Bool{ get set }
     var showCreateCapsule: Bool { get set }
     var showJoinPopup: Bool { get set }
     var showProfile: Bool { get set }
@@ -15,7 +16,7 @@ protocol HomeRecapsViewModelProtocol {
     var completedCapsules: [Capsule] { get }
     
     func didTapNewRecap()
-    func joinCapsule(code: String) async
+    func joinCapsule(code: String) async -> Capsule?
     func fetchCapsules() async
     func fetchCapsule(id: UUID) async -> Capsule?
 

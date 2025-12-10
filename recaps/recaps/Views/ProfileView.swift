@@ -9,18 +9,20 @@ import SwiftUI
 
 struct ProfileView: View {
     @State private var viewModel = ProfileViewModel()
+    @Binding var user: User
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) var scenePhase
     
     var body: some View {
         NavigationStack {
-            ScrollView{
+            ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(viewModel.userName)
+                        Text(user.name)
                             .font(.coveredByYourGraceTitle)
-                        Text(viewModel.userEmail)
+                        
+                        Text(user.email)
                             .font(.footnote)
                     }
                     .padding(16)
@@ -62,22 +64,18 @@ struct ProfileView: View {
                         
                         VStack(alignment: .leading, spacing: 12) {
                             Button {
-                                Task {
-                                    await viewModel.deleteAccount()
-                                }
-                                dismiss()
+                                viewModel.showDeleteAlert = true
                             } label: {
                                 Text("Delete account")
                                     .foregroundStyle(.red)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                             }
-                            
+
                             Divider()
                                 .padding(.horizontal, 8)
                             
                             Button {
-                                viewModel.logout()
-                                dismiss()
+                                viewModel.showSignOutAlert = true
                             } label: {
                                 Text("Sign out")
                                     .foregroundStyle(.red)
@@ -106,8 +104,30 @@ struct ProfileView: View {
                             .font(.headline)
                             .foregroundStyle(.primary)
                     }
-                    
                 }
+            }
+            .alert("Delete account?", isPresented: $viewModel.showDeleteAlert) {
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await viewModel.deleteAccount()
+                    }
+                    dismiss()
+                }
+
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("Your account and all associated data will be permanently deleted.")
+            }
+            
+            .alert("Sign Out?", isPresented: $viewModel.showSignOutAlert) {
+                Button("Sign Out", role: .destructive) {
+                    viewModel.logout()
+                    dismiss()
+                }
+
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("You'll need to sign in again to access your account.")
             }
         }
         .task {
@@ -122,9 +142,4 @@ struct ProfileView: View {
             }
         }
     }
-}
-
-
-#Preview {
-    ProfileView()
 }

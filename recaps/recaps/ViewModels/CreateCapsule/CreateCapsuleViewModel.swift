@@ -47,7 +47,7 @@ class CreateCapsuleViewModel: CreateCapsuleViewModelProtocol {
     
     // MARK: Helpers
     func generateCode() -> String {
-        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz"
+        let chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         return String((0..<5).map { _ in chars.randomElement()! })
     }
     
