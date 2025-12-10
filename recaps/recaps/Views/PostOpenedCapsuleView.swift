@@ -25,54 +25,53 @@ struct PostOpenedCapsuleView: View {
                 .resizable()
                 .ignoresSafeArea()
             
-            if !viewModel.isLoading {
+            if showLottie {
                 ZStack {
-                    if showLottie {
-                        ZStack{
-                            Color.black
-                                .ignoresSafeArea()
-                            
-                            LottieView(animation: .named("OpenCapsule"))
-                                .playing(loopMode: .playOnce)
-                                .configure {
-                                    $0.contentMode = .scaleAspectFill
-                                }
-                                .onAppear {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
-                                        withAnimation {
-                                            showLottie = false
-                                        }
-                                    }
-                                }
+                    Color.black
+                        .ignoresSafeArea()
+                    
+                    LottieView(animation: .named("OpenCapsule"))
+                        .playing(loopMode: .playOnce)
+                        .configure {
+                            $0.contentMode = .scaleAspectFill
                         }
-                    } else {
-                        ScrollView(showsIndicators: false) {
-                            VStack(spacing: 16) {
-                                VStack(spacing: 5) {
-                                    Text(viewModel.dates(submissions: submissions))
-                                        .font(.coveredByYourGraceSignature)
-                                    
-                                    NameComponent(text: .constant(capsule.name))
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 8) {
+                                withAnimation {
+                                    showLottie = false
                                 }
-                                
-                                Gallery(submissions: submissions)
                             }
-                            .padding(.bottom, -40)
-                            .padding(.horizontal, 24)
                         }
-                        
-                    }
                 }
             } else {
-                ProgressView()
-                    .controlSize(ControlSize.large)
-                    .tint(Color.white)
+                
+                if !viewModel.isLoading {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 16) {
+                            VStack(spacing: 5) {
+                                Text(viewModel.dates(submissions: submissions))
+                                    .font(.coveredByYourGraceSignature)
+                                
+                                NameComponent(text: .constant(capsule.name))
+                            }
+                            
+                            Gallery(submissions: submissions)
+                        }
+                        .padding(.bottom, -40)
+                        .padding(.horizontal, 24)
+                    }
+                } else {
+                    ProgressView()
+                        .controlSize(ControlSize.large)
+                        .tint(Color.white)
+                }
             }
         }
-        
         .onAppear() {
             Task {
-                try await viewModel.fetchSubmissions()
+                if viewModel.submissions.isEmpty {
+                    try await viewModel.fetchSubmissions()
+                }
             }
         }
     }
