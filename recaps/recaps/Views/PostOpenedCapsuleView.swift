@@ -44,11 +44,7 @@ struct PostOpenedCapsuleView: View {
                     }
 
                     Gallery(submissions: submissions)
-//                    Timeline(
-//                        sortedMonths: viewModel.sortedMonths(submissions: submissions),
-//                        groupedByMonth: viewModel.groupedByMonth(submissions: submissions),
-//                        scrollOffset: scrollOffset
-//                    )
+                    
                 }
                 .padding(.bottom, -40)
                 .padding(.horizontal, 24)

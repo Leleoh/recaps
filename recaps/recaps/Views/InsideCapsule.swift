@@ -290,10 +290,13 @@ struct InsideCapsule: View {
             )
         }
         .fullScreenCover(isPresented: $vm.goToGame) {
-            if let image = vm.gameImage {
-                SlidingPuzzleView(image: image)
-            } else {
-                Color.black.ignoresSafeArea()
+            NavigationStack{
+                if let image = vm.gameImage {
+                    
+                    SlidingPuzzleView(image: image)
+                } else {
+                    Color.black.ignoresSafeArea()
+                }
             }
         }
         
