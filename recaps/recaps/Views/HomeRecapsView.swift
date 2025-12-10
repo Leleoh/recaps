@@ -96,6 +96,7 @@ struct HomeRecapsView: View {
                                                 if recap.status == .completed {
                                                     Task {
                                                         try await viewModel.changeCompletedCapsuleToOpenCapsule(capsuleID: recap.id)
+                                                        capsuleToNavigate = recap
                                                         await viewModel.fetchCapsules()
                                                     }
                                                 } else {
@@ -257,7 +258,13 @@ struct HomeRecapsView: View {
             }
             // Navigation to InsideCapsule when capsuleToNavigate is set
             .navigationDestination(item: $capsuleToNavigate) { capsule in
-                InsideCapsule(capsule: capsule)
+                if capsule.status == .completed {
+                    PostOpenedCapsuleView(capsule: capsule, viewModel: PostOpenedCapsuleViewModel(capsule: capsule))
+                } else {
+                    InsideCapsule(capsule: capsule)
+                }
+                
+                
             }
             
         }
