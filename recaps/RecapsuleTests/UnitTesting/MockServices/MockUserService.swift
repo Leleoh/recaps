@@ -8,22 +8,21 @@
 import Foundation
 @testable import recaps
 
-class MockUserService: UserServiceProtocol {
-    
-    // MARK: - Mocked State / Configurable Returns
+final class MockUserService: UserServiceProtocol {
+
+    // MARK: - Mocked State
     var userId: String = "mock-user-id"
-    
-    // O usuário que será retornado ao chamar getCurrentUser
+
+    // Estado em memória
+    private var storedUsers: [String: User] = [:]
+
+    // Configurações de retorno
     var mockCurrentUser: User?
-    
-    // O usuário que será retornado ao chamar getUser(id)
     var mockFetchedUser: User?
-    
-    // Controle de erros forçados
     var shouldThrowOnGetCurrent = false
     var shouldThrowOnUpdate = false
 
-    // MARK: - Flags (Spy Pattern para Testes)
+    // MARK: - Spy Flags
     var didCreate = false
     var didGetCurrentUser = false
     var didGetUser = false
@@ -33,106 +32,134 @@ class MockUserService: UserServiceProtocol {
     var didSaveUserId = false
     var didLogout = false
     var didChangeCompletedCapsuleToOpenCapsule = false
+    var didGetUsers = false
 
-    // MARK: - Captured Values (Para verificar o que foi passado)
+    // MARK: - Captured values
     var createdUser: User?
     var deletedUserId: String?
     var fetchedUserId: String?
-    
+
     // MARK: - Protocol Methods
-    
+
     func getCurrentUser() async throws -> User {
         didGetCurrentUser = true
 
         if shouldThrowOnGetCurrent {
-            throw NSError(domain: "MockUserService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Forced error on getCurrentUser"])
+            throw NSError(
+                domain: "MockUserService",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Forced error on getCurrentUser"]
+            )
         }
 
-        if let user = mockCurrentUser {
-            return user
+        if let mock = mockCurrentUser {
+            return mock
         }
 
-        // Retorno padrão caso não tenha sido configurado
-        return User(id: userId, name: "Mock User", email: "mock@test.com", capsules: [], openCapsules: [])
+        if let stored = storedUsers[userId] {
+            return stored
+        }
+
+        return User(
+            id: userId,
+            name: "Mock User",
+            email: "mock@test.com",
+            capsules: [],
+            openCapsules: []
+        )
     }
 
     func getUser(with id: String) async throws -> User {
         didGetUser = true
         fetchedUserId = id
 
-        if let user = mockFetchedUser {
-            return user
-        }
-        
-        // Se o ID solicitado for o do usuário atual mockado, retorna ele
-        if let current = mockCurrentUser, current.id == id {
-            return current
+        if let mock = mockFetchedUser {
+            return mock
         }
 
-        throw NSError(domain: "MockUserService", code: 4, userInfo: [
-            NSLocalizedDescriptionKey: "Mock user not found"
-        ])
+        if let stored = storedUsers[id] {
+            return stored
+        }
+
+        throw NSError(
+            domain: "MockUserService",
+            code: 404,
+            userInfo: [NSLocalizedDescriptionKey: "Mock user not found"]
+        )
+    }
+
+    func getUsers(IDs: [String]) async throws -> [User] {
+        didGetUsers = true
+        return IDs.compactMap { storedUsers[$0] }
     }
 
     func createUser(user: User) async throws {
         didCreate = true
         createdUser = user
-        // Simula o salvamento
+
+        storedUsers[user.id] = user
         mockCurrentUser = user
         userId = user.id
     }
 
-    func updateUser(_ user: User, name: String?, email: String?, capsules: [UUID]?, openCapsules: [UUID]?) async throws -> User {
+    func updateUser(
+        _ user: User,
+        name: String?,
+        email: String?,
+        capsules: [UUID]?,
+        openCapsules: [UUID]?
+    ) async throws -> User {
+
         didUpdateUser = true
 
         if shouldThrowOnUpdate {
-            throw NSError(domain: "MockUserService", code: 3, userInfo: [NSLocalizedDescriptionKey: "Forced error on updateUser"])
+            throw NSError(
+                domain: "MockUserService",
+                code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "Forced error on updateUser"]
+            )
         }
 
-        // Cria o objeto atualizado
-        let updatedUser = User(
+        let updated = User(
             id: user.id,
             name: name ?? user.name,
             email: email ?? user.email,
             capsules: capsules ?? user.capsules,
             openCapsules: openCapsules ?? user.openCapsules
         )
-        
-        // Atualiza o estado do mock para refletir a mudança
-        self.mockCurrentUser = updatedUser
-        
-        return updatedUser
+
+        storedUsers[user.id] = updated
+        mockCurrentUser = updated
+
+        return updated
     }
-    
+
     func changeCompletedCapsuleToOpenCapsule(user: User, capsuleId: UUID) async throws {
         didChangeCompletedCapsuleToOpenCapsule = true
-        
-        // Simula a lógica real: remove de capsules e adiciona em openCapsules
-        // Isso é importante para testar se a View atualiza corretamente
-        if var currentUser = mockCurrentUser {
-            
-            // Remove dos arrays (se existir) para evitar duplicatas ou inconsistência
-            if let index = currentUser.capsules.firstIndex(of: capsuleId) {
-                currentUser.capsules.remove(at: index)
-            }
-            
-            if !currentUser.openCapsules.contains(capsuleId) {
-                currentUser.openCapsules.append(capsuleId)
-            }
-            
-            // Salva o estado atualizado no mock
-            self.mockCurrentUser = currentUser
+
+        guard var current = storedUsers[user.id] ?? mockCurrentUser else { return }
+
+        current.capsules.removeAll { $0 == capsuleId }
+
+        if !current.openCapsules.contains(capsuleId) {
+            current.openCapsules.append(capsuleId)
         }
+
+        storedUsers[user.id] = current
+        mockCurrentUser = current
     }
 
     func deleteUser() async throws {
         didDeleteUser = true
         deletedUserId = userId
+
+        storedUsers.removeValue(forKey: userId)
         mockCurrentUser = nil
         logout()
     }
 
-    // MARK: - User ID Handling
+    // MARK: - User ID handling
+
     func loadUserId() -> String? {
         didLoadUserId = true
         return userId.isEmpty ? nil : userId
@@ -144,7 +171,6 @@ class MockUserService: UserServiceProtocol {
     }
 
     func getUserId() -> String {
-        // didLoadUserId = true // Opcional, dependendo de como você quer rastrear
         return userId
     }
 
@@ -153,19 +179,25 @@ class MockUserService: UserServiceProtocol {
         userId = ""
         mockCurrentUser = nil
     }
-    
-    // MARK: - Helper para limpar estado entre testes
+
+    // MARK: - Helpers
+
+    func addUser(_ user: User) {
+        storedUsers[user.id] = user
+    }
+
     func resetTrackers() {
         didCreate = false
         didGetCurrentUser = false
         didGetUser = false
+        didGetUsers = false
         didUpdateUser = false
         didDeleteUser = false
         didLoadUserId = false
         didSaveUserId = false
         didLogout = false
         didChangeCompletedCapsuleToOpenCapsule = false
-        
+
         shouldThrowOnGetCurrent = false
         shouldThrowOnUpdate = false
     }
