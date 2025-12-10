@@ -6,38 +6,53 @@
 //
 
 import SwiftUI
-
-import SwiftUI
+import Lottie
 
 struct PostOpenedCapsuleView: View {
     var capsule: Capsule
     let viewModel = PostOpenedCapsuleViewModel()
-
+    @State private var showLottie = true
     @State private var scrollOffset: CGFloat = 0
-
+    
     var submissions: [Submission] {
         viewModel.orderSubmission(submissions: capsule.submissions)
     }
-
+    
     var body: some View {
         ZStack {
             Image(.backgroundPNG)
                 .resizable()
                 .ignoresSafeArea()
-            
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    VStack(spacing: 5) {
-                        Text(viewModel.dates(submissions: submissions))
-                            .font(.coveredByYourGraceSignature)
-                        
-                        NameComponent(text: .constant(capsule.name))
-                    }
-                    
-                    Gallery(submissions: submissions)
+            ZStack {
+                if showLottie {
+                    LottieView(animation: .named("FinalGame"))
+                        .playing(loopMode: .playOnce)
+                        .configure {
+                            $0.contentMode = .scaleAspectFill
+                        }
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                withAnimation {
+                                    showLottie = false
+                                }
+                            }
+                        }
                 }
-                .padding(.bottom, -40)
-                .padding(.horizontal, 24)
+                
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        VStack(spacing: 5) {
+                            Text(viewModel.dates(submissions: submissions))
+                                .font(.coveredByYourGraceSignature)
+                            
+                            NameComponent(text: .constant(capsule.name))
+                        }
+                        
+                        Gallery(submissions: submissions)
+                    }
+                    .padding(.bottom, -40)
+                    .padding(.horizontal, 24)
+                }
             }
         }
     }
@@ -96,6 +111,6 @@ struct PostOpenedCapsuleView: View {
         status: .inProgress,
         blacklisted: []
     )
-
+    
     PostOpenedCapsuleView(capsule: capsule)
 }
