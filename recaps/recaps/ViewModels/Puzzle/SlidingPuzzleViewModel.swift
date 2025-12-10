@@ -13,18 +13,102 @@ import SwiftUI
 @Observable
 class SlidingPuzzleViewModel {
     
+    private var capsuleService = CapsuleService()
+    
     let gridSize: Int = 3
     
     var tiles: [PuzzleTile] = []
     var isSolved: Bool = false
     var moveCount: Int = 0
+    var timeUntilMidnight: String = "00:00:00"
+    
+    private var timer: Timer?
+    private var serverTimeAtFetch: Date?
+    private var localTimeAtFetch: Date?
+    
+    init() {
+        Task {
+            await startTimer()
+        }
+    }
+    
+    deinit {
+        timer?.invalidate()
+    }
+    
+    func startTimer() async {
+        await fetchServerTime()
+        
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.updateTimeUntilMidnight()
+        }
+    }
+    
+    private func fetchServerTime() async {
+        do {
+            let serverTime = try await capsuleService.fetchBrazilianTime()
+            serverTimeAtFetch = serverTime
+            localTimeAtFetch = serverTime
+            updateTimeUntilMidnight()
+        } catch {
+            print("Failed to fetch server time: \(error)")
+            serverTimeAtFetch = Date()
+            localTimeAtFetch = Date()
+            updateTimeUntilMidnight()
+        }
+    }
+    
+    private func updateTimeUntilMidnight() {
+        guard let serverTime = serverTimeAtFetch,
+              let localTime = localTimeAtFetch else {
+            timeUntilMidnight = "00:00:00"
+            return
+        }
+        
+        let elapsedTime = Date().timeIntervalSince(localTime)
+        let currentTrueTime = serverTime.addingTimeInterval(elapsedTime)
+        
+        guard let brazilTimeZone = TimeZone(identifier: "America/Sao_Paulo") else {
+            timeUntilMidnight = "00:00:00"
+            return
+        }
+        
+        var calendar = Calendar.current
+        calendar.timeZone = brazilTimeZone
+        
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: currentTrueTime),
+              let startOfTomorrow = calendar.date(from: calendar.dateComponents([.year, .month, .day], from: tomorrow)) else {
+            timeUntilMidnight = "00:00:00"
+            return
+        }
+        
+        let components = calendar.dateComponents([.hour, .minute, .second], from: currentTrueTime, to: startOfTomorrow)
+        
+        let hours = components.hour ?? 0
+        let minutes = components.minute ?? 0
+        let seconds = components.second ?? 0
+        
+        timeUntilMidnight = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        
+        if elapsedTime > 600 {
+            Task {
+                await fetchServerTime()
+            }
+        }
+    }
+    
+    func getCurrentTime() async throws -> Date {
+        do {
+            return try await capsuleService.fetchBrazilianTime()
+        } catch {
+            return Date()
+        }
+    }
     
     func setupGame(originalImage: UIImage) {
         self.moveCount = 0
         self.isSolved = false
         
-//        let squaredImage = cropToSquare(image: originalImage)
-//        let squaredImage = fitImageIntoSquare(image: originalImage)
         let squaredImage = cropToSquare(image: originalImage)
         let pieceSize = squaredImage.size.width / CGFloat(gridSize)
         var newTiles: [PuzzleTile] = []
@@ -52,8 +136,7 @@ class SlidingPuzzleViewModel {
         shuffleTiles()
     }
     
-    
-    func shuffleTiles(){
+    func shuffleTiles() {
         let numberOfShuffles = 150
         
         for _ in 0..<numberOfShuffles{
@@ -67,7 +150,7 @@ class SlidingPuzzleViewModel {
         moveCount = 0
     }
     
-    func moveTile(index: Int){
+    func moveTile(index: Int) {
         if isSolved || tiles[index].image == nil {return}
         
         guard let emptyIndex = tiles.firstIndex(where: { $0.image == nil}) else { return }
@@ -98,19 +181,19 @@ class SlidingPuzzleViewModel {
         let col = index % gridSize
         
         if row > 0 {
-            neighbors.append(index - gridSize) //Vizinho de cima
+            neighbors.append(index - gridSize)
         }
         
         if row < gridSize - 1{
-            neighbors.append(index + gridSize) //Vizinho de baixo
+            neighbors.append(index + gridSize)
         }
         
         if col > 0 {
-            neighbors.append(index - 1) //Vizinho da esquerda
+            neighbors.append(index - 1)
         }
         
         if col < gridSize - 1{
-            neighbors.append(index + 1) //Vizinho da direita
+            neighbors.append(index + 1)
         }
         
         return neighbors
@@ -125,50 +208,33 @@ class SlidingPuzzleViewModel {
         return abs(row1 - row2) + abs(col1 - col2) == 1
     }
     
-//    private func cropToSquare(image: UIImage) -> UIImage {
-//        let originalWidth = image.size.width
-//        let originalHeight = image.size.height
-//        
-//        let edge = min(originalWidth, originalHeight) //define o lado como o menor da imagem
-//        let posX = (originalWidth - edge) / 2.0
-//        let posY = (originalHeight - edge) / 2.0
-//        
-//        let cropSquare = CGRect(x: posX, y: posY, width: edge, height: edge) //Cria o quadradoo
-//        
-//        if let imageRef = image.cgImage?.cropping(to: cropSquare) {
-//            return UIImage(cgImage: imageRef, scale: image.scale, orientation: image.imageOrientation)
-//        }
-//        return image
-//    }
-//
-    
     private func cropToSquare(image: UIImage) -> UIImage {
-            // First, redraw the image in the correct orientation
-            let normalizedImage: UIImage
-            if image.imageOrientation != .up {
-                UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
-                image.draw(in: CGRect(origin: .zero, size: image.size))
-                normalizedImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
-                UIGraphicsEndImageContext()
-            } else {
-                normalizedImage = image
-            }
-            
-            guard let cgImage = normalizedImage.cgImage else { return image }
-            
-            let originalWidth = CGFloat(cgImage.width)
-            let originalHeight = CGFloat(cgImage.height)
-            
-            let edge = min(originalWidth, originalHeight)
-            let posX = (originalWidth - edge) / 2.0
-            let posY = (originalHeight - edge) / 2.0
-            
-            let cropSquare = CGRect(x: posX, y: posY, width: edge, height: edge)
-            
-            if let croppedCGImage = cgImage.cropping(to: cropSquare) {
-                return UIImage(cgImage: croppedCGImage, scale: image.scale, orientation: .up)
-            }
-            
-            return image
+        // First, redraw the image in the correct orientation
+        let normalizedImage: UIImage
+        if image.imageOrientation != .up {
+            UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
+            image.draw(in: CGRect(origin: .zero, size: image.size))
+            normalizedImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
+            UIGraphicsEndImageContext()
+        } else {
+            normalizedImage = image
         }
+        
+        guard let cgImage = normalizedImage.cgImage else { return image }
+        
+        let originalWidth = CGFloat(cgImage.width)
+        let originalHeight = CGFloat(cgImage.height)
+        
+        let edge = min(originalWidth, originalHeight)
+        let posX = (originalWidth - edge) / 2.0
+        let posY = (originalHeight - edge) / 2.0
+        
+        let cropSquare = CGRect(x: posX, y: posY, width: edge, height: edge)
+        
+        if let croppedCGImage = cgImage.cropping(to: cropSquare) {
+            return UIImage(cgImage: croppedCGImage, scale: image.scale, orientation: .up)
+        }
+        
+        return image
+    }
 }
