@@ -11,7 +11,6 @@ import SwiftUI
 @Observable
 class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
-    var isLoading: Bool = false
     var showCreateCapsule: Bool = false
     var showPopup = false
     var showJoinPopup = false
@@ -21,17 +20,19 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
     var inProgressCapsules: [Capsule] = []
     var completedCapsules: [Capsule] = []
-    var user: User = User(
-        id: "",
-        name: "",
-        email: "",
-        capsules: [],
-        openCapsules: []
-    )
+    var user: User?
 
+    var fetchDone: Bool = false
+    
+    var isLoading: Bool {
+        if !inProgressCapsules.isEmpty || !completedCapsules.isEmpty {
+            return false
+        }
+        return !fetchDone
+    }
     
     private let capsuleService: CapsuleServiceProtocol
-    private let userService: UserServiceProtocol
+    let userService: UserServiceProtocol
     
     init(capsuleService: CapsuleServiceProtocol = CapsuleService(), userService: UserServiceProtocol = UserService()) {
         self.capsuleService = capsuleService
@@ -41,8 +42,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     // MARK: - Fetch Data Logic
     @MainActor
     func fetchCapsules() async {
-        isLoading = true
-        defer { isLoading = false }
+       fetchDone = false
 
         do {
             let currentUser = try await userService.getCurrentUser()
@@ -51,32 +51,77 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             let capsuleIDs = progressCapsuleIDs + openCapsuleIDs
 
             guard !capsuleIDs.isEmpty else {
+                fetchDone = true
                 inProgressCapsules = []
                 completedCapsules = []
                 return
             }
+            
+            // MARK: - CONCORRÊNCIA REAL
+            async let progressCapsulesTask = capsuleService.fetchCapsulesWithoutSubmissions(IDs: progressCapsuleIDs)
+            async let openCapsulesTask = capsuleService.fetchCapsulesWithoutSubmissions(IDs: openCapsuleIDs)
 
-            var allCapsules = try await capsuleService
-                .fetchCapsules(IDs: capsuleIDs)
-                .sorted(by: { $0.createdAt < $1.createdAt })
 
-            self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
+            // Só espera as duas agora
+            var (progressCapsules, openCapsules) = try await (progressCapsulesTask, openCapsulesTask)
 
+            // Ordena e salva
+            self.inProgressCapsules = progressCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+            self.completedCapsules = openCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+
+            fetchDone = true
+            
             await checkIfCapsuleIsValidOffensive(user: currentUser)
+            
+            async let progressCapsulesTaskSubmissions = capsuleService.fetchCapsules(IDs: progressCapsuleIDs)
+            async let openCapsulesTaskSubmissions = capsuleService.fetchCapsules(IDs: openCapsuleIDs)
+            
+            // Só espera as duas agora
+            (progressCapsules, openCapsules) = try await (progressCapsulesTaskSubmissions, openCapsulesTaskSubmissions)
+            // Ordena e salva
+            
+            self.inProgressCapsules = progressCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+            self.completedCapsules = openCapsules.sorted(by: { $0.createdAt < $1.createdAt })
 
-            // Recarrega depois das possíveis atualizações
-            allCapsules = try await capsuleService
-                .fetchCapsules(IDs: capsuleIDs)
-                .sorted(by: { $0.createdAt < $1.createdAt })
-
-            self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
 
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
             inProgressCapsules = []
             completedCapsules = []
+        }
+    }
+    
+    func refreshCapsules() async {
+
+        do {
+            if let user = self.user {
+                
+            let progressCapsuleIDs = user.capsules
+            let openCapsuleIDs = user.openCapsules
+            let capsuleIDs = progressCapsuleIDs + openCapsuleIDs
+
+            guard !capsuleIDs.isEmpty else {
+                inProgressCapsules = []
+                completedCapsules = []
+                return
+            }
+            
+                await checkIfCapsuleIsValidOffensive(user: user)
+                
+                async let progressCapsulesTaskSubmissions = capsuleService.fetchCapsules(IDs: progressCapsuleIDs)
+                async let openCapsulesTaskSubmissions = capsuleService.fetchCapsules(IDs: openCapsuleIDs)
+                
+                // Só espera as duas agora
+                let(progressCapsules, openCapsules) = try await (progressCapsulesTaskSubmissions, openCapsulesTaskSubmissions)
+                // Ordena e salva
+                
+                self.inProgressCapsules = progressCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+                self.completedCapsules = openCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+            }
+            
+
+        } catch {
+            print("Erro ao carregar dados da Home: \(error.localizedDescription)")
         }
     }
     
@@ -210,6 +255,13 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             print("deu merda aqui")
         }
             
+    }
+    
+    func changeCompletedCapsuleToOpenCapsule(capsuleID: UUID) async throws {
+        if let user = self.user{
+            try await userService.changeCompletedCapsuleToOpenCapsule(user: user , capsuleId: capsuleID)
+        }
+        
     }
      
 }
