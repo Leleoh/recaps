@@ -11,8 +11,10 @@ import Lottie
 struct PostOpenedCapsuleView: View {
     var capsule: Capsule
     let viewModel = PostOpenedCapsuleViewModel()
-    @State private var showLottie = true
+    
     @State private var scrollOffset: CGFloat = 0
+    @State private var showLottie = true
+    
     
     var submissions: [Submission] {
         viewModel.orderSubmission(submissions: capsule.submissions)
@@ -23,35 +25,41 @@ struct PostOpenedCapsuleView: View {
             Image(.backgroundPNG)
                 .resizable()
                 .ignoresSafeArea()
+            
             ZStack {
                 if showLottie {
-                    LottieView(animation: .named("FinalGame"))
-                        .playing(loopMode: .playOnce)
-                        .configure {
-                            $0.contentMode = .scaleAspectFill
-                        }
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                                withAnimation {
-                                    showLottie = false
+                    ZStack{
+                        Color.black
+                            .ignoresSafeArea()
+                        
+                        LottieView(animation: .named("OpenCapsule"))
+                            .playing(loopMode: .playOnce)
+                            .configure {
+                                $0.contentMode = .scaleAspectFill
+                            }
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 7.5) {
+                                    withAnimation {
+                                        showLottie = false
+                                    }
                                 }
                             }
-                        }
-                }
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 16) {
-                        VStack(spacing: 5) {
-                            Text(viewModel.dates(submissions: submissions))
-                                .font(.coveredByYourGraceSignature)
-                            
-                            NameComponent(text: .constant(capsule.name))
-                        }
-                        
-                        Gallery(submissions: submissions)
                     }
-                    .padding(.bottom, -40)
-                    .padding(.horizontal, 24)
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 16) {
+                            VStack(spacing: 5) {
+                                Text(viewModel.dates(submissions: submissions))
+                                    .font(.coveredByYourGraceSignature)
+                                
+                                NameComponent(text: .constant(capsule.name))
+                            }
+                            
+                            Gallery(submissions: submissions)
+                        }
+                        .padding(.bottom, -40)
+                        .padding(.horizontal, 24)
+                    }
                 }
             }
         }

@@ -1075,6 +1075,52 @@ class CapsuleService: CapsuleServiceProtocol {
         return brasiliaDate
     }
     
+    func fetchLastSubmission(capsuleID: UUID) async throws -> Submission? {
+        let predicate = NSPredicate(format: "capsuleID == %@", capsuleID.uuidString)
+        let query = CKQuery(recordType: "Submission", predicate: predicate)
+
+        query.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+
+        let result = try await database.records(matching: query, resultsLimit: 1)
+
+        for (_, recordResult) in result.matchResults {
+            if case .success(let record) = recordResult {
+                
+                let idString = record["id"] as? String ?? ""
+                guard let id = UUID(uuidString: idString) else { return nil }
+                
+                let description = record["description"] as? String
+                let date = record["date"] as? Date ?? Date()
+                let authorId = record["authorId"] as? String ?? ""
+                
+                let capsuleIDString = record["capsuleID"] as? String ?? ""
+                let capsuleID = UUID(uuidString: capsuleIDString) ?? UUID()
+
+                var imageURL: URL? = nil
+                if let asset = record["image"] as? CKAsset,
+                   let fileURL = asset.fileURL {
+
+                    let localURL = FileManager.default.temporaryDirectory
+                        .appendingPathComponent("\(UUID().uuidString).jpg")
+
+                    try? FileManager.default.copyItem(at: fileURL, to: localURL)
+                    imageURL = localURL
+                }
+
+                return Submission(
+                    id: id,
+                    imageURL: imageURL,
+                    description: description,
+                    authorId: authorId,
+                    date: date,
+                    capsuleID: capsuleID
+                )
+            }
+        }
+        return nil
+    }
+
+    
     private func dateAtMidnight(from utcDate: Date) -> Date {
         
         let calendar = Calendar(identifier: .gregorian)
