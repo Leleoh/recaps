@@ -26,6 +26,8 @@ class SlidingPuzzleViewModel {
     private var serverTimeAtFetch: Date?
     private var localTimeAtFetch: Date?
     
+    private var hasFetchedServerTime = false
+    
     init() {
         Task {
             await startTimer()
@@ -45,17 +47,20 @@ class SlidingPuzzleViewModel {
     }
     
     private func fetchServerTime() async {
+        guard !hasFetchedServerTime else { return }
+        hasFetchedServerTime = true
+
         do {
             let serverTime = try await capsuleService.fetchBrazilianTime()
             serverTimeAtFetch = serverTime
-            localTimeAtFetch = serverTime
-            updateTimeUntilMidnight()
+            localTimeAtFetch = Date()
         } catch {
             print("Failed to fetch server time: \(error)")
             serverTimeAtFetch = Date()
             localTimeAtFetch = Date()
-            updateTimeUntilMidnight()
         }
+        
+        updateTimeUntilMidnight()
     }
     
     private func updateTimeUntilMidnight() {
@@ -84,17 +89,10 @@ class SlidingPuzzleViewModel {
         
         let components = calendar.dateComponents([.hour, .minute, .second], from: currentTrueTime, to: startOfTomorrow)
         
-        let hours = components.hour ?? 0
-        let minutes = components.minute ?? 0
-        let seconds = components.second ?? 0
-        
-        timeUntilMidnight = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        
-        if elapsedTime > 600 {
-            Task {
-                await fetchServerTime()
-            }
-        }
+        timeUntilMidnight = String(format: "%02d:%02d:%02d",
+                                   components.hour ?? 0,
+                                   components.minute ?? 0,
+                                   components.second ?? 0)
     }
     
     func getCurrentTime() async throws -> Date {
