@@ -11,7 +11,6 @@ import SwiftUI
 @Observable
 class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     
-    var isLoading: Bool = false
     var showCreateCapsule: Bool = false
     var showPopup = false
     var showJoinPopup = false
@@ -29,6 +28,14 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         openCapsules: []
     )
 
+    var fetchDone: Bool = false
+    
+    var isLoading: Bool {
+        if !inProgressCapsules.isEmpty || !completedCapsules.isEmpty {
+            return false
+        }
+        return !fetchDone
+    }
     
     private let capsuleService: CapsuleServiceProtocol
     private let userService: UserServiceProtocol
@@ -41,8 +48,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     // MARK: - Fetch Data Logic
     @MainActor
     func fetchCapsules() async {
-        isLoading = true
-        defer { isLoading = false }
+       fetchDone = false
 
         do {
             let currentUser = try await userService.getCurrentUser()
@@ -51,6 +57,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             let capsuleIDs = progressCapsuleIDs + openCapsuleIDs
 
             guard !capsuleIDs.isEmpty else {
+                fetchDone = true
                 inProgressCapsules = []
                 completedCapsules = []
                 return
@@ -58,17 +65,19 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
 
             var allCapsules = try await capsuleService
                 .fetchCapsules(IDs: capsuleIDs)
-                .sorted(by: { $0.createdAt < $1.createdAt })
+                .sorted(by: { $0.createdAt > $1.createdAt })
 
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
 
+            fetchDone = true
+            
             await checkIfCapsuleIsValidOffensive(user: currentUser)
 
             // Recarrega depois das possíveis atualizações
             allCapsules = try await capsuleService
                 .fetchCapsules(IDs: capsuleIDs)
-                .sorted(by: { $0.createdAt < $1.createdAt })
+                .sorted(by: { $0.createdAt > $1.createdAt })
 
             self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
             self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }

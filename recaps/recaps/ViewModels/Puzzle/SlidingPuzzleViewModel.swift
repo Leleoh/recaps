@@ -9,11 +9,8 @@ import Foundation
 import UIKit
 import SwiftUI
 
-
 @Observable
 class SlidingPuzzleViewModel {
-    
-    private var capsuleService = CapsuleService()
     
     let gridSize: Int = 3
     
@@ -23,51 +20,26 @@ class SlidingPuzzleViewModel {
     var timeUntilMidnight: String = "00:00:00"
     
     private var timer: Timer?
-    private var serverTimeAtFetch: Date?
-    private var localTimeAtFetch: Date?
     
     init() {
-        Task {
-            await startTimer()
-        }
+        startTimer()
     }
     
     deinit {
         timer?.invalidate()
     }
     
-    func startTimer() async {
-        await fetchServerTime()
+    func startTimer() {
+        guard timer == nil else { return }
+        
+        updateTimeUntilMidnight()
         
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateTimeUntilMidnight()
         }
     }
     
-    private func fetchServerTime() async {
-        do {
-            let serverTime = try await capsuleService.fetchBrazilianTime()
-            serverTimeAtFetch = serverTime
-            localTimeAtFetch = serverTime
-            updateTimeUntilMidnight()
-        } catch {
-            print("Failed to fetch server time: \(error)")
-            serverTimeAtFetch = Date()
-            localTimeAtFetch = Date()
-            updateTimeUntilMidnight()
-        }
-    }
-    
     private func updateTimeUntilMidnight() {
-        guard let serverTime = serverTimeAtFetch,
-              let localTime = localTimeAtFetch else {
-            timeUntilMidnight = "00:00:00"
-            return
-        }
-        
-        let elapsedTime = Date().timeIntervalSince(localTime)
-        let currentTrueTime = serverTime.addingTimeInterval(elapsedTime)
-        
         guard let brazilTimeZone = TimeZone(identifier: "America/Sao_Paulo") else {
             timeUntilMidnight = "00:00:00"
             return
@@ -76,33 +48,20 @@ class SlidingPuzzleViewModel {
         var calendar = Calendar.current
         calendar.timeZone = brazilTimeZone
         
-        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: currentTrueTime),
+        let currentTime = Date()
+        
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: currentTime),
               let startOfTomorrow = calendar.date(from: calendar.dateComponents([.year, .month, .day], from: tomorrow)) else {
             timeUntilMidnight = "00:00:00"
             return
         }
         
-        let components = calendar.dateComponents([.hour, .minute, .second], from: currentTrueTime, to: startOfTomorrow)
+        let components = calendar.dateComponents([.hour, .minute, .second], from: currentTime, to: startOfTomorrow)
         
-        let hours = components.hour ?? 0
-        let minutes = components.minute ?? 0
-        let seconds = components.second ?? 0
-        
-        timeUntilMidnight = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        
-        if elapsedTime > 600 {
-            Task {
-                await fetchServerTime()
-            }
-        }
-    }
-    
-    func getCurrentTime() async throws -> Date {
-        do {
-            return try await capsuleService.fetchBrazilianTime()
-        } catch {
-            return Date()
-        }
+        timeUntilMidnight = String(format: "%02d:%02d:%02d",
+                                   components.hour ?? 0,
+                                   components.minute ?? 0,
+                                   components.second ?? 0)
     }
     
     func setupGame(originalImage: UIImage) {
@@ -113,22 +72,20 @@ class SlidingPuzzleViewModel {
         let pieceSize = squaredImage.size.width / CGFloat(gridSize)
         var newTiles: [PuzzleTile] = []
         
-        
         for row in 0..<gridSize {
             for col in 0..<gridSize {
                 let index = row * gridSize + col
                 
-                if index == (gridSize * gridSize) - 1{
+                if index == (gridSize * gridSize) - 1 {
                     newTiles.append(PuzzleTile(originalIndex: index, currentPosition: index, image: nil))
-                } else{
+                } else {
                     let x = CGFloat(col) * pieceSize
                     let y = CGFloat(row) * pieceSize
                     let cropRect = CGRect(x: x, y: y, width: pieceSize, height: pieceSize)
-                    if let cgImage = squaredImage.cgImage?.cropping(to: cropRect){
+                    if let cgImage = squaredImage.cgImage?.cropping(to: cropRect) {
                         let pieceImage = UIImage(cgImage: cgImage)
                         newTiles.append(PuzzleTile(originalIndex: index, currentPosition: index, image: pieceImage))
                     }
-                    
                 }
             }
         }
@@ -139,8 +96,8 @@ class SlidingPuzzleViewModel {
     func shuffleTiles() {
         let numberOfShuffles = 150
         
-        for _ in 0..<numberOfShuffles{
-            guard let emptyIndex = tiles.firstIndex(where: { $0.image == nil}) else { return }
+        for _ in 0..<numberOfShuffles {
+            guard let emptyIndex = tiles.firstIndex(where: { $0.image == nil }) else { return }
             let neighbors = getValidNeighbors(index: emptyIndex)
             
             if let randomNeighbor = neighbors.randomElement() {
@@ -151,31 +108,30 @@ class SlidingPuzzleViewModel {
     }
     
     func moveTile(index: Int) {
-        if isSolved || tiles[index].image == nil {return}
+        if isSolved || tiles[index].image == nil { return }
         
-        guard let emptyIndex = tiles.firstIndex(where: { $0.image == nil}) else { return }
+        guard let emptyIndex = tiles.firstIndex(where: { $0.image == nil }) else { return }
         
-        if isNeighbor(index1: index, index2: emptyIndex){
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)){
+        if isNeighbor(index1: index, index2: emptyIndex) {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 tiles.swapAt(index, emptyIndex)
             }
             moveCount += 1
             checkWinCondition()
-            
         }
     }
     
-    private func checkWinCondition(){
-        let isAllCorrect = tiles.enumerated().allSatisfy{ index, tile in
+    private func checkWinCondition() {
+        let isAllCorrect = tiles.enumerated().allSatisfy { index, tile in
             return tile.originalIndex == index
         }
         
-        if isAllCorrect{
+        if isAllCorrect {
             isSolved = true
         }
     }
     
-    private func getValidNeighbors(index: Int) -> [Int]{
+    private func getValidNeighbors(index: Int) -> [Int] {
         var neighbors: [Int] = []
         let row = index / gridSize
         let col = index % gridSize
@@ -184,7 +140,7 @@ class SlidingPuzzleViewModel {
             neighbors.append(index - gridSize)
         }
         
-        if row < gridSize - 1{
+        if row < gridSize - 1 {
             neighbors.append(index + gridSize)
         }
         
@@ -192,14 +148,14 @@ class SlidingPuzzleViewModel {
             neighbors.append(index - 1)
         }
         
-        if col < gridSize - 1{
+        if col < gridSize - 1 {
             neighbors.append(index + 1)
         }
         
         return neighbors
     }
     
-    private func isNeighbor(index1: Int, index2: Int) -> Bool{
+    private func isNeighbor(index1: Int, index2: Int) -> Bool {
         let row1 = index1 / gridSize
         let col1 = index1 % gridSize
         
@@ -209,7 +165,6 @@ class SlidingPuzzleViewModel {
     }
     
     private func cropToSquare(image: UIImage) -> UIImage {
-        // First, redraw the image in the correct orientation
         let normalizedImage: UIImage
         if image.imageOrientation != .up {
             UIGraphicsBeginImageContextWithOptions(image.size, false, image.scale)
