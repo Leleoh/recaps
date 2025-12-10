@@ -13,6 +13,9 @@
 //
 
 import SwiftUI
+import Lottie
+import AVFoundation
+
 
 struct SlidingPuzzleView: View {
     
@@ -21,90 +24,82 @@ struct SlidingPuzzleView: View {
     
     @State var isSolved = false
     @State private var hidePuzzle = false
-    
+    @State private var audioPlayer: AVAudioPlayer?
+
     var image: UIImage?
     
     var body: some View {
         
-        VStack{
+        ZStack {
+            // 1. Fundo Escurecido da Tela
+            Color.black.opacity(0.6) // Aumentei um pouco para dar destaque ao modal
+                .ignoresSafeArea()
             
-            
-            ZStack {
-                // 1. Fundo Escurecido da Tela
-                Color.black.opacity(0.6) // Aumentei um pouco para dar destaque ao modal
-                    .ignoresSafeArea()
-                
-                VStack (spacing: 54) {
-                    VStack (spacing: 8) {
-                        Text("New memory available in")
-                            .font(.coveredByYourGraceSignature)
-                        
-                        Text(viewModel.timeUntilMidnight)
-                            .font(.appTitle2)
-                            .bold()
-                            .foregroundStyle(.white)
-                    }
-                    .padding(.top, -54)
+            VStack (spacing: 54) {
+                VStack (spacing: 8) {
+                    Text("New memory available in")
+                        .font(.coveredByYourGraceSignature)
                     
-                    // 2. O Card Flutuante
-                    VStack(spacing: 0) {
-                        
-                        Text("Daily memory")
-                            .foregroundStyle(.white)
-                            .font(.coveredByYourGraceTitle)
-                            .padding(.top, 24)
-                        
-                        Text("Play to reveal the memory")
-                            .foregroundStyle(.white)
-                            .font(.appBody)
-                            .padding(.top, 8)
-                        
-                        ZStack {
-                            
-                            if let image = image {
-                                ScreenshotPrivacy {
-                                    SlidingPuzzleComponent(isSolved: $isSolved, image: image)
-                                }
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                            } else {
-                                Image(systemName: "photo")
-                                    .resizable()
-                                    .padding()
-                                    .foregroundStyle(.white)
-                            }
-                        }
-                        .aspectRatio(1, contentMode: .fit)
-        //                .padding(.horizontal, 8)
-                        
-                        
-                    }
-                    .background(Color.fillDarkSecondary) // Fundo do Card
-                    .cornerRadius(24)
-            
-                    .padding(.horizontal, 12)
-                }
-
-            }
-            
-            if isSolved {
-                VStack(spacing: 16) {
-                    Image(systemName: "checkmark.seal.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(.green)
-                        .shadow(radius: 5)
-                    
-                    Text("Memória concluída!")
-                        .font(.title)
+                    Text(viewModel.timeUntilMidnight)
+                        .font(.appTitle2)
                         .bold()
                         .foregroundStyle(.white)
                 }
-                .background(.black.opacity(0.75))
-                .transition(.opacity)
-                .offset(y: -40)
+                .padding(.top, -54)
+                
+                // 2. O Card Flutuante
+                VStack(spacing: 0) {
+                    
+                    Text("Daily memory")
+                        .foregroundStyle(.white)
+                        .font(.coveredByYourGraceTitle)
+                        .padding(.top, 24)
+                    
+                    Text("Play to reveal the memory")
+                        .foregroundStyle(.white)
+                        .font(.appBody)
+                        .padding(.top, 8)
+                    
+                    ZStack {
+                        
+                        if let image = image {
+                            ScreenshotPrivacy {
+                                SlidingPuzzleComponent(isSolved: $isSolved, image: image)
+                            }
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                        } else {
+                            Image(systemName: "photo")
+                                .resizable()
+                                .padding()
+                                .foregroundStyle(.white)
+                        }
+                    }
+                    .aspectRatio(1, contentMode: .fit)
+                    //                .padding(.horizontal, 8)
+                    
+                    
+                }
+                .background(Color.fillDarkSecondary) // Fundo do Card
+                .cornerRadius(24)
+                
+                .padding(.horizontal, 12)
             }
-            
-            Spacer()
+            if isSolved {
+                LottieView(animation: .named("FinalGame"))
+                    .playing(loopMode: .playOnce)
+                    .animationSpeed(2)
+                    .configure {
+                        $0.contentMode = .scaleAspectFill
+                    }
+                    .offset(y: 30)
+            }
         }
+        .onChange(of: isSolved) {
+            if isSolved {
+                playVictorySound()
+            }
+        }
+        
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.userDidTakeScreenshotNotification)) { _ in
             withAnimation(.easeInOut(duration: 0.2)) {
                 hidePuzzle = true
@@ -123,6 +118,18 @@ struct SlidingPuzzleView: View {
             }
             
             
+        }
+    }
+    private func playVictorySound() {
+        guard let url = Bundle.main.url(forResource: "victory", withExtension: "mp3") else {
+            return
+        }
+
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.play()
+        } catch {
+            print("Erro ao tocar som: \(error)")
         }
     }
 }
