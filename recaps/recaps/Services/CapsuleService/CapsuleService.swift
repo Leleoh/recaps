@@ -1050,31 +1050,44 @@ class CapsuleService: CapsuleServiceProtocol {
     }
 
 
-    func fetchBrazilianTime() async throws -> Date {
-        let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
-
-        let (data, response) = try await URLSession.shared.data(from: url)
-
-        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-            throw NSError(domain: "TimeAPIError", code: -1)
+    func fetchBrazilianTime() async -> Date {
+        do {
+            let url = URL(string: "https://recaps-time.recaps-academy-utc.workers.dev")!
+            
+            let (data, response) = try await URLSession.shared.data(from: url)
+            
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
+                return getBrazilianDate()
+            }
+            
+            let decoded = try JSONDecoder().decode(TimeResponse.self, from: data)
+            
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            
+            guard let utcDate = formatter.date(from: decoded.utc) else {
+                return getBrazilianDate()
+            }
+            
+            let tz = TimeZone(identifier: "America/Sao_Paulo")!
+            let offset = TimeInterval(tz.secondsFromGMT(for: utcDate))
+            let brasiliaDate = Date(timeInterval: offset, since: utcDate)
+            
+            return brasiliaDate
+            
+        } catch {
+            print("Failed to fetch Brazilian time: \(error). Using local time converted to Brazilian timezone.")
+            return getBrazilianDate()
         }
-
-        let decoded = try JSONDecoder().decode(TimeResponse.self, from: data)
-
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-
-        guard let utcDate = formatter.date(from: decoded.utc) else {
-            throw NSError(domain: "TimeAPIParse", code: -1)
-        }
-
-        let tz = TimeZone(identifier: "America/Sao_Paulo")!
-        let offset = TimeInterval(tz.secondsFromGMT(for: utcDate))
-        let brasiliaDate = Date(timeInterval: offset, since: utcDate)
-
-        return brasiliaDate
     }
-    
+
+    // Helper function to get current date in Brazilian timezone
+    private func getBrazilianDate() -> Date {
+        let now = Date()
+        let tz = TimeZone(identifier: "America/Sao_Paulo")!
+        let offset = TimeInterval(tz.secondsFromGMT(for: now))
+        return Date(timeInterval: offset, since: now)
+    }
     private func dateAtMidnight(from utcDate: Date) -> Date {
         
         let calendar = Calendar(identifier: .gregorian)
