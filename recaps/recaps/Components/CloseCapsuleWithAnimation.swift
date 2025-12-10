@@ -17,6 +17,7 @@ struct CloseCapsuleWithAnimation: View {
     
     var body: some View {
         ZStack {
+            
             let lastThree = Array(capsule.submissions.suffix(3))
             
             ZStack {
@@ -36,6 +37,11 @@ struct CloseCapsuleWithAnimation: View {
             
             Image(.locked)
                 .offset(y: 22)
+            
+            if capsule.status == .completed {
+                RotatingOrbitView()
+            }
+            
         }
         .onTapGesture {
             onTap()
