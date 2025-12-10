@@ -13,7 +13,7 @@ struct PostOpenedCapsuleView: View {
     
     @State var viewModel: PostOpenedCapsuleViewModel
     
-    @State private var showLottie = true
+    @State var showLottie = true
     
     var submissions: [Submission] {
         viewModel.submissions

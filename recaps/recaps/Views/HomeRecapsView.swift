@@ -154,7 +154,7 @@ struct HomeRecapsView: View {
                                 LazyVGrid(columns: columns, spacing: 24) {
                                     ForEach(viewModel.completedCapsules) { recap in
                                         NavigationLink {
-                                            PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap))
+                                            PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap), showLottie: false)
 //                                            Text("Openend Capsule View Placeholder.")
                                         } label: {
                                             VStack(spacing: 8){
