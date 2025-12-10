@@ -28,7 +28,7 @@ struct OnboardingTwo: View {
                     Image(.photo5)
                         .offset(x: 70, y: 430)
                 }
-                .padding(.top, -20)
+                .padding(.top, -40)
                 Text("Save memories daily to generate the key that opens your Recapsule")
                     .font(.title2)
                     .multilineTextAlignment(.center)

@@ -14,7 +14,7 @@ struct OnboardingThree: View {
                 .resizable()
                 .ignoresSafeArea()
             
-            VStack{
+            VStack(spacing: 15){
                 Image(.photoOnboarding)
                     .resizable()
                     .ignoresSafeArea()
@@ -22,7 +22,7 @@ struct OnboardingThree: View {
                     .font(.title2)
                     .multilineTextAlignment(.center)
             }
-            .padding(.bottom, 70)
+            .padding(.bottom, 90)
         }
         
     }

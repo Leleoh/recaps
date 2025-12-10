@@ -35,46 +35,47 @@ struct Onboarding: View {
                 Spacer()
                 
                 HStack {
-                    if index == 0{ EmptyView()} else {
+                    if index != 0 {
                         Button {
-                            if index > 0 {
-                                index -= 1
-                            }
+                            index -= 1
                         } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 19, weight: .semibold))
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 4)
+                            ZStack {
+                                Circle()
+                                    .frame(width: 48, height: 48)
+                                    .tint(.black.opacity(0.35))
+                                    .clipShape(Circle())
+                                    .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 24))
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 19, weight: .semibold))
+                                    .foregroundStyle(.white)
+                            }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.black.opacity(0.5))
-                        .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
-                        
                     }
+
                     Spacer()
- 
+
                     Button {
                         if index < 2 {
                             index += 1
-                        }
-                        if index == 2{
+                        } else {
                             hasSeenOnboarding = true
                         }
                     } label: {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 19, weight: .semibold))
-                            .foregroundColor(.primary)
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 4)
-                        
+                        ZStack {
+                            Circle()
+                                .frame(width: 48, height: 48)
+                                .tint(.black.opacity(0.35))
+                                .clipShape(Circle())
+                                .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 24))
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 19, weight: .semibold))
+                                .foregroundStyle(.white)
+                        }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.black.opacity(0.5))
-                    .applyLiquidGlass(shape: RoundedRectangle(cornerRadius: 32))
                 }
             }
-            .padding()
+            .padding(.horizontal, 24)
+            .padding(.bottom, 8)
         }
     }
 }
