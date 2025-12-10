@@ -24,7 +24,6 @@ struct SlidingPuzzleView: View {
     
     @State var isSolved = false
     @State private var hidePuzzle = false
-    @State private var audioPlayer: AVAudioPlayer?
 
     var image: UIImage?
     
@@ -96,7 +95,7 @@ struct SlidingPuzzleView: View {
         }
         .onChange(of: isSolved) {
             if isSolved {
-                playVictorySound()
+                viewModel.playVictorySound()
             }
         }
         
@@ -118,18 +117,6 @@ struct SlidingPuzzleView: View {
             }
             
             
-        }
-    }
-    private func playVictorySound() {
-        guard let url = Bundle.main.url(forResource: "victory", withExtension: "mp3") else {
-            return
-        }
-
-        do {
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.play()
-        } catch {
-            print("Erro ao tocar som: \(error)")
         }
     }
 }
