@@ -15,7 +15,7 @@ struct OpenCapsule: View {
     var body: some View {
         ZStack {
             Image(isPink ? .backOpenCapsulePink : .backOpenCapsuleGreen)
-                .frame(width: 313, height: 211)
+//                .frame(width: 313, height: 211)
                 .opacity(0.8)
                 .offset(x: CGFloat(0), y: CGFloat(-56))
             let lastThree = Array(capsule.submissions.suffix(3))
@@ -28,9 +28,10 @@ struct OpenCapsule: View {
             }
 
             Image(isPink ? .openCapsulePink : .openCapsuleGreen)
-                .frame(width: 313, height: 211)
+//                .frame(width: 313, height: 211)
                 .opacity(0.8)
         }
+//        .background(.red)
     }
 }
 

@@ -92,8 +92,16 @@ struct HomeRecapsView: View {
                                 } else {
                                     TabView {
                                         ForEach(viewModel.inProgressCapsules) { recap in
-                                            NavigationLink {
-                                                InsideCapsule(capsule: recap)
+                                            Button {
+                                                if recap.status == .completed {
+                                                    Task {
+                                                        try await viewModel.changeCompletedCapsuleToOpenCapsule(capsuleID: recap.id)
+                                                        await viewModel.fetchCapsules()
+                                                    }
+                                                } else {
+                                                    capsuleToNavigate = recap
+                                                }
+                                                
                                             } label: {
                                                 VStack (spacing: 24){
                                                     CloseCapsule(capsule: recap)
@@ -145,10 +153,16 @@ struct HomeRecapsView: View {
                                 LazyVGrid(columns: columns, spacing: 24) {
                                     ForEach(viewModel.completedCapsules) { recap in
                                         NavigationLink {
-                                            PostOpenedCapsuleView(capsule: recap)
-                                            Text("Openend Capsule View Placeholder.")
+                                            PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap))
+//                                            Text("Openend Capsule View Placeholder.")
                                         } label: {
-                                            OpenCapsule(capsule: recap)
+                                            VStack(spacing: 8){
+                                                OpenCapsule(capsule: recap)
+                                                
+                                                NameComponent(text: .constant(recap.name))
+                                                    .disabled(true)
+                                                    .padding(.horizontal, 16)
+                                            }
                                         }
                                         .contextMenu {
                                             // Apenas Sair
@@ -172,6 +186,7 @@ struct HomeRecapsView: View {
                                         }
                                     }
                                 }
+                                .padding(.top, 16)
                             }
                         }
                     }
@@ -248,12 +263,13 @@ struct HomeRecapsView: View {
         }
         
         .refreshable {
-            await viewModel.fetchCapsules()
+            await viewModel.refreshCapsules()
         }
         
         .task {
             await viewModel.fetchCapsules()
             await viewModel.fetchUser()
+//            _ = try? await viewModel.userService.changeCompletedCapsuleToOpenCapsule(user: viewModel.user, capsuleId: UUID(uuidString: "710D4E62-6968-4073-B012-53290D3535AE")!)
         }
         .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
             Task { await viewModel.fetchCapsules() }
