@@ -112,18 +112,18 @@ struct SlidingPuzzleView: View {
             
         }
         
-        .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .foregroundStyle(.white)
-                }
-            }
-            
-            
-        }
+//        .toolbar {
+//            ToolbarItem(placement: .cancellationAction) {
+//                Button {
+//                    dismiss()
+//                } label: {
+//                    Image(systemName: "chevron.left")
+//                        .foregroundStyle(.white)
+//                }
+//            }
+//            
+//            
+//        }
     }
 }
 
