@@ -254,6 +254,7 @@ struct HomeRecapsView: View {
         .task {
             await viewModel.fetchCapsules()
             await viewModel.fetchUser()
+//            _ = try? await viewModel.userService.changeCompletedCapsuleToOpenCapsule(user: viewModel.user, capsuleId: UUID(uuidString: "710D4E62-6968-4073-B012-53290D3535AE")!)
         }
         .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
             Task { await viewModel.fetchCapsules() }

@@ -31,7 +31,7 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
 
     
     private let capsuleService: CapsuleServiceProtocol
-    private let userService: UserServiceProtocol
+    let userService: UserServiceProtocol
     
     init(capsuleService: CapsuleServiceProtocol = CapsuleService(), userService: UserServiceProtocol = UserService()) {
         self.capsuleService = capsuleService
@@ -55,23 +55,27 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
                 completedCapsules = []
                 return
             }
+            
+            // MARK: - CONCORRÊNCIA REAL
+            async let progressCapsulesTask = capsuleService.fetchCapsulesWithoutSubmissions(IDs: progressCapsuleIDs)
+            async let openCapsulesTask = capsuleService.fetchCapsulesWithoutSubmissions(IDs: openCapsuleIDs)
 
-            var allCapsules = try await capsuleService
-                .fetchCapsules(IDs: capsuleIDs)
-                .sorted(by: { $0.createdAt < $1.createdAt })
+            // Só espera as duas agora
+            var (progressCapsules, openCapsules) = try await (progressCapsulesTask, openCapsulesTask)
 
-            self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
+            // Ordena e salva
+            self.inProgressCapsules = progressCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+            self.completedCapsules = openCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+
 
             await checkIfCapsuleIsValidOffensive(user: currentUser)
+            
+            // Só espera as duas agora
+            (progressCapsules, openCapsules) = try await (progressCapsulesTask, openCapsulesTask)
 
-            // Recarrega depois das possíveis atualizações
-            allCapsules = try await capsuleService
-                .fetchCapsules(IDs: capsuleIDs)
-                .sorted(by: { $0.createdAt < $1.createdAt })
-
-            self.inProgressCapsules = allCapsules.filter { $0.status == .inProgress }
-            self.completedCapsules = allCapsules.filter { $0.status == .completed || $0.status == .opened }
+            // Ordena e salva
+            self.inProgressCapsules = progressCapsules.sorted(by: { $0.createdAt < $1.createdAt })
+            self.completedCapsules = openCapsules.sorted(by: { $0.createdAt < $1.createdAt })
 
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
