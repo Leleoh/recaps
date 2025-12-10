@@ -70,6 +70,10 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
 
             self.manageDailyNotifications()
             
+            Task {
+                try? await capsuleService.subscribeToCapsuleUnlock(for: currentUser.id)
+            }
+            
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
         }

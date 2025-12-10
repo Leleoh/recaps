@@ -8,6 +8,7 @@
 import Foundation
 import UserNotifications
 import Combine
+import UIKit
 
 class NotificationService: NSObject, NotificationServiceProtocol {
     
@@ -20,9 +21,16 @@ class NotificationService: NSObject, NotificationServiceProtocol {
         UNUserNotificationCenter.current().delegate = self
     }
     
+    @MainActor
     func requestAuthorization() async throws -> Bool {
         let options: UNAuthorizationOptions = [.alert, .sound, .badge]
-        return try await UNUserNotificationCenter.current().requestAuthorization(options: options)
+        let granted = try await UNUserNotificationCenter.current().requestAuthorization(options: options)
+        
+        if granted {
+            UIApplication.shared.registerForRemoteNotifications()
+        }
+        
+        return granted
     }
     
     func checkAuthorizationStatus() async -> UNAuthorizationStatus {

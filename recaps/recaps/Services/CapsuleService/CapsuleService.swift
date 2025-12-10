@@ -69,7 +69,6 @@ class CapsuleService: CapsuleServiceProtocol {
         
         recordsToSave.append(capsuleRecord)
         
-
         // 2. SUBMISSION RECORDS
         for (index, submission) in submissions.enumerated() {
             print("🔹 Processando submission \(index + 1)/\(submissions.count) - ID: \(submission.id)")
@@ -106,7 +105,7 @@ class CapsuleService: CapsuleServiceProtocol {
                     print("   ❌ FALHA: Não foi possível gerar jpegData para a imagem \(index)")
                 }
             } else {
-                 print("   ❌ ERRO CRÍTICO: Índice \(index) fora dos limites do array de imagens!")
+                print("   ❌ ERRO CRÍTICO: Índice \(index) fora dos limites do array de imagens!")
             }
 
             recordsToSave.append(submissionRecord)
@@ -342,7 +341,7 @@ class CapsuleService: CapsuleServiceProtocol {
     private func isStreakCompleted(record: CKRecord) async throws -> Bool {
         
         if let offensive = record["offensive"] as? Int,
-            let offensiveTarget = record["offensiveTarget"] as? Int {
+           let offensiveTarget = record["offensiveTarget"] as? Int {
             if offensive >= offensiveTarget {
                 try await changeCapsuleToCompleted(record: record)
                 return true
@@ -500,13 +499,10 @@ class CapsuleService: CapsuleServiceProtocol {
                 case .success:
                     Task {
                         try? await self.checkIfIncreasesStreak(capsuleID: capsuleID)
-                    
-                    
-                    // Remover arquivos temporários
-                    tempFiles.forEach { try? FileManager.default.removeItem(at: $0) }
-                    
-                    continuation.resume()
-                }
+                        // Remover arquivos temporários
+                        tempFiles.forEach { try? FileManager.default.removeItem(at: $0) }
+                        continuation.resume()
+                    }
                     
                 case .failure(let error):
                     print("Erro ao salvar submissions em lote: \(error)")
@@ -972,6 +968,42 @@ class CapsuleService: CapsuleServiceProtocol {
         let components = calendar.dateComponents([.year, .month, .day], from: utcDate)
 
         return calendar.date(from: components)!
+    }
+    
+    func subscribeToCapsuleUnlock(for userId: String) async throws {
+        
+        let subscriptionID = "capsule-unlock-subscription"
+        
+        let predicate = NSPredicate(format: "status == %@ AND members CONTAINS %@", CapsuleStatus.completed.rawValue, userId)
+        
+        let subscription = CKQuerySubscription(
+            recordType: "Capsule",
+            predicate: predicate,
+            subscriptionID: subscriptionID,
+            options: [.firesOnRecordUpdate]
+        )
+        
+        let notificationInfo = CKSubscription.NotificationInfo()
+        notificationInfo.title = "Capsule Unlocked! 🎉"
+        notificationInfo.alertBody = "A capsule has reached its streak and is ready to open."
+        notificationInfo.soundName = "default"
+        notificationInfo.shouldBadge = true
+        
+        subscription.notificationInfo = notificationInfo
+        
+        let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription], subscriptionIDsToDelete: [])
+        operation.qualityOfService = .utility
+        
+        operation.modifySubscriptionsResultBlock = { result in
+            switch result {
+            case .success:
+                print("✅ Inscrição 'Capsule Unlock' registrada com sucesso no CloudKit.")
+            case .failure(let error):
+                print("⚠️ Nota sobre inscrição (pode já existir): \(error.localizedDescription)")
+            }
+        }
+        
+        database.add(operation)
     }
 }
 
