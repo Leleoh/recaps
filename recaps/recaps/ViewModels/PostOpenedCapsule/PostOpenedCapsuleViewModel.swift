@@ -9,6 +9,32 @@ import Foundation
 @Observable
 class PostOpenedCapsuleViewModel {
 
+    private var capsuleService: CapsuleServiceProtocol
+    var isLoading = false
+    var capsule: Capsule
+    
+    var submissions: [Submission] = []
+    
+    init(capsule: Capsule, capsuleService: CapsuleServiceProtocol = CapsuleService()) {
+        self.capsuleService = capsuleService
+        self.capsule = capsule
+    }
+    
+    func fetchSubmissions() async throws {
+        
+        isLoading = true
+        
+        defer { isLoading = false }
+        
+        let fetchedSubmissions = try await capsuleService.fetchSubmissions(capsuleID: capsule.id, limit: nil)
+        
+        print("submissions fetched com sucesso")
+        
+        self.submissions = fetchedSubmissions.sorted(by: { $0.date > $1.date })
+        
+//        print(self.submissions)
+    }
+    
     // MARK: - Ordenação
     func orderSubmission(submissions: [Submission]) -> [Submission] {
         submissions.sorted { $0.date > $1.date }

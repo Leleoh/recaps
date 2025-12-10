@@ -11,33 +11,46 @@ import SwiftUI
 
 struct PostOpenedCapsuleView: View {
     var capsule: Capsule
-    let viewModel = PostOpenedCapsuleViewModel()
-
-    @State private var scrollOffset: CGFloat = 0
-
+    
+    let viewModel: PostOpenedCapsuleViewModel
+    
+    
     var submissions: [Submission] {
-        viewModel.orderSubmission(submissions: capsule.submissions)
+        viewModel.submissions
     }
-
+    
     var body: some View {
         ZStack {
             Image(.backgroundPNG)
                 .resizable()
                 .ignoresSafeArea()
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 16) {
-                    VStack(spacing: 5) {
-                        Text(viewModel.dates(submissions: submissions))
-                            .font(.coveredByYourGraceSignature)
+            if viewModel.isLoading {
+                ProgressView()
+                    .controlSize(ControlSize.large)
+                    .tint(Color.white)
+            } else{
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 16) {
+                        VStack(spacing: 5) {
+                            Text(viewModel.dates(submissions: submissions))
+                                .font(.coveredByYourGraceSignature)
+                            
+                            NameComponent(text: .constant(capsule.name))
+                        }
                         
-                        NameComponent(text: .constant(capsule.name))
+                        Gallery(submissions: submissions)
                     }
-                    
-                    Gallery(submissions: submissions)
+                    .padding(.bottom, -40)
+                    .padding(.horizontal, 24)
                 }
-                .padding(.bottom, -40)
-                .padding(.horizontal, 24)
+                
+            }
+        }
+        
+        .onAppear() {
+            Task {
+                try await viewModel.fetchSubmissions()
             }
         }
     }
@@ -96,6 +109,6 @@ struct PostOpenedCapsuleView: View {
         status: .inProgress,
         blacklisted: []
     )
-
-    PostOpenedCapsuleView(capsule: capsule)
+    
+    PostOpenedCapsuleView(capsule: capsule, viewModel: PostOpenedCapsuleViewModel(capsule: capsule))
 }
