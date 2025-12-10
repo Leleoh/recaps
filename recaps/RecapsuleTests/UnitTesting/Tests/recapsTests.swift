@@ -25,7 +25,8 @@ struct CloudKitServiceTests {
         lives: 3,
         members: [],
         ownerId: " ",
-        status: .inProgress
+        status: .inProgress,
+        blacklisted: []
     )
 
     @Test("Teste: criar cápsula chama o método correto")
@@ -115,7 +116,8 @@ struct CloudKitServiceTests {
             lives: 3,
             members: [],
             ownerId: "jccskdj",
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
 
         try await mock.createCapsule(capsule: capsule)

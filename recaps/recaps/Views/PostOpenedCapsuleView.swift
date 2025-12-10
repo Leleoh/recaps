@@ -24,38 +24,20 @@ struct PostOpenedCapsuleView: View {
             Image(.backgroundPNG)
                 .resizable()
                 .ignoresSafeArea()
-
+            
             ScrollView(showsIndicators: false) {
-                GeometryReader { geo in
-                    Color.clear
-                        .preference(
-                            key: ScrollOffsetKey.self,
-                            value: geo.frame(in: .named("scroll")).minY
-                        )
-                }
-                .frame(height: 0)
-
                 VStack(spacing: 16) {
                     VStack(spacing: 5) {
                         Text(viewModel.dates(submissions: submissions))
                             .font(.coveredByYourGraceSignature)
-
+                        
                         NameComponent(text: .constant(capsule.name))
                     }
-
+                    
                     Gallery(submissions: submissions)
-//                    Timeline(
-//                        sortedMonths: viewModel.sortedMonths(submissions: submissions),
-//                        groupedByMonth: viewModel.groupedByMonth(submissions: submissions),
-//                        scrollOffset: scrollOffset
-//                    )
                 }
                 .padding(.bottom, -40)
                 .padding(.horizontal, 24)
-            }
-            .coordinateSpace(name: "scroll")
-            .onPreferenceChange(ScrollOffsetKey.self) { value in
-                scrollOffset = value
             }
         }
     }
