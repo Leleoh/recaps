@@ -1134,6 +1134,7 @@ class CapsuleService: CapsuleServiceProtocol {
         let offset = TimeInterval(tz.secondsFromGMT(for: now))
         return Date(timeInterval: offset, since: now)
     }
+    
     private func dateAtMidnight(from utcDate: Date) -> Date {
         
         let calendar = Calendar(identifier: .gregorian)

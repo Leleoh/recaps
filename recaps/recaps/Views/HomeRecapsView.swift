@@ -96,6 +96,7 @@ struct HomeRecapsView: View {
                                                 if recap.status == .completed {
                                                     Task {
                                                         try await viewModel.changeCompletedCapsuleToOpenCapsule(capsuleID: recap.id)
+                                                        capsuleToNavigate = recap
                                                         await viewModel.fetchCapsules()
                                                     }
                                                 } else {
@@ -153,7 +154,7 @@ struct HomeRecapsView: View {
                                 LazyVGrid(columns: columns, spacing: 24) {
                                     ForEach(viewModel.completedCapsules) { recap in
                                         NavigationLink {
-                                            PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap))
+                                            PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap), showLottie: false)
 //                                            Text("Openend Capsule View Placeholder.")
                                         } label: {
                                             VStack(spacing: 8){
@@ -257,7 +258,13 @@ struct HomeRecapsView: View {
             }
             // Navigation to InsideCapsule when capsuleToNavigate is set
             .navigationDestination(item: $capsuleToNavigate) { capsule in
-                InsideCapsule(capsule: capsule)
+                if capsule.status == .completed {
+                    PostOpenedCapsuleView(capsule: capsule, viewModel: PostOpenedCapsuleViewModel(capsule: capsule))
+                } else {
+                    InsideCapsule(capsule: capsule)
+                }
+                
+                
             }
             
         }
