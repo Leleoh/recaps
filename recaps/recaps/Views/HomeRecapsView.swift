@@ -172,16 +172,7 @@ struct HomeRecapsView: View {
                                                     await viewModel.leaveCapsule(capsule: recap)
                                                 }
                                             } label: {
-                                                OpenCapsule(capsule: recap)
-                                            }
-                                            .contextMenu {
-                                                Button(role: .destructive) {
-                                                    Task {
-                                                        await viewModel.leaveCapsule(capsule: recap)
-                                                    }
-                                                } label: {
-                                                    Label("Leave Recapsule", systemImage: "rectangle.portrait.and.arrow.right")
-                                                }
+                                                Label("Leave Recapsule", systemImage: "rectangle.portrait.and.arrow.right")
                                             }
                                         }
                                     }
