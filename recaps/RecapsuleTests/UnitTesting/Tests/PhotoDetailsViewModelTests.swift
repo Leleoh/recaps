@@ -11,30 +11,30 @@ import UIKit
 
 struct PhotoDetailsViewModelTests {
     @Test
-        func testGetUserReturnsNameAndCallsService() async throws {
-            let user = User(
-                id: "1",
-                name: "Ana",
-                email: "ana@test.com",
-                capsules: [],
-                openCapsules: []
-            )
-
-            let mockUserService = MockUserService()
-            mockUserService.mockFetchedUser = user
-
-            let viewModel = await PhotoDetailsViewModel(
-                userService: mockUserService
-            )
-
-            let name = await viewModel.getUser(id: "1")
-
-            #expect(mockUserService.didGetUser)
-            #expect(name == "Ana")
-        }
+    func testGetUser() async throws {
+        let user = User(
+            id: "1",
+            name: "Ana",
+            email: "ana@test.com",
+            capsules: [],
+            openCapsules: []
+        )
+        
+        let mockUserService = MockUserService()
+        mockUserService.mockFetchedUser = user
+        
+        let viewModel = await PhotoDetailsViewModel(
+            userService: mockUserService
+        )
+        
+        let name = await viewModel.getUser(id: "1")
+        
+        #expect(mockUserService.didGetUser)
+        #expect(name == "Ana")
+    }
     
     @Test
-    func testFormatDateReturnsCorrectString() async throws {
+    func testFormatDate() async throws {
         let viewModel = await PhotoDetailsViewModel(
             userService: MockUserService()
         )

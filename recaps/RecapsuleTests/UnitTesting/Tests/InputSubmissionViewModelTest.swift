@@ -22,7 +22,7 @@ struct InputSubmissionViewModelTests {
     
     // MARK: - Tests
     @Test
-    func CreatesEmptyMessagesArrayWithSameCountAsImages() async {
+    func CreatesEmptyMessages() async {
         let vm = makeVm()
         
         #expect(vm.messages.count == vm.images.count)

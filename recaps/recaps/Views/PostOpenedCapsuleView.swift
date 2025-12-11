@@ -67,6 +67,7 @@ struct PostOpenedCapsuleView: View {
                 }
             }
         }
+        
         .onAppear() {
             Task {
                 if viewModel.submissions.isEmpty {

@@ -25,7 +25,7 @@ struct CreateCapsuleViewModelTests {
     // MARK: - Tests
     
     @Test
-    func isValidToSaveWhenNoNameAndNoImagesReturnsFalse() async {
+    func isValidToSaveWhenNoNameAndNoImages() async {
         let mockViewModel = services()
         
         await MainActor.run {
@@ -37,7 +37,7 @@ struct CreateCapsuleViewModelTests {
     }
     
     @Test
-    func isValidToSaveWhenNameAndLessThan3ImagesReturnsFalse() async {
+    func isValidToSaveWhenNameAndLessThan3Images() async {
         let mockViewModel = services()
         
         await MainActor.run {
@@ -49,7 +49,7 @@ struct CreateCapsuleViewModelTests {
     }
     
     @Test
-    func isValidToSaveWhenNameAndThreeImagesReturnsTrue() async {
+    func isValidToSaveWhenNameAndThreeImages() async {
         let mockViewModel = services()
         
         await MainActor.run {
@@ -61,7 +61,7 @@ struct CreateCapsuleViewModelTests {
     }
     
     @Test
-    func createCapsuleWhenUserNotLoggedReturnsFalseAndSetsError() async throws {
+    func createCapsuleWhenUserNotLogged() async throws {
         let capsuleService = MockCapsuleService()
         let userService = MockUserService()
         
@@ -79,7 +79,7 @@ struct CreateCapsuleViewModelTests {
     }
     
     @Test
-    func createCapsuleWhenValidInputCreatesCapsuleAndUpdatesUser() async throws {
+    func createCapsuleWhenValidInput() async throws {
         let capsuleService = MockCapsuleService()
         let userService = MockUserService()
         
