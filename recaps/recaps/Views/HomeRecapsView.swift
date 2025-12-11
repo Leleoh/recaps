@@ -245,8 +245,10 @@ struct HomeRecapsView: View {
                     .zIndex(2)
                 }
             }
-            .navigationDestination(item: $navigationCapsuleID) { uuid in
-                if let capsule = viewModel.inProgressCapsules.first(where: { $0.id == uuid }) {
+            .navigationDestination(item: $capsuleToNavigate) { capsule in
+                if capsule.status == .completed {
+                    PostOpenedCapsuleView(capsule: capsule)
+                } else {
                     InsideCapsule(capsule: capsule)
                 }
             }
@@ -259,6 +261,21 @@ struct HomeRecapsView: View {
                 NotificationService.shared.selectedCapsuleID = nil
             }
         }
+        
+        //            .navigationDestination(item: $navigationCapsuleID) { uuid in
+        //                if let capsule = viewModel.inProgressCapsules.first(where: { $0.id == uuid }) {
+        //                    InsideCapsule(capsule: capsule)
+        //                }
+        //            }
+        //        }
+        //        .onReceive(NotificationService.shared.$selectedCapsuleID) { uuidString in
+        //            if let uuidString = uuidString, let uuid = UUID(uuidString: uuidString) {
+        //                // Aciona a navegação programática
+        //                self.navigationCapsuleID = uuid
+        //                // Reseta para permitir novos cliques futuros
+        //                NotificationService.shared.selectedCapsuleID = nil
+        //            }
+        //        }
         
         .refreshable {
             await viewModel.fetchCapsules()
