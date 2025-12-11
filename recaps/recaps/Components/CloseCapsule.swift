@@ -13,6 +13,7 @@ struct CloseCapsule: View {
     
     var body: some View {
         ZStack {
+            
             let lastThree = Array(capsule.submissions.suffix(3))
             
             ZStack {
@@ -32,6 +33,11 @@ struct CloseCapsule: View {
             
             Image(.locked)
                 .offset(y: 22)
+            
+            if capsule.status == .completed {
+                RotatingOrbitView()
+            }
+                
         }
     }
 }
@@ -65,7 +71,7 @@ struct CloseCapsule: View {
             lives: 3,
             members: [],
             ownerId: " ",
-            status: .inProgress,
+            status: .completed,
             blacklisted: []
         )
     )
