@@ -9,9 +9,12 @@ import SwiftUI
 
 struct RootView: View {
     @AppStorage("userId") var userId: String = ""
-    
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+
     var body: some View {
-        if userId.isEmpty {
+        if !hasSeenOnboarding {
+            Onboarding()
+        } else if userId.isEmpty {
             AuthenthicationView()
         } else {
             HomeRecapsView()

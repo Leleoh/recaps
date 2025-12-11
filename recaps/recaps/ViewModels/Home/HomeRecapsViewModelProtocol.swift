@@ -8,7 +8,7 @@
 import Foundation
 
 protocol HomeRecapsViewModelProtocol {
-    var isLoading: Bool{ get set }
+   // var isLoading: Bool{ get set }
     var showCreateCapsule: Bool { get set }
     var showJoinPopup: Bool { get set }
     var showProfile: Bool { get set }
