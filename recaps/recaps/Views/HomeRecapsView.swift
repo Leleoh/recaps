@@ -10,16 +10,18 @@ import SwiftUI
 struct HomeRecapsView: View {
     
     @State private var viewModel = HomeRecapsViewModel()
-    
+    @State private var navigationCapsuleID: UUID?
     @State private var capsuleToNavigate: Capsule?
     
     var body: some View {
         NavigationStack {
             ZStack {
+                
                 // Fundo da tela
                 Image(.backgroundPNG)
                     .resizable()
                     .ignoresSafeArea()
+                
                 ScrollView {
                     VStack(spacing: 32) {
                         
@@ -155,7 +157,6 @@ struct HomeRecapsView: View {
                                     ForEach(viewModel.completedCapsules) { recap in
                                         NavigationLink {
                                             PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap), showLottie: false)
-//                                            Text("Openend Capsule View Placeholder.")
                                         } label: {
                                             VStack(spacing: 8){
                                                 OpenCapsule(capsule: recap)
@@ -166,7 +167,6 @@ struct HomeRecapsView: View {
                                             }
                                         }
                                         .contextMenu {
-                                            // Apenas Sair
                                             Button(role: .destructive) {
                                                 Task {
                                                     await viewModel.leaveCapsule(capsule: recap)
@@ -175,7 +175,6 @@ struct HomeRecapsView: View {
                                                 OpenCapsule(capsule: recap)
                                             }
                                             .contextMenu {
-                                                // Apenas Sair
                                                 Button(role: .destructive) {
                                                     Task {
                                                         await viewModel.leaveCapsule(capsule: recap)
@@ -194,9 +193,7 @@ struct HomeRecapsView: View {
                     .padding(.bottom, 40)
                 }
                 .scrollIndicators(.hidden)
-                
             }
-            // Configuração da Navigation Bar
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -256,19 +253,20 @@ struct HomeRecapsView: View {
                     .zIndex(2)
                 }
             }
-            // Navigation to InsideCapsule when capsuleToNavigate is set
             .navigationDestination(item: $capsuleToNavigate) { capsule in
                 if capsule.status == .completed {
                     PostOpenedCapsuleView(capsule: capsule, viewModel: PostOpenedCapsuleViewModel(capsule: capsule))
                 } else {
                     InsideCapsule(capsule: capsule)
                 }
-                
-                
             }
-            
         }
-        
+        .onReceive(NotificationService.shared.$selectedCapsuleID) { uuidString in
+            if let uuidString = uuidString, let uuid = UUID(uuidString: uuidString) {
+                self.navigationCapsuleID = uuid
+                NotificationService.shared.selectedCapsuleID = nil
+            }
+        }
         .refreshable {
             await viewModel.refreshCapsules()
         }
@@ -276,7 +274,6 @@ struct HomeRecapsView: View {
         .task {
             await viewModel.fetchCapsules()
             await viewModel.fetchUser()
-//            _ = try? await viewModel.userService.changeCompletedCapsuleToOpenCapsule(user: viewModel.user, capsuleId: UUID(uuidString: "710D4E62-6968-4073-B012-53290D3535AE")!)
         }
         .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
             Task { await viewModel.fetchCapsules() }

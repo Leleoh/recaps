@@ -12,16 +12,66 @@ import SwiftUI
 class ProfileViewModel: ProfileViewModelProtocol {
     private let userService: UserServiceProtocol
     private let capsuleService: CapsuleServiceProtocol
+    private let notificationService: NotificationServiceProtocol
     
-    init(capsuleService: CapsuleServiceProtocol = CapsuleService(), userService: UserServiceProtocol = UserService()) {
+    init(capsuleService: CapsuleServiceProtocol = CapsuleService(), userService: UserServiceProtocol = UserService(), notificationService: NotificationServiceProtocol = NotificationService.shared) {
         self.capsuleService = capsuleService
         self.userService = userService
+        self.notificationService = notificationService
     }
     
     var user: User? = nil
     var allowNotifications = false
+    var showSettingsAlert = false
     var showDeleteAlert: Bool = false
     var showSignOutAlert: Bool = false
+    
+    func checkNotificationStatus() async {
+        let status = await notificationService.checkAuthorizationStatus()
+        
+        await MainActor.run {
+            self.allowNotifications = (status == .authorized)
+        }
+    }
+    
+    func toggleNotifications(isOn: Bool) async {
+        if isOn {
+            let status = await notificationService.checkAuthorizationStatus()
+            
+            switch status {
+            case .notDetermined:
+                // Primeira vez: pede permissão
+                do {
+                    let granted = try await notificationService.requestAuthorization()
+                    await MainActor.run { self.allowNotifications = granted }
+                } catch {
+                    print("Erro: \(error)")
+                    await MainActor.run { self.allowNotifications = false }
+                }
+                
+            case .denied:
+                // Já negado: avisa a View para mostrar alerta/botão de configurações
+                await MainActor.run {
+                    self.allowNotifications = false
+                    self.showSettingsAlert = true
+                }
+                
+            case .authorized, .provisional, .ephemeral:
+                await MainActor.run { self.allowNotifications = true }
+                
+            @unknown default:
+                break
+            }
+        } else {
+            // Usuário quer desligar. Como não podemos revogar via código,
+            // também sugerimos ir às configurações.
+            await MainActor.run {
+                self.showSettingsAlert = true
+                // Revertemos o toggle visualmente até ele mudar lá fora
+                self.allowNotifications = true
+            }
+        }
+    }
     
     func loadUser() async {
         do {

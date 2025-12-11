@@ -82,8 +82,13 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             
             self.inProgressCapsules = progressCapsules.sorted(by: { $0.createdAt < $1.createdAt })
             self.completedCapsules = openCapsules.sorted(by: { $0.createdAt < $1.createdAt })
-
-
+          
+            self.manageDailyNotifications()
+            
+            Task {
+                try? await capsuleService.subscribeToCapsuleUnlock(for: currentUser.id)
+            }
+            
         } catch {
             print("Erro ao carregar dados da Home: \(error.localizedDescription)")
             inProgressCapsules = []
@@ -139,8 +144,6 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
     func checkIfCapsuleIsValidOffensive(user: User) async {
         print("Verificando a validades das vidas")
         
-       // var updatesMade: Bool = false
-        
         for capsule in user.capsules {
             do{
                 let isValid = try await capsuleService.checkIfCapsuleIsValidOffensive(capsuleID: capsule)
@@ -155,19 +158,12 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
             }
         }
     }
-        
-//        if updatesMade {
-//            print("🔄 Recarregando cápsulas para atualizar UI...")
-//            await fetchCapsules()
-//        } else {
-//            print("✅ Nenhuma alteração necessária nas ofensivas.")
-//        }
-        
+
     func fetchCapsule(id: UUID) async -> Capsule? {
         do {
             return try await capsuleService.fetchCapsule(id: id)
         } catch {
-            print("Erro ao buscar cápsula: \(error)")
+            print("Erro ao buscar cápsula: \(error.localizedDescription)")
             return nil
         }
     }
@@ -254,7 +250,28 @@ class HomeRecapsViewModel: HomeRecapsViewModelProtocol {
         } catch {
             print("deu merda aqui")
         }
+        
+    }
+    
+    // MARK: - Notifications Logic
+    private func manageDailyNotifications() {
+        let calendar = Calendar.current
+        
+        for capsule in inProgressCapsules {
+            let hasSubmissionToday = calendar.isDateInToday(capsule.lastSubmissionDate)
             
+            if hasSubmissionToday {
+                // Se já tem foto hoje, cancela o aviso dessa cápsula específica
+                NotificationService.shared.cancelReminder(for: capsule.id)
+            } else {
+                // Se ninguém postou, garante que o aviso está agendado
+                NotificationService.shared.scheduleStreakReminder(
+                    for: capsule,
+                    at: 20,
+                    minute: 00
+                )
+            }
+        }
     }
     
     func changeCompletedCapsuleToOpenCapsule(capsuleID: UUID) async throws {

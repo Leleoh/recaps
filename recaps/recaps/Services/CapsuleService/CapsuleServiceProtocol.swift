@@ -30,5 +30,6 @@ protocol CapsuleServiceProtocol {
     func checkIfCapsuleIsValidOffensive(capsuleID: UUID) async throws -> Bool
     func checkIfCapsuleIsCompleted(capsuleID: UUID) async throws -> Bool
     func checkIfIncreasesStreak(capsuleID: UUID) async throws
+    func subscribeToCapsuleUnlock(for userId: String) async throws
 }
 

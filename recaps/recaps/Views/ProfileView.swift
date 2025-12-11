@@ -11,6 +11,8 @@ struct ProfileView: View {
     @State private var viewModel = ProfileViewModel()
     @Binding var user: User?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) var scenePhase
     
     var body: some View {
         NavigationStack {
@@ -35,8 +37,23 @@ struct ProfileView: View {
                             .font(.headline)
                         
                         HStack {
-                            Toggle(isOn: $viewModel.allowNotifications) {
-                                Text("Allow notifications")
+                            Toggle("Allow notifications", isOn: Binding(
+                                get: { viewModel.allowNotifications },
+                                set: { newValue in
+                                    Task {
+                                        await viewModel.toggleNotifications(isOn: newValue)
+                                    }
+                                }
+                            ))
+                            .alert("Necessary Setup", isPresented: $viewModel.showSettingsAlert) {
+                                Button("Cancel", role: .cancel) { }
+                                Button("Open Settings") {
+                                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                                        openURL(url)
+                                    }
+                                }
+                            } message: {
+                                Text("To change the notification setup, you need to go to iOS Settings.")
                             }
                         }
                         .padding()
@@ -111,7 +128,17 @@ struct ProfileView: View {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("You'll need to sign in again to access your account.")
-
+            }
+        }
+        .task {
+            await viewModel.loadUser()
+            await viewModel.checkNotificationStatus()
+        }
+        .onChange(of: scenePhase) { oldPhase, newPhase in
+            if newPhase == .active {
+                Task {
+                    await viewModel.checkNotificationStatus()
+                }
             }
         }
     }
