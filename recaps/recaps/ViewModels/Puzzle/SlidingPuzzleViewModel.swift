@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import SwiftUI
+import AVFoundation
 
 @Observable
 class SlidingPuzzleViewModel {
@@ -18,6 +19,7 @@ class SlidingPuzzleViewModel {
     var isSolved: Bool = false
     var moveCount: Int = 0
     var timeUntilMidnight: String = "00:00:00"
+    var audioPlayer: AVAudioPlayer?
     
     private var timer: Timer?
     
@@ -118,6 +120,19 @@ class SlidingPuzzleViewModel {
             }
             moveCount += 1
             checkWinCondition()
+        }
+    }
+    func playVictorySound() {
+        guard let url = Bundle.main.url(forResource: "victory", withExtension: "mp3") else {
+            print("AAAAAASAAAAAAAAAA")
+            return
+        }
+
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.play()
+        } catch {
+            print("Erro ao tocar som: \(error)")
         }
     }
     

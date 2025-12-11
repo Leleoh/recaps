@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9B10BAE32EE89B0C004D5912 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9B10BAE22EE89B0C004D5912 /* Lottie */; };
 		9BA8170C2EE0A59D008297E7 /* PinterestLikeGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */; };
 /* End PBXBuildFile section */
 
@@ -64,6 +65,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9BA8170C2EE0A59D008297E7 /* PinterestLikeGrid in Frameworks */,
+				9B10BAE32EE89B0C004D5912 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,6 +134,7 @@
 			name = recaps;
 			packageProductDependencies = (
 				9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */,
+				9B10BAE22EE89B0C004D5912 /* Lottie */,
 			);
 			productName = recaps;
 			productReference = D72F9B812ECCE53A00B1C949 /* recaps.app */;
@@ -167,6 +170,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */,
+				9B10BAE12EE89B0C004D5912 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D72F9B822ECCE53A00B1C949 /* Products */;
@@ -526,6 +530,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9B10BAE12EE89B0C004D5912 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
 		9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/thaisrfernandes/PinterestLikeGrid";
@@ -537,6 +549,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9B10BAE22EE89B0C004D5912 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9B10BAE12EE89B0C004D5912 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
 		9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */;
