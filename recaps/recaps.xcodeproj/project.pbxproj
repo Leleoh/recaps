@@ -6,23 +6,66 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9B10BAE32EE89B0C004D5912 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 9B10BAE22EE89B0C004D5912 /* Lottie */; };
+		9BA8170C2EE0A59D008297E7 /* PinterestLikeGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		75E9FEFE2ECE471600D47F7F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D72F9B792ECCE53A00B1C949 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D72F9B802ECCE53A00B1C949;
+			remoteInfo = recaps;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		75E9FEFA2ECE471600D47F7F /* recapsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = recapsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D72F9B812ECCE53A00B1C949 /* recaps.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = recaps.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		D7F9A8602ED4D0C7008513CC /* Exceptions for "recaps" folder in "recaps" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = D72F9B802ECCE53A00B1C949 /* recaps */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		75E9FEFB2ECE471600D47F7F /* RecapsuleTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RecapsuleTests;
+			sourceTree = "<group>";
+		};
 		D72F9B832ECCE53A00B1C949 /* recaps */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				D7F9A8602ED4D0C7008513CC /* Exceptions for "recaps" folder in "recaps" target */,
+			);
 			path = recaps;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		75E9FEF72ECE471600D47F7F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D72F9B7E2ECCE53A00B1C949 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9BA8170C2EE0A59D008297E7 /* PinterestLikeGrid in Frameworks */,
+				9B10BAE32EE89B0C004D5912 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				D72F9B832ECCE53A00B1C949 /* recaps */,
+				75E9FEFB2ECE471600D47F7F /* RecapsuleTests */,
 				D72F9B822ECCE53A00B1C949 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				D72F9B812ECCE53A00B1C949 /* recaps.app */,
+				75E9FEFA2ECE471600D47F7F /* recapsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +93,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		75E9FEF92ECE471600D47F7F /* recapsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 75E9FF002ECE471600D47F7F /* Build configuration list for PBXNativeTarget "recapsTests" */;
+			buildPhases = (
+				75E9FEF62ECE471600D47F7F /* Sources */,
+				75E9FEF72ECE471600D47F7F /* Frameworks */,
+				75E9FEF82ECE471600D47F7F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				75E9FEFF2ECE471600D47F7F /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				75E9FEFB2ECE471600D47F7F /* RecapsuleTests */,
+			);
+			name = recapsTests;
+			packageProductDependencies = (
+			);
+			productName = recapsTests;
+			productReference = 75E9FEFA2ECE471600D47F7F /* recapsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		D72F9B802ECCE53A00B1C949 /* recaps */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D72F9B8C2ECCE53B00B1C949 /* Build configuration list for PBXNativeTarget "recaps" */;
@@ -65,6 +133,8 @@
 			);
 			name = recaps;
 			packageProductDependencies = (
+				9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */,
+				9B10BAE22EE89B0C004D5912 /* Lottie */,
 			);
 			productName = recaps;
 			productReference = D72F9B812ECCE53A00B1C949 /* recaps.app */;
@@ -77,9 +147,13 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2600;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					75E9FEF92ECE471600D47F7F = {
+						CreatedOnToolsVersion = 26.0.1;
+						TestTargetID = D72F9B802ECCE53A00B1C949;
+					};
 					D72F9B802ECCE53A00B1C949 = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -94,17 +168,29 @@
 			);
 			mainGroup = D72F9B782ECCE53A00B1C949;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */,
+				9B10BAE12EE89B0C004D5912 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = D72F9B822ECCE53A00B1C949 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				D72F9B802ECCE53A00B1C949 /* recaps */,
+				75E9FEF92ECE471600D47F7F /* recapsTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		75E9FEF82ECE471600D47F7F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D72F9B7F2ECCE53A00B1C949 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -115,6 +201,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		75E9FEF62ECE471600D47F7F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D72F9B7D2ECCE53A00B1C949 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +217,69 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		75E9FEFF2ECE471600D47F7F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D72F9B802ECCE53A00B1C949 /* recaps */;
+			targetProxy = 75E9FEFE2ECE471600D47F7F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		75E9FF012ECE471600D47F7F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4S5UL2WGZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = academy.recapsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/recaps.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/recaps";
+			};
+			name = Debug;
+		};
+		75E9FF022ECE471600D47F7F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4S5UL2WGZS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = academy.recapsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/recaps.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/recaps";
+			};
+			name = Release;
+		};
 		D72F9B8A2ECCE53B00B1C949 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -254,16 +409,23 @@
 				CODE_SIGN_ENTITLEMENTS = recaps/recaps.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RX54746WSR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = recaps/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to take photos to add to our app, so they can be stored in our time capsules. Each photo will capture a unique moment, letting us revisit these memories in the future.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need to access your photos to add them to our app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = telephony;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -272,14 +434,18 @@
 				PRODUCT_BUNDLE_IDENTIFIER = br.academy.recaps;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = RecapsuleProfile;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = RecapsuleProfileDevelopment;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -291,16 +457,23 @@
 				CODE_SIGN_ENTITLEMENTS = recaps/recaps.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = RX54746WSR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = recaps/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
+				INFOPLIST_KEY_NSCameraUsageDescription = "We need to take photos to add to our app, so they can be stored in our time capsules. Each photo will capture a unique moment, letting us revisit these memories in the future.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "We need to access your photos to add them to our app";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiredDeviceCapabilities = telephony;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -309,20 +482,33 @@
 				PRODUCT_BUNDLE_IDENTIFIER = br.academy.recaps;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = RecapsuleProfile;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = RecapsuleProfileDevelopment;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		75E9FF002ECE471600D47F7F /* Build configuration list for PBXNativeTarget "recapsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				75E9FF012ECE471600D47F7F /* Debug */,
+				75E9FF022ECE471600D47F7F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D72F9B7C2ECCE53A00B1C949 /* Build configuration list for PBXProject "recaps" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -342,6 +528,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9B10BAE12EE89B0C004D5912 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
+		9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/thaisrfernandes/PinterestLikeGrid";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9B10BAE22EE89B0C004D5912 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9B10BAE12EE89B0C004D5912 /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			productName = Lottie;
+		};
+		9BA8170B2EE0A59D008297E7 /* PinterestLikeGrid */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9BA8170A2EE0A59D008297E7 /* XCRemoteSwiftPackageReference "PinterestLikeGrid" */;
+			productName = PinterestLikeGrid;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D72F9B792ECCE53A00B1C949 /* Project object */;
 }

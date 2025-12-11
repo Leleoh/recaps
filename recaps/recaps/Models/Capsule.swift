@@ -8,17 +8,22 @@ import Foundation
 
 // MARK: - Capsule
 
-struct Capsule: Codable, Identifiable {
+struct Capsule: Codable, Identifiable, Hashable {
     let id: UUID
     var code: String
     var submissions: [Submission]
     var name: String
     var createdAt: Date
     var offensive: Int
+    var offensiveTarget: Int
     var lastSubmissionDate: Date
     var validOffensive: Bool
     var lives: Int
-    var members: [UUID]
-    var ownerId: UUID
+    var members: [String]
+    var ownerId: String
     var status: CapsuleStatus
+    var dailyGameDate: Date?
+    var dailyGameSubmission: UUID?
+    var blacklisted: [UUID]
 }
+

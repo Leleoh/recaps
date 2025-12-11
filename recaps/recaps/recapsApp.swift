@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct recapsApp: App {
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .preferredColorScheme(.dark)
         }
     }
 }

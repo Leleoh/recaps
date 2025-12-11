@@ -1,0 +1,168 @@
+//
+//  CreateCapsuleView.swift
+//  recaps
+//
+//  Created by Richard Fagundes Rodrigues on 21/11/25.
+//
+
+import SwiftUI
+import PhotosUI
+
+struct CreateCapsuleView: View {
+    @Environment(\.dismiss) var dismiss
+    var onFinish: (String) -> Void = { _ in }
+    
+    @State private var viewModel = CreateCapsuleViewModel()
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 24) {
+                
+                // MARK: - Área de Seleção de Fotos
+                PhotosPicker(
+                    selection: $viewModel.selectedPickerItems,
+                    maxSelectionCount: 3,
+                    matching: .images
+                ) {
+                    
+                    if viewModel.selectedImages.isEmpty {
+                        
+                        InitialPhotosComponent()
+                           
+                        
+                    } else {
+                        // Estado com Fotos Selecionadas
+                        FilledPhotos(images: viewModel.selectedImages)
+                            
+                    }
+                }
+                .frame(height: 362)
+                .padding(.top, 90)
+                
+                // Input de Nome
+                VStack(alignment: .leading, spacing: 8) {
+                    
+                    NameComponent(text: $viewModel.capsuleName)
+
+                        .padding(.top, -32)
+                    
+                }
+                
+                // Input de Ofensiva
+                VStack{
+                    HStack(alignment: .center, spacing: 16) {
+                        Text("Streak days")
+                            .foregroundColor(Color(.label))
+                        
+                        Spacer()
+                        
+                        Picker("", selection: $viewModel.offensiveTarget) {
+                            ForEach([1,7,30,60,90,180,360], id: \.self) { days in
+                                Text("\(days)").tag(days)
+                                    .tag(days)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(.sweetnSour)
+                        .background(
+                            RoundedRectangle(cornerRadius: 26)
+                                .fill(Color("SheetBackground"))
+                                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
+                        )
+                    }
+
+                    .padding(.top, 8)
+                    
+                    Text("Streak days is the number of consecutive days saving memories that will be required for the Recapsule to open.")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(nil)
+                        .foregroundStyle(.secondary)
+                }
+                
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                // Botão Cancelar (Esquerda)
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .foregroundColor(.white)
+//                            .padding(8)
+                    }
+                }
+                
+                // Título Central
+                ToolbarItem(placement: .principal) {
+                    Text("New Capsule")
+                        .font(.headline)
+                }
+                
+                // Botão Salvar (Direita)
+                ToolbarItem(placement: .topBarTrailing) {
+
+                    if viewModel.isValidToSave {
+                        Button {
+                            Task {
+                                viewModel.code = viewModel.generateCode()
+                                let success = await viewModel.createCapsule(code: viewModel.code)
+                                if success {
+                                    dismiss()
+                                    onFinish(viewModel.code)
+                                }
+                            }
+                        } label: {
+                            if viewModel.isLoading {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                    } else {
+                        Button {
+                            
+                        } label: {
+                            if viewModel.isLoading {
+                                ProgressView()
+                            } else {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        
+                        // Desabilita o botão se a validação falhar ou estiver carregando
+                        .disabled(!viewModel.isValidToSave || viewModel.isLoading)
+                    }
+                    
+                    
+//                    .buttonStyle(.borderedProminent)
+//                    .tint(viewModel.isValidToSave ? Color("SweetnSour") : Color(.gray))
+//                    .foregroundColor(.white)
+                }
+                
+                
+            }
+        }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+    }
+}
+
+#Preview {
+    CreateCapsuleView()
+}

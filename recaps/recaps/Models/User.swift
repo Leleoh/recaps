@@ -6,15 +6,14 @@
 //
 
 import Foundation
-
+import CloudKit
 // MARK: - User
 
-struct User: Codable, Identifiable {
-    let id: UUID
+struct User: Identifiable {
+    let id: String
     var name: String
-    var mail: String
-    var capsulesIDs: [UUID]
-    var photo: Data
+    var email: String
+    var capsules: [UUID]
+    var openCapsules: [UUID]
 }
-
 

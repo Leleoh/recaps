@@ -8,12 +8,12 @@
 import Foundation
 
 // MARK: - Submission
-
-struct Submission: Codable, Identifiable {
+struct Submission: Codable, Identifiable, Hashable {
     let id: UUID
-    let image: Data
+    let imageURL: URL?
     let description: String?
-    let authorId: UUID
+    let authorId: String
     let date: Date
+    let capsuleID: UUID
 }
 
