@@ -116,9 +116,8 @@ struct ProfileView: View {
 
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("Your account and all associated data will be permanently deleted.")
+                Text("Your account and all associated data will be permanently deleted.\n\nTo fully unlink, please go to iPhone Settings > Apple ID (Your Name) > Sign in with Apple > Recaps > Stop Using Apple ID.")
             }
-            
             .alert("Sign Out?", isPresented: $viewModel.showSignOutAlert) {
                 Button("Sign Out", role: .destructive) {
                     viewModel.logout()
