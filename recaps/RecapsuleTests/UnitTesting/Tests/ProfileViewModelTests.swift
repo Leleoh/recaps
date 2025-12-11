@@ -57,7 +57,8 @@ struct ProfileViewModelTests {
             lives: 3,
             members: ["user1"],
             ownerId: "owner1",
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
         
         let capsuleService = MockCapsuleService()
@@ -94,7 +95,8 @@ struct ProfileViewModelTests {
             lives: 3,
             members: ["user1"],
             ownerId: "owner1",
-            status: .inProgress
+            status: .inProgress,
+            blacklisted: []
         )
         
         let capsuleService = MockCapsuleService()

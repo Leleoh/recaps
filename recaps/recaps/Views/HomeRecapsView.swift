@@ -98,6 +98,7 @@ struct HomeRecapsView: View {
                                                 if recap.status == .completed {
                                                     Task {
                                                         try await viewModel.changeCompletedCapsuleToOpenCapsule(capsuleID: recap.id)
+                                                        capsuleToNavigate = recap
                                                         await viewModel.fetchCapsules()
                                                     }
                                                 } else {
@@ -155,8 +156,7 @@ struct HomeRecapsView: View {
                                 LazyVGrid(columns: columns, spacing: 24) {
                                     ForEach(viewModel.completedCapsules) { recap in
                                         NavigationLink {
-                                            PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap))
-//                                            Text("Openend Capsule View Placeholder.")
+                                            PostOpenedCapsuleView(capsule: recap, viewModel: PostOpenedCapsuleViewModel(capsule: recap), showLottie: false)
                                         } label: {
                                             VStack(spacing: 8){
                                                 OpenCapsule(capsule: recap)
@@ -167,7 +167,6 @@ struct HomeRecapsView: View {
                                             }
                                         }
                                         .contextMenu {
-                                            // Apenas Sair
                                             Button(role: .destructive) {
                                                 Task {
                                                     await viewModel.leaveCapsule(capsule: recap)
@@ -176,7 +175,6 @@ struct HomeRecapsView: View {
                                                 OpenCapsule(capsule: recap)
                                             }
                                             .contextMenu {
-                                                // Apenas Sair
                                                 Button(role: .destructive) {
                                                     Task {
                                                         await viewModel.leaveCapsule(capsule: recap)
@@ -196,7 +194,6 @@ struct HomeRecapsView: View {
                 }
                 .scrollIndicators(.hidden)
             }
-            // Configuração da Navigation Bar
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -266,28 +263,10 @@ struct HomeRecapsView: View {
         }
         .onReceive(NotificationService.shared.$selectedCapsuleID) { uuidString in
             if let uuidString = uuidString, let uuid = UUID(uuidString: uuidString) {
-                // Aciona a navegação programática
                 self.navigationCapsuleID = uuid
-                // Reseta para permitir novos cliques futuros
                 NotificationService.shared.selectedCapsuleID = nil
             }
         }
-        
-        //            .navigationDestination(item: $navigationCapsuleID) { uuid in
-        //                if let capsule = viewModel.inProgressCapsules.first(where: { $0.id == uuid }) {
-        //                    InsideCapsule(capsule: capsule)
-        //                }
-        //            }
-        //        }
-        //        .onReceive(NotificationService.shared.$selectedCapsuleID) { uuidString in
-        //            if let uuidString = uuidString, let uuid = UUID(uuidString: uuidString) {
-        //                // Aciona a navegação programática
-        //                self.navigationCapsuleID = uuid
-        //                // Reseta para permitir novos cliques futuros
-        //                NotificationService.shared.selectedCapsuleID = nil
-        //            }
-        //        }
-        
         .refreshable {
             await viewModel.refreshCapsules()
         }
@@ -295,7 +274,6 @@ struct HomeRecapsView: View {
         .task {
             await viewModel.fetchCapsules()
             await viewModel.fetchUser()
-//            _ = try? await viewModel.userService.changeCompletedCapsuleToOpenCapsule(user: viewModel.user, capsuleId: UUID(uuidString: "710D4E62-6968-4073-B012-53290D3535AE")!)
         }
         .sheet(isPresented: $viewModel.showCreateCapsule, onDismiss: {
             Task { await viewModel.fetchCapsules() }

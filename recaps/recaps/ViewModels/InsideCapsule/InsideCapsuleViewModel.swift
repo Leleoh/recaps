@@ -14,7 +14,14 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
     
     private var capsuleService = CapsuleService()
     private var userService = UserService()
-
+    
+    var isShaking = false
+    var showPopup: Bool = false
+    var showFullScreenAnimation = false
+    var goToGame = false
+    var showAlert = false
+    var gameImage: UIImage?
+    
     
     var selectedImages: [UIImage] = []
     var selectedPickerItems: [PhotosPickerItem] = [] {
@@ -38,14 +45,14 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
 
     func loadSelectedImages() async {
         var loadedImages: [UIImage] = []
-
+        
         for item in selectedPickerItems {
             if let data = try? await item.loadTransferable(type: Data.self),
                let image = UIImage(data: data) {
                 loadedImages.append(image)
             }
         }
-
+        
         await MainActor.run {
             self.selectedImages = loadedImages
         }
@@ -67,20 +74,6 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
         }
     }
     
-//    func generateDailySubmission(capsule: Capsule) async throws {
-//        let possibleSubmissions = try await capsuleService.fetchPossibleSubmissions(capsule: capsule)
-//        
-//        guard let dailySubmission = possibleSubmissions.first else {
-//            throw CapsuleError.noAvailableSubmissions
-//        }
-//        
-//        try await capsuleService.addSubmissionToDailyGameAndBlacklist(
-//            capsule: capsule,
-//            submissionId: dailySubmission.id
-//        )
-//        
-//        gameSubmission = dailySubmission
-//    }
     
     func generateDailySubmission(capsule: Capsule) async throws {
                 
@@ -129,5 +122,40 @@ class InsideCapsuleViewModel: InsideCapsuleViewModelProtocol {
             currentTime = Date()
         }
     }
+    
+    func canPlayGame(capsuleId: UUID) async -> Bool {
+        do {
+            let lastSubmission = try await capsuleService.fetchLastSubmission(capsuleID: capsuleId)
+            let brazilianTime = try await capsuleService.fetchBrazilianTime()
+            
+            guard let lastDate = lastSubmission?.date else {
+                return true
+            }
+            
+            let calendar = Calendar.current
+            
+            let lastDay = calendar.startOfDay(for: lastDate)
+            let today = calendar.startOfDay(for: brazilianTime)
+            
+            print(lastDay == today)
+            return lastDay == today
+            
+        } catch {
+            print("Erro ao verificar jogo:", error)
+            return true
+        }
+    }
+    @MainActor
+    func prepareGameImage() async {
+        guard let url = gameSubmission?.imageURL else { return }
+
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            self.gameImage = UIImage(data: data)
+        } catch {
+            print("Erro ao baixar imagem do game:", error)
+        }
+    }
+
 }
 
