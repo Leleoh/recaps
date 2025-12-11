@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     @State private var viewModel = ProfileViewModel()
-    @Binding var user: User
+    @Binding var user: User?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) var scenePhase
@@ -19,10 +19,10 @@ struct ProfileView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(user.name)
+                        Text(user?.name ?? "")
                             .font(.coveredByYourGraceTitle)
                         
-                        Text(user.email)
+                        Text(user?.email ?? "")
                             .font(.footnote)
                     }
                     .padding(16)
