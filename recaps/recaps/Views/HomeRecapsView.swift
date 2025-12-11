@@ -255,7 +255,7 @@ struct HomeRecapsView: View {
             }
             .navigationDestination(item: $capsuleToNavigate) { capsule in
                 if capsule.status == .completed {
-                    PostOpenedCapsuleView(capsule: capsule)
+                    PostOpenedCapsuleView(capsule: capsule, viewModel: PostOpenedCapsuleViewModel(capsule: capsule))
                 } else {
                     InsideCapsule(capsule: capsule)
                 }
